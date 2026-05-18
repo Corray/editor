@@ -102,8 +102,7 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 
 ### 业务定位
 
-> 来源：`docs/prd/PRD-v0.1-mvp.md` (v0.1 draft，待 PM 评审升 v1.0)
-> ⚠ 本段全部 [推断: AI 草案]，评审通过后回填
+> 来源：`docs/prd/PRD-v1.0-mvp.md` (v1.0 accepted，2026-05-18 Corray 评审通过)
 
 - **产品形态：** Web 轻量 Markdown 编辑器（纯前端 SPA）
 - **核心使用场景：** 临时草稿 / 移动端速记 / Markdown 渲染校验
@@ -115,7 +114,6 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 - **Markdown 渲染库选型** [TBD] → 待架构阶段 ADR-001 对比 marked / markdown-it / micromark
 - **持久化策略** localStorage（MVP）→ IndexedDB（v1.1+）
 - **部署目标** [TBD] → GitHub Pages / Vercel / Cloudflare Pages 任一
-- **PRD 最大不确定性：** "editor = Markdown 编辑器" 是 AI 推断，评审可能整体翻案
 
 ### 当前 active 阶段
 - 参见 `docs/env.yaml`（TAPD 流派 `active_stories` / GitHub 流派 `active_milestones`）
@@ -138,3 +136,5 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 日期 | 变更 |
 |------|------|
 | 2026-05-18 | install Step 2 交互式配置：填项目元数据 + standard_path + Issue 配置段；issue_repo / compile_cmd 标 [TBD] 待回填 |
+| 2026-05-18 | 接入 git remote (`Corray/editor`)，回填 issue_repo；首次 commit + push (master) |
+| 2026-05-18 | PRD v0.1 draft 起草 → v1.0 评审通过（Corray 全盘接受 I1-I7），业务定位 / 关键决策点段落升级 |

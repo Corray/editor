@@ -101,10 +101,21 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 > PM 按项目实际情况填以下段，可标 TBD 后续补。
 
 ### 业务定位
-- TBD
+
+> 来源：`docs/prd/PRD-v0.1-mvp.md` (v0.1 draft，待 PM 评审升 v1.0)
+> ⚠ 本段全部 [推断: AI 草案]，评审通过后回填
+
+- **产品形态：** Web 轻量 Markdown 编辑器（纯前端 SPA）
+- **核心使用场景：** 临时草稿 / 移动端速记 / Markdown 渲染校验
+- **MVP 范围：** 编辑+实时预览 / localStorage 持久化 / 下载 .md / 复制 HTML / 移动端单栏 tab / 浅深色主题
+- **明确非目标：** 多用户协作 / 后端账号 / WYSIWYG / 插件市场 / 多文档管理
 
 ### 关键决策点
-- TBD
+
+- **Markdown 渲染库选型** [TBD] → 待架构阶段 ADR-001 对比 marked / markdown-it / micromark
+- **持久化策略** localStorage（MVP）→ IndexedDB（v1.1+）
+- **部署目标** [TBD] → GitHub Pages / Vercel / Cloudflare Pages 任一
+- **PRD 最大不确定性：** "editor = Markdown 编辑器" 是 AI 推断，评审可能整体翻案
 
 ### 当前 active 阶段
 - 参见 `docs/env.yaml`（TAPD 流派 `active_stories` / GitHub 流派 `active_milestones`）

@@ -24,21 +24,21 @@
 
 ---
 
-## FB 条目（示例骨架，删除后追加真实条目）
+## FB 条目
 
-## FB-001 — <标题>
-- **date**: YYYY-MM-DD
-- **file**: <feedback/source-file.md>
-- **category**: audit / process / design / implement / meta
-- **skills**: <relevant skills>
-- **modules**: <relevant modules or "(all)">
-- **phases**: <relevant phases or "—">
-- **severity**: low / medium / high / critical
+## FB-001 — business .gitignore 模板漏 `.install-state.done`
+- **date**: 2026-05-18
+- **file**: ../feedback/2026-05-18-business-gitignore-install-state-done.md
+- **category**: meta
+- **skills**: install
+- **modules**: (all)
+- **phases**: —
+- **severity**: low
 - **status**: candidate
 - **occurrences**: 1
-- **guidance**: <guideline 一句话>
-- **scan_when**: <什么场景启动前扫描本条 FB>
-- **related**: <related FB IDs>
+- **guidance**: standard install 的 business / hub .gitignore 模板需同步忽略 `/.install-state.done`（与 `.install-state.json` 同源）
+- **scan_when**: 新项目首次 `/install` 完成后；standard install 模板修改 PR 时
+- **related**: —
 
 ---
 
@@ -46,11 +46,12 @@
 
 | 维度 | 数量 |
 |------|------|
-| 总计 | 0 |
+| 总计 | 1 |
 | critical | 0 |
 | high | 0 |
 | medium | 0 |
-| low | 0 |
+| low | 1 |
+| candidate 状态 | 1 |
 | applied 状态 | 0 |
 | observing 状态 | 0 |
 

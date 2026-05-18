@@ -1,9 +1,10 @@
-# 共识文档 v0.1 — editor MVP
+# 共识文档 v1.0 — editor MVP
 
 | 字段 | 值 |
 |------|----|
-| **状态** | `draft` (待 PM-FE 对齐 §9 [TBD] 清单后升 v1.0) |
-| **版本** | v0.1 |
+| **状态** | `accepted` (TBD-1~10 全部采纳 AI 倾向，进入 spec-to-code-flow 主路径) |
+| **版本** | v1.0 |
+| **最近评审** | 2026-05-18 (v0.1 → v1.0，全盘接受) |
 | **基线 PRD** | `docs/prd/PRD-v1.0-mvp.md` (v1.0 accepted, 2026-05-18) |
 | **首版日期** | 2026-05-18 |
 | **参与方** | PM (Corray) + FE (Corray + AI Claude) |
@@ -27,6 +28,7 @@
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
 | v0.1 | 2026-05-18 | AI 基于 PRD v1.0 起草，§9 列 10 项 [TBD] 待 PM-FE 对齐 |
+| v1.0 | 2026-05-18 | Corray 全盘接受 TBD-1~10 AI 倾向；§4 / §9 表格去 TBD 标，正式进入主路径，下一站 = 业务模块清单 |
 
 ---
 
@@ -79,9 +81,9 @@ PRD 中混用了「编辑器 / 编辑区 / 编辑面板」、「预览 / 渲染 
 
 | 规则 | 决议 [TBD] |
 |------|----------|
-| **写入策略** | [TBD-1] debounce(500ms) vs throttle(500ms)？AI 倾向 debounce（用户停止输入后才写入，避免高频写入磨损 localStorage） |
-| **多 tab 竞争** | [TBD-2] 同浏览器 2 个 tab 同时编辑同一 key——A 写 / B 后写覆盖 A？还是用 `storage` event 监听他 tab 写入并提示？AI 倾向「后写覆盖 + 不提示」（MVP 单文档场景，复杂度不值） |
-| **localStorage 配额满** | [TBD-3] 写入抛 `QuotaExceededError`——静默忽略？toast 提示？降级到 sessionStorage？AI 倾向「toast 提示 + 不降级」（MVP 让用户感知风险，引导走 v1.1 IndexedDB） |
+| **写入策略** | **debounce(500ms)** — 用户停止输入 500ms 后才写入，避免高频写入磨损 localStorage |
+| **多 tab 竞争** | **后写覆盖 + 不提示**（MVP 单文档场景，跨 tab 协同复杂度不值；如需可在 v1.1+ 加 `storage` event 监听）|
+| **localStorage 配额满** | 写入抛 `QuotaExceededError` 时 **toast 提示，不降级**到 sessionStorage（让用户感知风险，引导走 v1.1 IndexedDB）|
 | **key 命名** | 固定 `editor.document.v1`（v1 留语义版本前缀，未来兼容性变更走 v2） |
 | **value 编码** | 纯字符串（Markdown 源文，UTF-8） |
 
@@ -89,18 +91,18 @@ PRD 中混用了「编辑器 / 编辑区 / 编辑面板」、「预览 / 渲染 
 
 | 规则 | 决议 [TBD] |
 |------|----------|
-| **XSS 防护** | [TBD-4] CommonMark 允许 raw HTML——是 sanitize（如 DOMPurify）还是 raw 渲染？AI 强烈倾向 **sanitize**（XSS 是安全红线，security-review.md 要求）|
+| **XSS 防护** | **sanitize**（如 DOMPurify 或同等方案）— CommonMark 允许 raw HTML，必须过滤；属安全红线，遵循 `security-review.md`（架构阶段 ADR 锁定具体库）|
 | **渲染时机** | M1 状态变更 → 同步触发 M2 重渲染（无 debounce，渲染本身应在 50ms 内完成）|
 | **空文档显示** | 预览区显示灰色占位文字「在左侧输入 Markdown，这里会显示预览」 |
-| **滚动同步** | [TBD-5] PRD F2.3 说 "best-effort"——AI 建议 MVP **不做**（v1.1+ 再做行匹配 / 百分比同步），simplify 优先 |
+| **滚动同步** | **MVP 不做** — v1.1+ 再做行匹配 / 百分比同步，simplify 优先（PRD F2.3 "best-effort" → 实际取舍为推迟）|
 
 ### 4.3 导出规则（M4）
 
 | 规则 | 决议 [TBD] |
 |------|----------|
-| **.md 文件名** | [TBD-6] PRD 写 `editor-YYYYMMDD-HHmmss.md`——本地时区还是 UTC？AI 倾向本地时区（用户预期）|
+| **.md 文件名** | `editor-YYYYMMDD-HHmmss.md`，**本地时区**（匹配用户预期）|
 | **.md 内容** | 纯 Markdown 源文（M1 当前内容），无 BOM，LF 换行 |
-| **HTML 复制范围** | [TBD-7] 复制预览区 innerHTML（无 outer wrapper）vs 完整 HTML 文档（含 `<html><head>` 等）？AI 倾向 **innerHTML**（用户复制后多用于贴到富文本编辑器 / Slack / Notion，外壳无用）|
+| **HTML 复制范围** | **innerHTML**（无 outer wrapper）— 用户复制后多用于贴到富文本编辑器 / Slack / Notion，外壳无用 |
 | **HTML 内联样式** | innerHTML 不携带 CSS（依赖目标环境样式表）|
 
 ### 4.4 主题规则（M6）
@@ -108,7 +110,7 @@ PRD 中混用了「编辑器 / 编辑区 / 编辑面板」、「预览 / 渲染 
 | 规则 | 决议 [TBD] |
 |------|----------|
 | **切换粒度** | 全局（M5 容器加 `data-theme="dark"` class，所有子模块继承）|
-| **持久化范围** | [TBD-8] 浏览器级（key=`editor.theme.v1`，所有 tab 共享）vs tab 级？AI 倾向浏览器级 |
+| **持久化范围** | **浏览器级**（key=`editor.theme.v1`，所有 tab 共享）|
 | **默认值** | 跟随系统 `prefers-color-scheme`，无系统提示时默认浅色 |
 
 ### 4.5 i18n 规则（M7）
@@ -116,7 +118,7 @@ PRD 中混用了「编辑器 / 编辑区 / 编辑面板」、「预览 / 渲染 
 | 规则 | 决议 [TBD] |
 |------|----------|
 | **首版语言** | 中文 |
-| **抽象层做法** | [TBD-9] MVP 是否真做 i18n 抽象（如 i18next / 内部 dict）？还是硬编中文 + 留注释「待 v1.1 抽 i18n」？AI 倾向**先抽象**（成本低 = 10 行代码 + 一个 dict，反过来回填成本高）|
+| **抽象层做法** | **MVP 即抽象**（极简方案：内部 dict + `t('key')` 函数 ~10 行代码，避免日后回填成本）|
 
 ### 4.6 错误边界与降级
 
@@ -125,7 +127,7 @@ PRD 中混用了「编辑器 / 编辑区 / 编辑面板」、「预览 / 渲染 
 | localStorage 不可用（隐私模式 / 浏览器禁用）| toast 提示「持久化不可用，请勿关闭页面」，编辑功能仍可用 |
 | 剪贴板 API 不可用（HTTP 环境 / 浏览器不支持）| F4.2 复制 HTML 按钮显示 toast「复制失败，请手动选择预览区内容复制」 |
 | Markdown 解析异常（理论不应发生，但兜底）| 预览区显示「渲染失败：<错误摘要>」，不崩溃 |
-| 文档长度极端（≥ 5MB）| [TBD-10] 不限制还是提示？AI 倾向「不限制，但首次超过 1MB 时 toast 一次性提示性能可能下降」 |
+| 文档长度极端 | 不限制写入；首次超过 **1MB** 时 toast 一次性提示「内容较长，性能可能下降」|
 
 ---
 
@@ -201,22 +203,22 @@ UI 不必显式呈现 DIRTY/SAVING——内部状态，仅用于决定是否触�
 
 ---
 
-## 9. 待对齐清单（[TBD] 全集）
+## 9. 决议汇总（原 TBD-1~10 待对齐清单）
 
-| # | 议题 | AI 倾向 | PM-FE 决议 |
-|---|------|--------|-----------|
-| **TBD-1** | 持久化：debounce vs throttle | debounce(500ms) | 待评审 |
-| **TBD-2** | 多 tab 竞争策略 | 后写覆盖，不提示 | 待评审 |
-| **TBD-3** | localStorage 配额满处理 | toast 提示，不降级 | 待评审 |
-| **TBD-4** | 预览 XSS 防护 | sanitize（强烈倾向）| 待评审 |
-| **TBD-5** | 滚动同步 | MVP 不做，v1.1+ 再做 | 待评审 |
-| **TBD-6** | .md 文件名时区 | 本地时区 | 待评审 |
-| **TBD-7** | HTML 复制范围 | innerHTML（不带 outer wrapper）| 待评审 |
-| **TBD-8** | 主题持久化粒度 | 浏览器级 | 待评审 |
-| **TBD-9** | i18n MVP 抽象 | 先抽象（避免回填）| 待评审 |
-| **TBD-10** | 极端长度文档（≥ 1MB）提示 | 不限制 + 首次超 1MB 一次性 toast | 待评审 |
+| # | 议题 | 决议（v1.0）|
+|---|------|-----------|
+| TBD-1 | 持久化：debounce vs throttle | ✓ debounce(500ms) |
+| TBD-2 | 多 tab 竞争策略 | ✓ 后写覆盖，不提示 |
+| TBD-3 | localStorage 配额满处理 | ✓ toast 提示，不降级 |
+| TBD-4 | 预览 XSS 防护 | ✓ sanitize（DOMPurify 或同等；具体库由架构阶段 ADR 锁定）|
+| TBD-5 | 滚动同步 | ✓ MVP 不做，v1.1+ 再做 |
+| TBD-6 | .md 文件名时区 | ✓ 本地时区 |
+| TBD-7 | HTML 复制范围 | ✓ innerHTML（不带 outer wrapper）|
+| TBD-8 | 主题持久化粒度 | ✓ 浏览器级 |
+| TBD-9 | i18n MVP 抽象 | ✓ 先抽象（极简 dict + `t()` 函数）|
+| TBD-10 | 极端长度文档（≥ 1MB）提示 | ✓ 不限制 + 首次超 1MB 一次性 toast |
 
-**决议方式：** 用户在评审时对每项给出「采纳 AI 倾向 / 改成 X / 推迟到 v1.1」。
+> 全部 10 项已转为正式决议。后续如有变更，走「§1 版本史」追加版本号。
 
 ---
 
@@ -224,6 +226,6 @@ UI 不必显式呈现 DIRTY/SAVING——内部状态，仅用于决定是否触�
 
 | 日期 | 评审人 | 决议 | 备注 |
 |------|-------|------|------|
-| — | — | — | 待首次评审（v0.1 → v1.0）|
+| 2026-05-18 | Corray | v0.1 → v1.0，全盘接受 TBD-1~10 | AI 倾向方案全部采纳；§4 / §9 同步去 TBD 标 |
 
-**评审通过后：** 升 v1.0 / commit / 进入 spec-to-code-flow 主路径，下一节点 = 业务模块清单。
+**下一步：** 进入 spec-to-code-flow 主路径，下一节点 = **业务模块清单**（基于 §3 的 M1-M7 框架展开细化）。

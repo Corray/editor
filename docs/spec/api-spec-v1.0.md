@@ -106,7 +106,8 @@ export interface PreviewAPI {
 | 入口 | 状态 | Issue / commit |
 |------|------|---------------|
 | `render()` (pipeline.ts) | ✓ 已实现（2026-05-19）| #1 — markdown-it v14 + DOMPurify v3 双保险，17 单测全绿，覆盖率 100% |
-| `getRootElement()` | ⏳ 待 M2 集成 Issue | 后续 Issue（含 Solid effect 订阅 M1）|
+| `PreviewArea` 组件挂载 | ✓ 已实现（2026-05-19）| #8 — createMemo + Show fallback (placeholder) + innerHTML 注入（唯一源 render，标 SECURITY REVIEW）|
+| `getRootElement()` | ⏳ 留 M4 导出 Issue 实现 ref 转发 | 后续 |
 
 ### 3.3 M3 Persistence
 

@@ -45,6 +45,34 @@
   outline-offset: 2px;
 }
 
+/* panes — desktop row, mobile column */
+.panes {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.editor-pane,
+.preview-pane {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-pane {
+  border-left: 1px solid var(--border);
+  padding: 1rem;
+  overflow-y: auto;
+  position: relative;
+}
+
+.preview-placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* editor-area inside editor-pane fills the flex slot */
 .editor-area {
   flex: 1;
   width: 100%;
@@ -57,4 +85,93 @@
   font-size: 0.9375rem;
   line-height: 1.6;
   resize: none;
+}
+
+/* preview-content basic markdown typography */
+.preview-content > :first-child {
+  margin-top: 0;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+  margin: 0.75em 0 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.preview-content h1 { font-size: 1.5em; }
+.preview-content h2 { font-size: 1.3em; }
+.preview-content h3 { font-size: 1.15em; }
+
+.preview-content p,
+.preview-content ul,
+.preview-content ol,
+.preview-content blockquote,
+.preview-content pre,
+.preview-content table {
+  margin: 0.5em 0;
+}
+
+.preview-content code {
+  background: var(--code-bg);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.preview-content pre {
+  background: var(--code-bg);
+  padding: 0.75em;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.preview-content pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875em;
+}
+
+.preview-content ul,
+.preview-content ol {
+  padding-left: 1.5em;
+}
+
+.preview-content blockquote {
+  padding-left: 1em;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.preview-content table {
+  border-collapse: collapse;
+}
+
+.preview-content th,
+.preview-content td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.75em;
+}
+
+.preview-content a {
+  color: var(--accent);
+}
+
+.preview-content img {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .panes {
+    flex-direction: column;
+  }
+  .preview-pane {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }

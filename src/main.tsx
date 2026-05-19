@@ -5,6 +5,7 @@ import type { DocumentState } from '@/modules/m1-editor/state';
 import { createEditorAPI } from '@/modules/m1-editor/api';
 import type { EditorAPI } from '@/modules/m1-editor/api';
 import { EditorArea } from '@/modules/m1-editor/EditorArea';
+import { PreviewArea } from '@/modules/m2-preview/PreviewArea';
 import {
   createPersistence,
   readStoredDocument,
@@ -34,7 +35,12 @@ function AppShell(props: AppShellProps) {
           {t('theme.toggle')}
         </button>
       </header>
-      <EditorArea state={props.state} />
+      <div class="panes">
+        <div class="editor-pane">
+          <EditorArea state={props.state} />
+        </div>
+        <PreviewArea state={props.state} />
+      </div>
     </main>
   );
 }

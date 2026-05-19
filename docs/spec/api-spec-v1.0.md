@@ -126,6 +126,14 @@ export interface PersistenceAPI {
 - M1 main.tsx 启动时 `const initial = m3.init(); m1.setTextFromStorage(initial)`
 - M1 subscribe text → 内部触发 `setItem`（无显式 API，封装在 M3 内部）
 
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `createPersistence(text)` (store.ts) | ✓ 已实现（2026-05-19）| #2 — Solid effect on(text, ..., {defer:true}) 订阅；状态机 IDLE/DIRTY/SAVING/ERROR；debounce 500ms；QuotaExceededError → toast → ERROR → 5s fallback；1MB 一次性 toast；clear() reset 一切 |
+| `debounce()` (debounce.ts) | ✓ 已实现 | #2 — 通用 helper，5 单测 100% 覆盖 |
+| 测试 | ✓ 18 单测（11 UT-PR + 7 补充）| store.test.ts 94.62% / debounce.test.ts 100% |
+
 ### 3.4 M4 Export
 
 ```ts
@@ -204,6 +212,12 @@ export interface ToastAPI {
 // 默认实例（imperative）
 export const toast: ToastAPI;
 ```
+
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `toast.show()` | ⚠ MVP **stub**（console.{info,warn,error} 转发）| #2 — 接口稳定，TODO(post-mvp): full DOM toast UI（后续单独 Issue）|
 
 **约定：**
 - M3 配额满 → `toast.show(t('storage.quota.full'), 'error')`

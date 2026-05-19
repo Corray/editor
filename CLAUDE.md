@@ -108,6 +108,8 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 > - 业务模块清单: `docs/spec/module-list-v1.0.md` (v1.0 accepted, 2026-05-19 Corray 全盘接受 TBD-M1~M4)
 > - 架构设计: `docs/spec/architecture-v1.0.md` (v1.0 accepted, 2026-05-19; A4 部署推迟)
 > - ADR: 001/002/003 accepted；**004 deferred**（部署到 release 前重启）
+> - 接口设计: `docs/spec/api-spec-v0.1.md` (v0.1 draft, 7 模块 TS API + 5 时序图 + TBD-I1~I4)
+> - 数据模型: `docs/spec/data-model-v0.1.md` (v0.1 draft, 3 localStorage keys + M3 状态机 + TBD-D1~D3)
 
 - **产品形态：** Web 轻量 Markdown 编辑器（纯前端 SPA）
 - **核心使用场景：** 临时草稿 / 移动端速记 / Markdown 渲染校验
@@ -152,3 +154,4 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 2026-05-19 | 业务模块清单 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-M1~M4），M1-M7 状态 accepted，进入架构设计阶段 |
 | 2026-05-19 | 架构设计 v0.1 draft 落档（docs/spec/architecture-v0.1.md）+ 4 份 ADR（001 markdown-it / 002 DOMPurify / 003 Solid / 004 GitHub Pages），TBD-A1~A8 待评审 |
 | 2026-05-19 | 架构 v0.1 → v1.0 评审通过；TBD-A1~A3/A5~A8 接受，**TBD-A4 部署推迟**；ADR-001/002/003 accepted；ADR-004 deferred；MVP 实现期不出 deploy.yml |
+| 2026-05-19 | 接口设计 v0.1 draft（7 模块 TS API + 5 时序图）+ 数据模型 v0.1 draft（localStorage schema + M3 状态机详细）落档，TBD-I1~I4 / TBD-D1~D3 待评审 |

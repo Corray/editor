@@ -93,6 +93,13 @@ export interface PreviewAPI {
 - `render()` 是纯函数（无副作用），可被单测
 - DOM 层订阅 M1 `text()` signal，自动调用 `render()` 并替换 innerHTML
 
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `render()` (pipeline.ts) | ✓ 已实现（2026-05-19）| #1 — markdown-it v14 + DOMPurify v3 双保险，17 单测全绿，覆盖率 100% |
+| `getRootElement()` | ⏳ 待 M2 集成 Issue | 后续 Issue（含 Solid effect 订阅 M1）|
+
 ### 3.3 M3 Persistence
 
 ```ts

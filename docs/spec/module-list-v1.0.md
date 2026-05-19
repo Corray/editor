@@ -37,7 +37,7 @@
 | 模块 | 职责（一句话）| 共识 §| PRD F | owner | 状态 | 对外依赖（外部） | 内部依赖（本项目）|
 |------|-------|-------|-------|-------|------|----------|----------|
 | **M1 编辑** | 维护 Markdown 源文 + 输入交互 | §3 / §4 (隐) | F1 | FE | accepted | — | — |
-| **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | accepted | sanitize 库（如 DOMPurify）、Markdown 渲染库（如 marked / markdown-it，架构 ADR 决定） | ← M1 |
+| **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | in-dev (#1 pipeline 已实现) | sanitize 库 DOMPurify v3.4.5（ADR-002 accepted）、Markdown 渲染库 markdown-it v14.1.1（ADR-001 accepted） | ← M1 |
 | **M3 持久化** | localStorage 读写 + 状态机 | §4.1 / §5 | F3 | FE | accepted | localStorage Web API | ← M1 |
 | **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | accepted | File / Blob API、Clipboard API | ← M1, ← M2 |
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | accepted | CSS Container Queries / media queries | 容纳 M1/M2 + 装饰 M6 |

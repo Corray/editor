@@ -23,6 +23,8 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/main.tsx',
         'src/vite-env.d.ts',
+        // 模块 api.ts 仅做 type re-export，无 runtime 行为
+        'src/modules/**/api.ts',
       ],
       thresholds: {
         lines: 70,

@@ -1,6 +1,7 @@
 import { createSignal, createEffect, on, type Accessor } from 'solid-js';
 import { debounce } from './debounce';
 import { toast } from '@/shared/toast';
+import { t } from '@/modules/m7-i18n/i18n';
 import type { PersistenceAPI, SaveStatus } from './api';
 
 const KEY_DOC = 'editor.document.v1';
@@ -39,7 +40,7 @@ export function createPersistence(text: Accessor<string>): PersistenceAPI {
     } catch {
       // Treat any setItem throw as quota (the only realistic cause).
       setStatus('ERROR');
-      toast.show('Storage quota exceeded.', 'error');
+      toast.show(t('storage.quota'), 'error');
       clearErrorTimer();
       errorTimer = setTimeout(() => {
         errorTimer = null;
@@ -53,7 +54,7 @@ export function createPersistence(text: Accessor<string>): PersistenceAPI {
   function maybeNotifyLarge(value: string): void {
     if (value.length <= LARGE_DOC_THRESHOLD) return;
     if (localStorage.getItem(KEY_LARGE_NOTICE) === '1') return;
-    toast.show('Document exceeds 1MB; performance may degrade.', 'info', 8000);
+    toast.show(t('doc.large'), 'info', 8000);
     localStorage.setItem(KEY_LARGE_NOTICE, '1');
   }
 

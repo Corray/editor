@@ -3,6 +3,7 @@ import { createRoot, createSignal } from 'solid-js';
 import { createPersistence } from '@/modules/m3-persistence/store';
 import type { PersistenceAPI } from '@/modules/m3-persistence/api';
 import { toast } from '@/shared/toast';
+import { t } from '@/modules/m7-i18n/i18n';
 
 interface TestContext {
   api: PersistenceAPI;
@@ -93,10 +94,7 @@ describe('M3 persistence — UT-PR (state machine + invariants)', () => {
     await flushMicrotasks();
 
     expect(api.status()).toBe('ERROR');
-    expect(toast.show).toHaveBeenCalledWith(
-      expect.stringContaining('quota'),
-      'error',
-    );
+    expect(toast.show).toHaveBeenCalledWith(t('storage.quota'), 'error');
     expect(setItemSpy).toHaveBeenCalled();
     dispose();
   });
@@ -180,11 +178,7 @@ describe('M3 persistence — UT-PR (state machine + invariants)', () => {
     setText(huge);
     await flushMicrotasks();
 
-    expect(toast.show).toHaveBeenCalledWith(
-      expect.stringContaining('1MB'),
-      'info',
-      8000,
-    );
+    expect(toast.show).toHaveBeenCalledWith(t('doc.large'), 'info', 8000);
     expect(localStorage.getItem('editor.notice.large-doc.v1')).toBe('1');
     dispose();
   });
@@ -212,11 +206,7 @@ describe('M3 persistence — UT-PR (state machine + invariants)', () => {
     const huge = 'x'.repeat(1_000_001);
     setText(huge);
     await flushMicrotasks();
-    expect(toast.show).toHaveBeenCalledWith(
-      expect.stringContaining('1MB'),
-      'info',
-      8000,
-    );
+    expect(toast.show).toHaveBeenCalledWith(t('doc.large'), 'info', 8000);
     dispose();
   });
 

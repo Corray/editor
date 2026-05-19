@@ -181,6 +181,12 @@ export interface ThemeAPI {
 }
 ```
 
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `createTheme()` 工厂 | ✓ 已实现（2026-05-19）| #5 — 三级 fallback init (localStorage → prefers-color-scheme → 'light')；invalid value 防投毒；createEffect 同步 `<html>.dataset.theme` + `editor.theme.v1` localStorage；9 单测覆盖 family-B 全集 |
+
 ### 3.7 M7 i18n
 
 ```ts

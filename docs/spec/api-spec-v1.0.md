@@ -190,8 +190,17 @@ export type Lang = 'zh-CN';  // MVP 仅 zh-CN
 export interface I18nAPI {
   readonly lang: Accessor<Lang>;
   t(key: string): string;  // 同步查询；未命中返回 key 本身
+  setLang(lang: Lang): void;  // v1.1+ 接入点预留
 }
 ```
+
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `i18n` singleton + `t()` | ✓ 已实现（2026-05-19）| #3 — module-level singleton；plain const dict + 字面 key type；t() fallback 到 key 本身；setLang 预留接入点 |
+| `zh-CN.dict.ts` | ✓ 15 keys 白名单 | 覆盖 M2/M3/M4/M5 chrome 文案 |
+| **遗留 follow-up** | ⚠ M3 toast 文案当前硬编（#2 实现时 M7 未存在）| 后续 Issue「M3 i18n integration」抓 fix-pattern-scan |
 
 ---
 

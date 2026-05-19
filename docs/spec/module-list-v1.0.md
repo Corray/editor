@@ -42,7 +42,7 @@
 | **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | accepted | File / Blob API、Clipboard API | ← M1, ← M2 |
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | accepted | CSS Container Queries / media queries | 容纳 M1/M2 + 装饰 M6 |
 | **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | accepted | `prefers-color-scheme` media query、localStorage | → M5 (写入 data-theme) |
-| **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | accepted | — | 横切，被 M1-M6 chrome 文案消费 |
+| **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | in-dev (#3 实现) | — | 横切，被 M1-M6 chrome 文案消费 |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）
 

@@ -105,7 +105,7 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 > 来源：
 > - PRD: `docs/prd/PRD-v1.0-mvp.md` (v1.0 accepted, 2026-05-18)
 > - 共识文档: `docs/spec/consensus-v1.0.md` (v1.0 accepted, 2026-05-18 Corray 全盘接受 TBD-1~10)
-> - 业务模块清单: `docs/spec/module-list-v0.1.md` (v0.1 draft, 7 模块 M1-M7 + 4 项 TBD-M1~M4 待评审)
+> - 业务模块清单: `docs/spec/module-list-v1.0.md` (v1.0 accepted, 2026-05-19 Corray 全盘接受 TBD-M1~M4)
 
 - **产品形态：** Web 轻量 Markdown 编辑器（纯前端 SPA）
 - **核心使用场景：** 临时草稿 / 移动端速记 / Markdown 渲染校验
@@ -144,3 +144,4 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 2026-05-18 | 共识文档 v0.1 draft 落档（docs/spec/consensus-v0.1.md），含 TBD-1~10 待 PM-FE 对齐 |
 | 2026-05-18 | 共识文档 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-1~10），进入 spec-to-code-flow 主路径，下一站 = 业务模块清单 |
 | 2026-05-18 | 业务模块清单 v0.1 draft 落档（docs/spec/module-list-v0.1.md），7 模块 M1-M7 + TBD-M1~M4 待评审 |
+| 2026-05-19 | 业务模块清单 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-M1~M4），M1-M7 状态 accepted，进入架构设计阶段 |

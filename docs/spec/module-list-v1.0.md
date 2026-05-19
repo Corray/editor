@@ -1,11 +1,12 @@
-# 业务模块清单 v0.1 — editor MVP
+# 业务模块清单 v1.0 — editor MVP
 
 | 字段 | 值 |
 |------|----|
-| **状态** | `draft` (待评审 §7 [TBD] 后升 v1.0) |
-| **版本** | v0.1 |
+| **状态** | `accepted` (TBD-M1~M4 全部采纳 AI 倾向，§2 各模块状态升 accepted) |
+| **版本** | v1.0 |
 | **基线** | PRD v1.0 + 共识文档 v1.0 |
 | **首版日期** | 2026-05-18 |
+| **最近评审** | 2026-05-19 (v0.1 → v1.0，全盘接受) |
 | **owner** | FE (Corray) |
 | **下游** | → 架构设计 → 接口+数据模型 → 测试计划 → 代码 |
 
@@ -27,6 +28,7 @@
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
 | v0.1 | 2026-05-18 | AI 基于共识 §3 起草，含 7 模块详细 + 4 项 [TBD] |
+| v1.0 | 2026-05-19 | Corray 全盘接受 TBD-M1~M4；§2 各模块 status proposed → accepted；进入下游架构设计阶段 |
 
 ---
 
@@ -34,13 +36,13 @@
 
 | 模块 | 职责（一句话）| 共识 §| PRD F | owner | 状态 | 对外依赖（外部） | 内部依赖（本项目）|
 |------|-------|-------|-------|-------|------|----------|----------|
-| **M1 编辑** | 维护 Markdown 源文 + 输入交互 | §3 / §4 (隐) | F1 | FE | proposed | — | — |
-| **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | proposed | sanitize 库（如 DOMPurify）、Markdown 渲染库（如 marked / markdown-it，架构 ADR 决定） | ← M1 |
-| **M3 持久化** | localStorage 读写 + 状态机 | §4.1 / §5 | F3 | FE | proposed | localStorage Web API | ← M1 |
-| **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | proposed | File / Blob API、Clipboard API | ← M1, ← M2 |
-| **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | proposed | CSS Container Queries / media queries | 容纳 M1/M2 + 装饰 M6 |
-| **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | proposed | `prefers-color-scheme` media query、localStorage | → M5 (写入 data-theme) |
-| **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | proposed | — | 横切，被 M1-M6 chrome 文案消费 |
+| **M1 编辑** | 维护 Markdown 源文 + 输入交互 | §3 / §4 (隐) | F1 | FE | accepted | — | — |
+| **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | accepted | sanitize 库（如 DOMPurify）、Markdown 渲染库（如 marked / markdown-it，架构 ADR 决定） | ← M1 |
+| **M3 持久化** | localStorage 读写 + 状态机 | §4.1 / §5 | F3 | FE | accepted | localStorage Web API | ← M1 |
+| **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | accepted | File / Blob API、Clipboard API | ← M1, ← M2 |
+| **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | accepted | CSS Container Queries / media queries | 容纳 M1/M2 + 装饰 M6 |
+| **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | accepted | `prefers-color-scheme` media query、localStorage | → M5 (写入 data-theme) |
+| **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | accepted | — | 横切，被 M1-M6 chrome 文案消费 |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）
 
@@ -239,14 +241,16 @@ M7 i18n ──t(key)──→ M1-M6 所有 chrome 文案
 
 ---
 
-## 7. 待对齐清单（[TBD]）
+## 7. 决议汇总（原 TBD-M1~M4 待对齐清单）
 
-| # | 议题 | AI 倾向 | 评审 |
-|---|------|--------|------|
-| **TBD-M1** | M7 i18n 算业务模块还是 utility？ | 算业务模块（共识 §3 已列 M7，保持一致；横切关注点也是模块）| 待评审 |
-| **TBD-M2** | 模块 label 命名 `module/m1-editor` vs `module:editor` | `module/m1-editor`（带编号，扫表对照）| 待评审 |
-| **TBD-M3** | M4 导出 / M6 主题这种**只有 1-2 个交互点**的小模块，要不要合并为「Utility」单模块？ | 不合并（保留 §3 共识结构，避免破坏追溯链）| 待评审 |
-| **TBD-M4** | 模块发版策略：每模块独立 PR vs MVP 整 PR | MVP 整 PR（单人开发 / MVP 范围小，独立 PR 反而碎）| 待评审 |
+| # | 议题 | 决议（v1.0）|
+|---|------|-----------|
+| TBD-M1 | M7 i18n 算业务模块还是 utility？ | ✓ 算业务模块（与共识 §3 一致，横切关注点保留模块身份）|
+| TBD-M2 | 模块 label 命名 | ✓ `module/m1-editor`（带编号便于扫表对照）|
+| TBD-M3 | M4 / M6 小模块合并 Utility？ | ✓ 不合并（保留共识结构，追溯链稳定）|
+| TBD-M4 | 发版策略 | ✓ MVP 整 PR（单人开发 / MVP 范围小，避免碎 PR）|
+
+> 全部 4 项已转为正式决议。后续如有变更，走「§1 版本史」追加版本号。
 
 ---
 
@@ -254,6 +258,6 @@ M7 i18n ──t(key)──→ M1-M6 所有 chrome 文案
 
 | 日期 | 评审人 | 决议 | 备注 |
 |------|-------|------|------|
-| — | — | — | 待首次评审（v0.1 → v1.0）|
+| 2026-05-19 | Corray | v0.1 → v1.0，全盘接受 TBD-M1~M4 | AI 倾向方案全部采纳；§2 各模块状态升 accepted；进入下游架构阶段 |
 
-**评审通过后：** 升 v1.0 / commit / 进入下一节点 = **架构设计 + ADR**（按共识 + 模块清单决定渲染库 / sanitize 库 / 构建工具 / 部署目标）。
+**下一步：** 进入 spec-to-code-flow 主路径，下一节点 = **架构设计 + ADR**（按共识 + 模块清单决定渲染库 / sanitize 库 / 构建工具 / 部署目标）。

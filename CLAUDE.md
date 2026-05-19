@@ -49,16 +49,16 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | `doc_repo` | `.` | self — 用本项目自身 `docs/`，不外接独立 docs 仓库 |
 | `adr_path` | `docs/adr/` | standard convention（目录待创建，首个 ADR 写入时建）|
 | `code_path` | `.` | 项目根（业务代码待 init）|
-| `compile_cmd` | `echo "compile_cmd TBD (no package.json yet)"` | ⚠ 临时占位。`package.json` + `tsconfig.json` 就绪后换成 `pnpm tsc --noEmit`（或 `pnpm build`，按实际命名）|
+| `compile_cmd` | `pnpm typecheck` | ✓ `tsc --noEmit`，TS strict 类型检查作为编译门禁 |
 | `role` | `FE` | 当前会话默认角色（前端开发）|
 
-### 待回填清单（按优先级）
+### 待回填清单（历史，全部完成）
 
-| # | 动作 | 解锁能力 |
+| # | 动作 | 状态 |
 |---|------|---------|
-| 1 | `git remote add origin <github-url>` + 在 GitHub 建仓 | `/issue list` / `gh issue *` 全部命令 |
-| 2 | `pnpm init` + `pnpm add -D typescript` + 写 `tsconfig.json` | `compile_cmd` 切真值，编译门禁生效 |
-| 3 | `mkdir docs/adr` + 首个 ADR | architecture 决策可落档 |
+| 1 | `git remote add origin git@github.com:Corray/editor.git` | ✓ 2026-05-18 |
+| 2 | `pnpm init` + tsconfig + Vite 脚手架 | ✓ 2026-05-19，`compile_cmd = pnpm typecheck` |
+| 3 | `docs/adr/` + ADR-001~004 | ✓ 2026-05-19 |
 
 ---
 
@@ -159,3 +159,4 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 2026-05-19 | 接口设计 + 数据模型 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-I1~I4 / TBD-D1~D3），进入测试计划阶段 |
 | 2026-05-19 | 测试计划 v0.1 draft 落档（docs/spec/test-plan-v0.1.md），AC 矩阵 6 条 + 6 类家族维度（family-A~F）+ ~50 用例，TBD-T1~T4 待评审 |
 | 2026-05-19 | 测试计划 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-T1~T4）；**spec-to-code-flow 上游全部 accepted**，进入代码实现阶段 |
+| 2026-05-19 | 工程脚手架：package.json + tsconfig + Vite + Vitest + Playwright + index.html + src/main.tsx + reset/variables.css；compile_cmd 升级为 `pnpm typecheck`；`pnpm install` 待用户执行 |

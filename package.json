@@ -16,14 +16,13 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "solid-js": "^1.8.0",
+    "dompurify": "^3.0.0",
     "markdown-it": "^14.0.0",
-    "dompurify": "^3.0.0"
+    "solid-js": "^1.8.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.43.0",
     "@solidjs/testing-library": "^0.8.0",
-    "@types/dompurify": "^3.0.0",
     "@types/markdown-it": "^14.0.0",
     "@vitest/coverage-v8": "^1.6.0",
     "jsdom": "^24.0.0",

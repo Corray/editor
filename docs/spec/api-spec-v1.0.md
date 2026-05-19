@@ -1,13 +1,14 @@
-# 接口设计 v0.1 — editor MVP
+# 接口设计 v1.0 — editor MVP
 
 | 字段 | 值 |
 |------|----|
-| **状态** | `draft` (待评审 §7 [TBD] 后升 v1.0) |
-| **版本** | v0.1 |
+| **状态** | `accepted` (TBD-I1~I4 全部采纳 AI 倾向) |
+| **版本** | v1.0 |
 | **基线** | PRD v1.0 + 共识 v1.0 + 模块 v1.0 + 架构 v1.0 |
 | **首版日期** | 2026-05-19 |
+| **最近评审** | 2026-05-19 (v0.1 → v1.0) |
 | **owner** | FE (Corray) |
-| **配套文件** | `data-model-v0.1.md` (数据模型) |
+| **配套文件** | `data-model-v1.0.md` (数据模型) |
 | **下游** | → 测试计划 → 代码 |
 
 ---
@@ -29,6 +30,7 @@
 | 版本 | 日期 | 摘要 |
 |------|------|------|
 | v0.1 | 2026-05-19 | AI 起草，含 7 模块 TS API + 5 时序图 + TBD-I1~I4 |
+| v1.0 | 2026-05-19 | Corray 全盘接受 TBD-I1~I4；进入下游测试计划阶段 |
 
 ---
 
@@ -317,14 +319,16 @@ init()────→│ IDLE │
 
 ---
 
-## 7. 待对齐清单（[TBD]）
+## 7. 决议汇总（原 TBD-I1~I4）
 
-| # | 议题 | AI 倾向 | 评审 |
-|---|------|--------|------|
-| **TBD-I1** | M1 输入区域：textarea vs contenteditable | textarea（简单 / 移动键盘行为友好 / 防意外格式化）| 待评审 |
-| **TBD-I2** | Toast 注入：imperative singleton 还是 Solid context | imperative singleton（极简，跨模块直接 import）| 待评审 |
-| **TBD-I3** | M3 写入失败：toast 后是否自动重试 | 不自动重试（用户感知 + 手动 Ctrl+S 触发，但 MVP 不做手动保存按钮，下次输入自然 retry）| 待评审 |
-| **TBD-I4** | M2 render 是纯函数还是带缓存 | 纯函数（MVP，markdown-it 本身够快；v1.1+ 大文档再加 memoization）| 待评审 |
+| # | 议题 | 决议（v1.0）|
+|---|------|-----------|
+| TBD-I1 | M1 输入：textarea vs contenteditable | ✓ textarea（简单 / 移动键盘友好 / 防意外格式化）|
+| TBD-I2 | Toast 注入：imperative singleton vs Solid context | ✓ imperative singleton（跨模块直接 import）|
+| TBD-I3 | M3 写入失败自动重试 | ✓ 不重试（下次输入自然 retry）|
+| TBD-I4 | M2 render 是否带缓存 | ✓ 纯函数（MVP markdown-it 够快；v1.1+ 再加 memoization）|
+
+> 4 项已转为正式决议。
 
 ---
 
@@ -332,6 +336,6 @@ init()────→│ IDLE │
 
 | 日期 | 评审人 | 决议 | 备注 |
 |------|-------|------|------|
-| — | — | — | 待首次评审 |
+| 2026-05-19 | Corray | v0.1 → v1.0，全盘接受 TBD-I1~I4 | AI 倾向方案全部采纳 |
 
-**评审通过后：** 升 v1.0 / commit / 进入下一节点 = **测试计划**。
+**下一步：** 进入下一节点 = **测试计划**。

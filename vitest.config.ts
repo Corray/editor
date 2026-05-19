@@ -23,8 +23,12 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/main.tsx',
         'src/vite-env.d.ts',
-        // 模块 api.ts 仅做 type re-export，无 runtime 行为
-        'src/modules/**/api.ts',
+        // type-only re-export api.ts 文件（无 runtime 函数）
+        // M1 api.ts 含 createEditorAPI runtime 工厂，**不排除**
+        'src/modules/m2-preview/api.ts',
+        'src/modules/m3-persistence/api.ts',
+        'src/modules/m6-theme/api.ts',
+        'src/modules/m7-i18n/api.ts',
       ],
       thresholds: {
         lines: 70,

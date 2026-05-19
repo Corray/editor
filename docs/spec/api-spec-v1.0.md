@@ -76,6 +76,14 @@ export interface EditorAPI {
 - M3 `subscribe(text)` → debounce 写入
 - M4 读 `text()` 当下值用于导出
 
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `createDocumentState()` / `createEditorAPI()` 工厂 | ✓ 已实现（2026-05-19）| #6 — 三层分离 (state / api / EditorArea)；textarea + onInput → state.setText；EditorAPI 不暴露 setText (按 spec)；14 单测 + 组件测全集，m1-editor 100% 覆盖 |
+| `EditorArea` 组件 | ✓ 已实现 | spellcheck="false" 字符串（非 boolean，因 spellcheck enumerated）；aria-label "Markdown editor" |
+| F1.2 行号 / F1.3 字号控件 | ⏳ 后续 Issue | PRD 标"可选"/"默认值即可"，MVP 不阻塞 |
+
 ### 3.2 M2 Preview
 
 ```ts

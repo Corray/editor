@@ -1,13 +1,14 @@
-# 架构设计 v0.1 — editor MVP
+# 架构设计 v1.0 — editor MVP
 
 | 字段 | 值 |
 |------|----|
-| **状态** | `draft` (待评审 §10 [TBD] 后升 v1.0) |
-| **版本** | v0.1 |
+| **状态** | `accepted` (TBD-A1~A3 / A5~A8 ✓ 采纳；TBD-A4 部署 🕒 推迟到 release 前) |
+| **版本** | v1.0 |
 | **基线** | PRD v1.0 + 共识 v1.0 + 模块清单 v1.0 |
 | **首版日期** | 2026-05-19 |
+| **最近评审** | 2026-05-19 (v0.1 → v1.0) |
 | **owner** | FE (Corray) |
-| **关联 ADR** | ADR-001 / ADR-002 / ADR-003 / ADR-004 |
+| **关联 ADR** | ADR-001 accepted / ADR-002 accepted / ADR-003 accepted / **ADR-004 deferred** |
 | **下游** | → 接口设计 + 数据模型 → 测试计划 → 代码 |
 
 ---
@@ -27,6 +28,7 @@
 | 版本 | 日期 | 摘要 |
 |------|------|------|
 | v0.1 | 2026-05-19 | AI 起草，含 4 ADR (001-004) + 4 次要决策 + 性能预算 + 部署架构 |
+| v1.0 | 2026-05-19 | Corray 评审：TBD-A1~A3 / A5~A8 全盘接受；**TBD-A4 部署推迟**（ADR-004 → deferred，MVP 实现期不出 deploy.yml）；ADR-001/002/003 升 accepted；进入下游接口设计阶段 |
 
 ---
 
@@ -172,16 +174,16 @@ MVP 三个状态（源文 / 主题 / i18n lang）极简，Solid 内置 `createSi
 
 ## 7. 部署架构
 
-详见 **ADR-004**。简述：
+**🕒 推迟（ADR-004 deferred at 2026-05-19）。** MVP 实现期不生成 deploy workflow，本节内容作为方向参考保留：
 
-- **GitHub Pages**（owner: `Corray/editor`）
-- 路由：单页静态，无 client-side routing（v1.x 不需要）
-- 域名：MVP 用 `corray.github.io/editor`，v1.1+ 可绑自定义域名
-- HTTPS：GitHub Pages 默认
-- CDN：GitHub Pages 内置（Fastly 边缘）
-- CI/CD：GitHub Actions（`.github/workflows/deploy.yml`），main 分支 push 触发 build + deploy
+- 候选目标：GitHub Pages（推荐）/ Vercel / Cloudflare Pages
+- 单页静态，无 client-side routing
+- 前置阻塞：repo PRIVATE + Free 账号矛盾（PUBLIC / Pro / Vercel 三选一）
 
-⚠ **前置依赖：** 当前 repo 是 PRIVATE，GitHub Pages 私有需要 Pro 账号。评审时需 Corray 选 PUBLIC / 升级 Pro / 改 Vercel 三选一（ADR-004 §Decision 已列）。
+**MVP 实现期实际行为：**
+- 本地 `pnpm dev` / `pnpm build` 可跑
+- 不生成 `.github/workflows/deploy.yml`
+- v1.0 代码完成 + release 前重启 ADR-004
 
 ---
 
@@ -244,18 +246,20 @@ editor/
 
 ---
 
-## 10. 待对齐清单（[TBD]）
+## 10. 决议汇总（原 TBD-A1~A8）
 
-| # | 议题 | AI 倾向 | ADR | 评审 |
-|---|------|--------|-----|------|
-| **TBD-A1** | 框架：Solid vs Preact+Signals vs React vs Vanilla | Solid（性能 / 体积 / DX 最优）| ADR-003 | 待评审 |
-| **TBD-A2** | Markdown 渲染：markdown-it vs marked vs micromark | markdown-it | ADR-001 | 待评审 |
-| **TBD-A3** | sanitize：DOMPurify vs 自写白名单 vs sanitize-html | DOMPurify | ADR-002 | 待评审 |
-| **TBD-A4** | 部署：GitHub Pages vs Vercel vs Cloudflare Pages | GitHub Pages（**前置：需定 PRIVATE → PUBLIC / Pro 升级 / 改 Vercel**）| ADR-004 | 待评审 |
-| TBD-A5 | PWA / Service Worker MVP 上不上 | 不上，v1.1+ 再加（PRD §5 已定）| — | 待评审 |
-| TBD-A6 | CSP `unsafe-inline` 是否允许 | 允许 `style-src 'unsafe-inline'`（CSS Variables 切主题需要）| — | 待评审 |
-| TBD-A7 | 测试覆盖率门槛 | 单测 ≥ 70% 行覆盖 / E2E 覆盖 AC-1~6 全部 | — | 待评审 |
-| TBD-A8 | 字体策略 | 系统字体栈（不引 web 字体），M1/M2 等宽用 `monospace` | — | 待评审 |
+| # | 议题 | 决议（v1.0）| ADR |
+|---|------|-----------|-----|
+| TBD-A1 | 框架 | ✓ Solid.js 1.8+ | ADR-003 accepted |
+| TBD-A2 | Markdown 渲染 | ✓ markdown-it v14 | ADR-001 accepted |
+| TBD-A3 | sanitize | ✓ DOMPurify v3 | ADR-002 accepted |
+| **TBD-A4** | **部署目标** | 🕒 **推迟**（MVP 实现期不部署，release 前重启）| **ADR-004 deferred** |
+| TBD-A5 | PWA / Service Worker | ✓ 不做（v1.1+ 再加）| — |
+| TBD-A6 | CSP `unsafe-inline` | ✓ 允许 `style-src 'unsafe-inline'`（主题切换需要）| — |
+| TBD-A7 | 测试覆盖率门槛 | ✓ 单测 ≥ 70% 行覆盖 / E2E 覆盖 AC-1~6 全部 | — |
+| TBD-A8 | 字体 | ✓ 系统字体栈，M1/M2 等宽用 `monospace` | — |
+
+> 7 项已转为正式决议；1 项（A4）显式推迟，留待 release 前重启。
 
 ---
 
@@ -263,6 +267,6 @@ editor/
 
 | 日期 | 评审人 | 决议 | 备注 |
 |------|-------|------|------|
-| — | — | — | 待首次评审（v0.1 → v1.0）|
+| 2026-05-19 | Corray | v0.1 → v1.0；TBD-A1~A3/A5~A8 ✓ 接受，TBD-A4 推迟 | ADR-001/002/003 升 accepted；ADR-004 deferred |
 
-**评审通过后：** 升 v1.0 / ADR-001~004 升 `accepted` / commit / 进入下一节点 = **接口设计 + 数据模型**。
+**下一步：** 进入 **接口设计 + 数据模型** 节点。ADR-004 在 release 前重启（待 repo 公开/私有/Vercel 三选一）。

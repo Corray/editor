@@ -106,8 +106,8 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 > - PRD: `docs/prd/PRD-v1.0-mvp.md` (v1.0 accepted, 2026-05-18)
 > - 共识文档: `docs/spec/consensus-v1.0.md` (v1.0 accepted, 2026-05-18 Corray 全盘接受 TBD-1~10)
 > - 业务模块清单: `docs/spec/module-list-v1.0.md` (v1.0 accepted, 2026-05-19 Corray 全盘接受 TBD-M1~M4)
-> - 架构设计: `docs/spec/architecture-v0.1.md` (v0.1 draft, 4 ADR + 8 TBD-A 待评审)
-> - ADR: `docs/adr/ADR-001~004*` (proposed)
+> - 架构设计: `docs/spec/architecture-v1.0.md` (v1.0 accepted, 2026-05-19; A4 部署推迟)
+> - ADR: 001/002/003 accepted；**004 deferred**（部署到 release 前重启）
 
 - **产品形态：** Web 轻量 Markdown 编辑器（纯前端 SPA）
 - **核心使用场景：** 临时草稿 / 移动端速记 / Markdown 渲染校验
@@ -116,11 +116,11 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 
 ### 关键决策点
 
-- **Markdown 渲染库** markdown-it v14（ADR-001 proposed，待评审）
-- **HTML sanitize** DOMPurify v3（ADR-002 proposed，待评审）
-- **框架** Solid.js 1.8+（ADR-003 proposed，待评审）
-- **部署目标** GitHub Pages（ADR-004 proposed；前置：当前 repo PRIVATE，需定 PUBLIC / Pro / Vercel 三选一）
-- **构建工具** Vite，**状态管理** Solid Signals 原生，**CSS** Variables + BEM，**测试** Vitest + Playwright（架构 §3）
+- **Markdown 渲染库** markdown-it v14（ADR-001 accepted）
+- **HTML sanitize** DOMPurify v3（ADR-002 accepted）
+- **框架** Solid.js 1.8+（ADR-003 accepted）
+- **部署目标** 🕒 推迟（ADR-004 deferred；MVP 实现期不出 deploy.yml；release 前重启，待 PUBLIC / Pro / Vercel 三选一）
+- **构建工具** Vite，**状态管理** Solid Signals 原生，**CSS** Variables + BEM，**测试** Vitest + Playwright
 - **持久化策略** localStorage（MVP）→ IndexedDB（v1.1+）
 
 ### 当前 active 阶段
@@ -151,3 +151,4 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 2026-05-18 | 业务模块清单 v0.1 draft 落档（docs/spec/module-list-v0.1.md），7 模块 M1-M7 + TBD-M1~M4 待评审 |
 | 2026-05-19 | 业务模块清单 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-M1~M4），M1-M7 状态 accepted，进入架构设计阶段 |
 | 2026-05-19 | 架构设计 v0.1 draft 落档（docs/spec/architecture-v0.1.md）+ 4 份 ADR（001 markdown-it / 002 DOMPurify / 003 Solid / 004 GitHub Pages），TBD-A1~A8 待评审 |
+| 2026-05-19 | 架构 v0.1 → v1.0 评审通过；TBD-A1~A3/A5~A8 接受，**TBD-A4 部署推迟**；ADR-001/002/003 accepted；ADR-004 deferred；MVP 实现期不出 deploy.yml |

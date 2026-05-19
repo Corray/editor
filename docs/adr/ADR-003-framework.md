@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | proposed |
+| **Status** | **accepted** (2026-05-19 Corray) |
 | **Date** | 2026-05-19 |
 | **Decider** | FE (Corray) |
 | **Context** | 共识 §3 / 模块清单 §3 / 架构 §2.2 |

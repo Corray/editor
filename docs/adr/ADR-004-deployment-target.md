@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | proposed |
+| **Status** | **deferred** (2026-05-19, MVP 实现期先不部署，到出 v1.0 release 前再启) |
 | **Date** | 2026-05-19 |
 | **Decider** | FE (Corray) |
 | **Context** | 架构 §7 / PRD §8 R3 |
@@ -35,24 +35,23 @@ editor 是纯静态 SPA，部署需求：
 
 ## Decision
 
-**采用 GitHub Pages。**
+**🕒 推迟（deferred at 2026-05-19）。** MVP 实现期不做部署，到出 v1.0 release 前重启本 ADR。
 
-⚠ **决策前置依赖：** 当前 `Corray/editor` 是 **PRIVATE** 仓库（已验证 `gh repo view` 2026-05-18）。GitHub Pages 私有仓库需要 GitHub Pro。
-
-**评审时需 Corray 确认：**
+待重启时仍需 Corray 三选一：
 
 | 路径 | 触发条件 | 后续动作 |
 |------|---------|---------|
-| A1: repo 切 PUBLIC | 接受代码公开 | 直接 GitHub Pages |
-| A2: 保持 PRIVATE + 升级 Pro | 接受 $4/月 | GitHub Pages 仍可用 |
-| A3: 改 Vercel | 保持 PRIVATE + 不升级 Pro | ADR-004 supersede 改 Vercel |
+| A1: repo 切 PUBLIC | 接受代码公开 | 走原推荐 GitHub Pages |
+| A2: 保持 PRIVATE + 升级 Pro | 接受 $4/月 | 走原推荐 GitHub Pages |
+| A3: 改 Vercel | 保持 PRIVATE + 不升 Pro | 本 ADR superseded by ADR-005-deployment |
 
 ## Consequences
 
-- ✅ 与 Issue / PR / Actions workflow 同源
-- ✅ 零额外账号
-- ⚠ 私有仓库 + Free 账号矛盾，**需评审解决**
-- 📌 v1.1+ 绑自定义域名时 DNS 配置走 Cloudflare
+- 🕒 MVP 实现期：**不生成 deploy workflow**（.github/workflows/deploy.yml 暂缓）
+- 🕒 MVP 实现期：仅做 `vite build` 产 dist/，可本地预览，不上线
+- ✅ 与 Issue / PR / Actions workflow 同源（推荐方向保留）
+- ⚠ 私有仓库 + Free 账号矛盾，**留待重启时解决**
+- 📌 v1.0 代码完成 + release 前重启本 ADR；如重启时选 A3，superseded
 
 ## References
 

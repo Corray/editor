@@ -126,6 +126,10 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 - **构建工具** Vite，**状态管理** Solid Signals 原生，**CSS** Variables + BEM，**测试** Vitest + Playwright
 - **持久化策略** localStorage（MVP）→ IndexedDB（v1.1+）
 
+### 反哺记录（spec-to-code-flow 实现层反馈到 spec 层）
+
+- **2026-05-19 / #7**：M3 `init()` chicken-and-egg → 加 `readStoredDocument()` 静态导出；`init()` 兼容保留。api-spec §3.3 同步增补。
+
 ### 当前 active 阶段
 - 参见 `docs/env.yaml`（TAPD 流派 `active_stories` / GitHub 流派 `active_milestones`）
 

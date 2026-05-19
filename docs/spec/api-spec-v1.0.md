@@ -115,7 +115,7 @@ export interface PreviewAPI {
 export type SaveStatus = 'IDLE' | 'DIRTY' | 'SAVING' | 'ERROR';
 
 export interface PersistenceAPI {
-  /** 启动时还原；找不到返回空字符串 */
+  /** 启动时还原；找不到返回空字符串（内部委托 readStoredDocument）*/
   init(): string;
 
   /** 当前保存状态（UI 不直接呈现，但暴露供 debug / 测试） */
@@ -128,10 +128,14 @@ export interface PersistenceAPI {
   enable(): void;
   disable(): void;
 }
+
+// 模块级静态导出（反哺 #7 落档）
+export function readStoredDocument(): string;
 ```
 
 **调用方：**
-- M1 main.tsx 启动时 `const initial = m3.init(); m1.setTextFromStorage(initial)`
+- **main.tsx 启动序列推荐路径**（反哺 #7）：先 `const initial = readStoredDocument()` 静态读 → `createDocumentState(initial)` → `createPersistence(state.text)`，避免 `init()` 方法与 `createPersistence` 参数之间的 chicken-and-egg
+- `init()` 实例方法保留作为 spec 契约 + 内部调 `readStoredDocument()`，向后兼容
 - M1 subscribe text → 内部触发 `setItem`（无显式 API，封装在 M3 内部）
 
 **实现追溯：**

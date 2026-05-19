@@ -11,6 +11,22 @@ const ERROR_FALLBACK_MS = 5000;
 const LARGE_DOC_THRESHOLD = 1_000_000;
 
 /**
+ * Module-level static read (does not require a PersistenceAPI instance).
+ *
+ * Use this from main.tsx **before** creating reactive state, breaking the
+ * chicken-and-egg between `init()` and `createPersistence(text)` — see
+ * api-spec §3.3.
+ */
+export function readStoredDocument(): string {
+  try {
+    return localStorage.getItem(KEY_DOC) ?? '';
+  } catch {
+    // privacy mode / storage disabled — treat as absent
+    return '';
+  }
+}
+
+/**
  * Build a PersistenceAPI bound to a Solid text signal.
  *
  * State machine per data-model v1.0 §5.2:
@@ -74,7 +90,7 @@ export function createPersistence(text: Accessor<string>): PersistenceAPI {
   );
 
   return {
-    init: () => localStorage.getItem(KEY_DOC) ?? '',
+    init: () => readStoredDocument(),
     status,
     clear: () => {
       clearErrorTimer();

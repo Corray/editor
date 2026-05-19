@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createRoot, createSignal } from 'solid-js';
-import { createPersistence } from '@/modules/m3-persistence/store';
+import {
+  createPersistence,
+  readStoredDocument,
+} from '@/modules/m3-persistence/store';
 import type { PersistenceAPI } from '@/modules/m3-persistence/api';
 import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
@@ -207,6 +210,32 @@ describe('M3 persistence — UT-PR (state machine + invariants)', () => {
     setText(huge);
     await flushMicrotasks();
     expect(toast.show).toHaveBeenCalledWith(t('doc.large'), 'info', 8000);
+    dispose();
+  });
+
+  // ---------- readStoredDocument (static, no instance) ----------
+
+  it('readStoredDocument: returns stored value when key present', () => {
+    localStorage.setItem('editor.document.v1', 'restored-from-static');
+    expect(readStoredDocument()).toBe('restored-from-static');
+  });
+
+  it('readStoredDocument: returns empty string when key absent', () => {
+    expect(readStoredDocument()).toBe('');
+  });
+
+  it('readStoredDocument: returns empty when localStorage throws (privacy mode)', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('disabled', 'SecurityError');
+    });
+    expect(readStoredDocument()).toBe('');
+  });
+
+  it('createPersistence init() equals readStoredDocument() (parity)', () => {
+    localStorage.setItem('editor.document.v1', 'parity-check');
+    const { api, dispose } = setup();
+    expect(api.init()).toBe(readStoredDocument());
+    expect(api.init()).toBe('parity-check');
     dispose();
   });
 

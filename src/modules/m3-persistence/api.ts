@@ -10,4 +10,4 @@ export interface PersistenceAPI {
   disable(): void;
 }
 
-export { createPersistence } from './store';
+export { createPersistence, readStoredDocument } from './store';

@@ -4,6 +4,9 @@ import path from 'node:path';
 
 export default defineConfig({
   plugins: [solid()],
+  // GitHub Pages subdirectory deploy: https://corray.github.io/editor/
+  // 决议见 ADR-004 (accepted 2026-05-20)
+  base: '/editor/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -2,8 +2,8 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | **deferred** (2026-05-19, MVP 实现期先不部署，到出 v1.0 release 前再启) |
-| **Date** | 2026-05-19 |
+| **Status** | **accepted** (2026-05-20 restart by Corray — A1 path: PUBLIC repo + GitHub Pages) |
+| **Date** | 2026-05-19（initial）/ 2026-05-20（restart）|
 | **Decider** | FE (Corray) |
 | **Context** | 架构 §7 / PRD §8 R3 |
 | **Supersedes** | — |
@@ -35,25 +35,41 @@ editor 是纯静态 SPA，部署需求：
 
 ## Decision
 
-**🕒 推迟（deferred at 2026-05-19）。** MVP 实现期不做部署，到出 v1.0 release 前重启本 ADR。
+**采用 GitHub Pages（A1 路径，重启 2026-05-20）。**
 
-待重启时仍需 Corray 三选一：
+### 历史
 
-| 路径 | 触发条件 | 后续动作 |
-|------|---------|---------|
-| A1: repo 切 PUBLIC | 接受代码公开 | 走原推荐 GitHub Pages |
-| A2: 保持 PRIVATE + 升级 Pro | 接受 $4/月 | 走原推荐 GitHub Pages |
-| A3: 改 Vercel | 保持 PRIVATE + 不升 Pro | 本 ADR superseded by ADR-005-deployment |
+- 2026-05-19 initial: ADR 标 deferred；MVP 实现期不做部署
+- 2026-05-20 restart: 用户选 A1 — repo 切 PUBLIC（`gh repo edit --visibility public`） + GitHub Pages free tier + GitHub Actions workflow
+
+### 路径选择（A1）
+
+| 选项 | 决议 |
+|------|------|
+| A1: repo 切 PUBLIC | ✅ **采纳** — 代码公开，GitHub Pages free tier 可用 |
+| A2: 保持 PRIVATE + 升级 Pro | ❌ 未采纳（$4/月 vs 公开化无成本）|
+| A3: 改 Vercel | ❌ 未采纳（避免引入第三方账号）|
+
+### 实施
+
+- Pages source: **GitHub Actions**（不用 main /docs 或 gh-pages branch）
+- Workflow: `.github/workflows/deploy.yml`
+  - on main push
+  - build: pnpm install + typecheck + test:run + vite build
+  - deploy: actions/upload-pages-artifact + actions/deploy-pages
+- Vite `base: '/editor/'`（仓库子路径前缀）
+- URL: `https://corray.github.io/editor/`
 
 ## Consequences
 
-- 🕒 MVP 实现期：**不生成 deploy workflow**（.github/workflows/deploy.yml 暂缓）
-- 🕒 MVP 实现期：仅做 `vite build` 产 dist/，可本地预览，不上线
-- ✅ 与 Issue / PR / Actions workflow 同源（推荐方向保留）
-- ⚠ 私有仓库 + Free 账号矛盾，**留待重启时解决**
-- 📌 v1.0 代码完成 + release 前重启本 ADR；如重启时选 A3，superseded
+- ✅ 与 Issue / PR / Actions workflow 同源
+- ✅ 零额外账号 + 免费 + HTTPS + 全球 CDN（Fastly 边缘）
+- ⚠ **repo 公开化（不可逆）**：所有 commit / Issue / PR / spec 文档对外可见；future 敏感配置（API key 等）必须走 GitHub Secrets
+- ⚠ 流量软上限 100 GB/月（MVP 无关，纪录在案）
+- 📌 v1.1+ 自定义域名时走 Cloudflare DNS（不写 ADR-004，留新 ADR-005-custom-domain）
 
 ## References
 
 - https://docs.github.com/en/pages
-- https://github.com/Corray/editor (PRIVATE, 2026-05-18)
+- https://github.com/Corray/editor (PUBLIC, switched 2026-05-20)
+- GitHub Pages Actions deploy: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site

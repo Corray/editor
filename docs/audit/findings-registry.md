@@ -69,7 +69,8 @@
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
-| BHV-001 | 2026-05-20 | proposed | **HIGH** | E2E 全集未跑（Playwright 浏览器未装；AC-1~6 端到端验收依赖手工浏览器）| audit §3 |
+| BHV-001 | 2026-05-20 | **resolved** (#10) | HIGH | E2E 全集未跑 → chromium + webkit 跑通（21 pass / 7 skip / 0 fail）；mobile-safari emulation 不稳定单列 BHV-004 | audit §3；#10 commit `<TBD>` |
+| BHV-004 | 2026-05-20 | deferred | LOW | mobile-safari emulation 本地 page.goto 30s 超时 — config 暂注释；移动 viewport 已用 iPhone SE context 单独覆盖 AC-4-001 | #10 |
 | BHV-002 | 2026-05-20 | proposed | MEDIUM | AC-4 移动端 tab 切换路径不存在（同 GAP-001）| 同上 |
 | BHV-003 | 2026-05-20 | proposed | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| 同上 |
 

@@ -51,23 +51,34 @@
 
 ### Spec 审查
 
-| 编号 | 首次发现 | 当前状态 | 说明 | 关联 |
-|------|---------|---------|------|------|
-| GAP-001 | YYYY-MM-DD | proposed | <一句话标题> | <audit 报告路径> |
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| GAP-001 | 2026-05-20 | proposed | MEDIUM | M5 LayoutAPI 整模块未实现（仅 CSS @media 列叠）| audit/2026-05-20-mvp-multiphase.md §1 |
+| GAP-002 | 2026-05-20 | proposed | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| 同上 |
+| GAP-003 | 2026-05-20 | proposed | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | 同上 |
+| GAP-004 | 2026-05-20 | proposed | MEDIUM | 清空按钮 + confirm 流程 UI 未实现（dict + API 工厂都已就位）| 同上 |
 
 ### API 审查
 
-| 编号 | 首次发现 | 当前状态 | 说明 | 关联 |
-|------|---------|---------|------|------|
-| API-001 | YYYY-MM-DD | proposed | <一句话标题> | <audit 报告路径> |
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| API-M5-001 | 2026-05-20 | proposed | MEDIUM | M5 模块整个 api.ts / LayoutAPI 缺（同 GAP-001）| audit §2 |
+| API-T-001 | 2026-05-20 | proposed | LOW | shared/toast 完整 UI follow-up Issue 未建（tech-debt 跟踪占位）| 同上 |
 
 ### Behavior 审查
 
-| 编号 | 首次发现 | 当前状态 | 说明 | 关联 |
-|------|---------|---------|------|------|
-| BHV-001 | YYYY-MM-DD | proposed | <一句话标题> | <audit 报告路径> |
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| BHV-001 | 2026-05-20 | proposed | **HIGH** | E2E 全集未跑（Playwright 浏览器未装；AC-1~6 端到端验收依赖手工浏览器）| audit §3 |
+| BHV-002 | 2026-05-20 | proposed | MEDIUM | AC-4 移动端 tab 切换路径不存在（同 GAP-001）| 同上 |
+| BHV-003 | 2026-05-20 | proposed | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| 同上 |
 
-<!-- 按需追加更多 phase 段 -->
+### Issue-process 审查
+
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| IPR-001 | 2026-05-20 | proposed | LOW | 9 Issues 全部跳过 raised → fe-reviewed 中间态直接 pm-reviewed（项目级 deviation，body 有理由）| audit §4 |
+| IPR-T-001 | 2026-05-20 | proposed | LOW | Issue 收尾 comment 预写 commit hash 占位错误 ×1（#8 自捕获修正）— process pattern | 同上 |
 
 ---
 
@@ -75,4 +86,4 @@
 
 | 日期 | 变更 |
 |------|------|
-| YYYY-MM-DD | 初建 |
+| 2026-05-20 | 初建 + 首次 multiphase audit 落 11 条 findings（GAP×4 / API×2 / BHV×3 / IPR×2）|

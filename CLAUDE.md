@@ -130,6 +130,39 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 
 - **2026-05-19 / #7**：M3 `init()` chicken-and-egg → 加 `readStoredDocument()` 静态导出；`init()` 兼容保留。api-spec §3.3 同步增补。
 
+---
+
+## Audit 输入映射
+
+### spec
+- PRD: `docs/prd/PRD-v1.0-mvp.md`
+- 共识文档: `docs/spec/consensus-v1.0.md`
+- 模块清单: `docs/spec/module-list-v1.0.md`
+
+### architecture
+- 共识文档: `docs/spec/consensus-v1.0.md`
+- 架构: `docs/spec/architecture-v1.0.md`
+- ADR: `docs/adr/`
+- 第三方约束: markdown-it / DOMPurify / Solid（ADR-001/002/003）
+
+### api
+- 接口设计: `docs/spec/api-spec-v1.0.md`
+- 数据模型: `docs/spec/data-model-v1.0.md`
+- 实现: `src/modules/m{1,2,3,4,6,7}-*/api.ts` + `src/shared/toast.ts`
+
+### behavior
+- AC: PRD §6 / 测试计划 §3 矩阵
+- 状态机: data-model §5 (M3) / api-spec §3.6 状态转换
+- 业务代码: `src/modules/**/*.ts(x)`
+- 测试: `tests/unit/**`
+
+### issue-process
+- Issue 仓库: `Corray/editor`
+- 默认窗口: `30d`（all 9 issues）
+- 共享文档仓库: `.` (self)
+
+### Findings registry: `docs/audit/findings-registry.md`
+
 ### 当前 active 阶段
 - 参见 `docs/env.yaml`（TAPD 流派 `active_stories` / GitHub 流派 `active_milestones`）
 

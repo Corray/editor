@@ -163,9 +163,18 @@ export interface ExportAPI {
 }
 ```
 
-**依赖：**
+**依赖（实现层调整）：**
 - 读 M1 `editor.text()`
-- 读 M2 `getRootElement()?.innerHTML`
+- ~~读 M2 `getRootElement()?.innerHTML`~~ → **改为直接调 `pipeline.render(text)` 拿 sanitized HTML**（解耦 M2 DOM 挂载状态；见 #9 反哺）
+
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `createExportAPI(text)` 工厂 | ✓ 已实现（2026-05-20）| #9 — ExportMd / CopyHtml / api 三层分离；getFileName 纯函数本地时区；Blob constructor 拦截测验证 content；clipboard 不可用 fallback false |
+| `downloadMarkdown` | ✓ 实现于 ExportMd.ts | Blob + URL.createObjectURL + `<a download>` click + revoke |
+| `copyHtml` | ✓ 实现于 CopyHtml.ts | navigator.clipboard?.writeText；不可用 / reject → false |
+| ~~`getRootElement`~~ | ⏳ 留 M2 ref 转发 Issue | M4 不依赖 |
 
 ### 3.5 M5 Layout
 

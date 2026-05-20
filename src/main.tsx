@@ -12,6 +12,9 @@ import {
 } from '@/modules/m3-persistence/store';
 import { createTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
+import { createExportAPI } from '@/modules/m4-export/api';
+import type { ExportAPI } from '@/modules/m4-export/api';
+import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
 import './styles/main.css';
 
@@ -19,21 +22,42 @@ interface AppShellProps {
   state: DocumentState;
   editor: EditorAPI;
   theme: ThemeAPI;
+  exporter: ExportAPI;
 }
 
 function AppShell(props: AppShellProps) {
+  const onCopy = async () => {
+    const ok = await props.exporter.copyHtml();
+    toast.show(
+      t(ok ? 'clipboard.ok' : 'clipboard.fail'),
+      ok ? 'info' : 'warn',
+    );
+  };
+
   return (
     <main class="app-shell">
       <header class="app-header">
         <h1>{t('app.title')}</h1>
-        <button
-          type="button"
-          class="theme-toggle"
-          onClick={() => props.theme.toggle()}
-          aria-label={t('theme.toggle')}
-        >
-          {t('theme.toggle')}
-        </button>
+        <div class="header-actions">
+          <button
+            type="button"
+            class="header-button"
+            onClick={() => props.exporter.downloadMarkdown()}
+          >
+            {t('download.button')}
+          </button>
+          <button type="button" class="header-button" onClick={onCopy}>
+            {t('copy.button')}
+          </button>
+          <button
+            type="button"
+            class="theme-toggle"
+            onClick={() => props.theme.toggle()}
+            aria-label={t('theme.toggle')}
+          >
+            {t('theme.toggle')}
+          </button>
+        </div>
       </header>
       <div class="panes">
         <div class="editor-pane">
@@ -63,6 +87,14 @@ if (root) {
     const editor = createEditorAPI(state);
     createPersistence(state.text);
     const theme = createTheme();
-    return <AppShell state={state} editor={editor} theme={theme} />;
+    const exporter = createExportAPI(state.text);
+    return (
+      <AppShell
+        state={state}
+        editor={editor}
+        theme={theme}
+        exporter={exporter}
+      />
+    );
   }, root);
 }

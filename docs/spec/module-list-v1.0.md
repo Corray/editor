@@ -39,7 +39,7 @@
 | **M1 编辑** | 维护 Markdown 源文 + 输入交互 | §3 / §4 (隐) | F1 | FE | in-dev (#6 textarea + state + API) | — | — |
 | **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | in-dev (#1 pipeline + #8 PreviewArea 挂载) | sanitize 库 DOMPurify v3.4.5（ADR-002 accepted）、Markdown 渲染库 markdown-it v14.1.1（ADR-001 accepted） | ← M1 |
 | **M3 持久化** | localStorage 读写 + 状态机 | §4.1 / §5 | F3 | FE | in-dev (#2 store + debounce 已实现) | localStorage Web API + shared/toast.ts | ← M1 |
-| **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | accepted | File / Blob API、Clipboard API | ← M1, ← M2 |
+| **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | in-dev (#9 实现) | File / Blob API、Clipboard API | ← M1（text accessor）, ← M2 pipeline.render |
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | accepted | CSS Container Queries / media queries | 容纳 M1/M2 + 装饰 M6 |
 | **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | in-dev (#5 实现) | `prefers-color-scheme` media query、localStorage | → 写 `<html>.dataset.theme`（M5 容器及全文档 CSS Variables 响应）|
 | **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | in-dev (#3 实现) | — | 横切，被 M1-M6 chrome 文案消费 |

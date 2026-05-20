@@ -25,7 +25,14 @@
   margin: 0;
 }
 
-.theme-toggle {
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.theme-toggle,
+.header-button {
   padding: 0.4rem 0.75rem;
   background: var(--bg);
   color: var(--fg);
@@ -34,13 +41,16 @@
   cursor: pointer;
   font-size: 0.875rem;
   transition: border-color 0.15s ease;
+  font-family: inherit;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.header-button:hover {
   border-color: var(--accent);
 }
 
-.theme-toggle:focus-visible {
+.theme-toggle:focus-visible,
+.header-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

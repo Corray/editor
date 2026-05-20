@@ -53,7 +53,7 @@
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
-| GAP-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 LayoutAPI 完整实现（createLayout + matchMedia reactive + mobile tabs UI）| #12 commit `<TBD>` |
+| GAP-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 LayoutAPI 完整实现（createLayout + matchMedia reactive + mobile tabs UI）| #12 commit `a9fc822` |
 | GAP-002 | 2026-05-20 | proposed | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| 同上 |
 | GAP-003 | 2026-05-20 | proposed | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | 同上 |
 | GAP-004 | 2026-05-20 | **resolved** (#11) | MEDIUM | 清空按钮 + confirm 实现 + E2E-AC2-002 unskip 通过 | #11 commit `fec015b` |
@@ -62,7 +62,7 @@
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
-| API-M5-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 api.ts / LayoutAPI 完整实现 | #12 commit `<TBD>` |
+| API-M5-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 api.ts / LayoutAPI 完整实现 | #12 commit `a9fc822` |
 | API-T-001 | 2026-05-20 | proposed | LOW | shared/toast 完整 UI follow-up Issue 未建（tech-debt 跟踪占位）| 同上 |
 
 ### Behavior 审查
@@ -71,7 +71,7 @@
 |------|---------|---------|---------|------|------|
 | BHV-001 | 2026-05-20 | **resolved** (#10) | HIGH | E2E 全集未跑 → chromium + webkit 跑通（21 pass / 7 skip / 0 fail）；mobile-safari emulation 不稳定单列 BHV-004 | audit §3；#10 commit `f03e170` |
 | BHV-004 | 2026-05-20 | deferred | LOW | mobile-safari emulation 本地 page.goto 30s 超时 — config 暂注释；移动 viewport 已用 iPhone SE context 单独覆盖 AC-4-001 | #10 |
-| BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `<TBD>` |
+| BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `a9fc822` |
 | BHV-003 | 2026-05-20 | proposed | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| 同上 |
 
 ### Issue-process 审查

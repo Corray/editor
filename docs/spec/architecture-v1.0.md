@@ -174,16 +174,23 @@ MVP 三个状态（源文 / 主题 / i18n lang）极简，Solid 内置 `createSi
 
 ## 7. 部署架构
 
-**🕒 推迟（ADR-004 deferred at 2026-05-19）。** MVP 实现期不生成 deploy workflow，本节内容作为方向参考保留：
+**✓ ADR-004 accepted at 2026-05-20 (A1 path).** v0.1.0 已部署到 GitHub Pages。
 
-- 候选目标：GitHub Pages（推荐）/ Vercel / Cloudflare Pages
-- 单页静态，无 client-side routing
-- 前置阻塞：repo PRIVATE + Free 账号矛盾（PUBLIC / Pro / Vercel 三选一）
+- **目标：** GitHub Pages（free tier，repo 公开）
+- **URL：** https://corray.github.io/editor/
+- **Source：** GitHub Actions（不用 main /docs 或 gh-pages branch）
+- **Workflow：** `.github/workflows/deploy.yml`
+  - on push (main / master) + workflow_dispatch
+  - build job: pnpm install --frozen-lockfile → typecheck → test:run → vite build → configure-pages → upload-pages-artifact
+  - deploy job: actions/deploy-pages@v4
+- **base path：** `vite.config.ts base: '/editor/'`（GitHub Pages 仓库子路径）
+- **HTTPS：** GitHub Pages 默认强制
+- **CDN：** Fastly 边缘（内置）
+- **首次部署：** 2026-05-20，release tag v0.1.0
 
-**MVP 实现期实际行为：**
-- 本地 `pnpm dev` / `pnpm build` 可跑
-- 不生成 `.github/workflows/deploy.yml`
-- v1.0 代码完成 + release 前重启 ADR-004
+**v1.1+ 待办（不在本 ADR 范围）：**
+- 自定义域名（DNS CNAME → 新 ADR-005-custom-domain）
+- E2E in CI（v0.1.1 加 e2e job）
 
 ---
 

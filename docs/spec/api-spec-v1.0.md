@@ -190,6 +190,14 @@ export interface LayoutAPI {
 }
 ```
 
+**实现追溯：**
+
+| 入口 | 状态 | Issue / commit |
+|------|------|---------------|
+| `createLayout()` 工厂 | ✓ 已实现（2026-05-20）| #12 — viewport 由 `matchMedia('(max-width: 767px)')` 驱动 + change event reactive + onCleanup；mobileTab 默认 `'edit'` 不持久化；matchMedia 缺失 fallback `'desktop'` |
+| `AppShell` viewport 分支 | ✓ 实现于 main.tsx | `<Show when={viewport === 'desktop'}>` 桌面双栏 / fallback `<MobilePanes>` tabs + 单 pane |
+| `MobilePanes` 组件 | ✓ inline 在 main.tsx | `.mobile-tabs` `role="tablist"` + 2 tabs；`<Show>` 切换 edit / preview 单 pane 挂载 |
+
 ### 3.6 M6 Theme
 
 ```ts

@@ -1,4 +1,6 @@
 /* @refresh reload */
+import { Show } from 'solid-js';
+import type { Accessor, Setter } from 'solid-js';
 import { render } from 'solid-js/web';
 import { createDocumentState } from '@/modules/m1-editor/state';
 import type { DocumentState } from '@/modules/m1-editor/state';
@@ -15,6 +17,8 @@ import { createTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
 import { createExportAPI } from '@/modules/m4-export/api';
 import type { ExportAPI } from '@/modules/m4-export/api';
+import { createLayout } from '@/modules/m5-layout/layout';
+import type { LayoutAPI, MobileTab } from '@/modules/m5-layout/api';
 import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
 import './styles/main.css';
@@ -25,6 +29,54 @@ interface AppShellProps {
   theme: ThemeAPI;
   exporter: ExportAPI;
   persist: PersistenceAPI;
+  layout: LayoutAPI;
+}
+
+interface MobilePanesProps {
+  state: DocumentState;
+  mobileTab: Accessor<MobileTab>;
+  setMobileTab: Setter<MobileTab>;
+}
+
+function MobilePanes(props: MobilePanesProps) {
+  return (
+    <>
+      <div class="mobile-tabs" role="tablist" aria-label="Mobile panes">
+        <button
+          type="button"
+          role="tab"
+          class="mobile-tab"
+          classList={{ 'mobile-tab--active': props.mobileTab() === 'edit' }}
+          aria-selected={props.mobileTab() === 'edit'}
+          onClick={() => props.setMobileTab('edit')}
+        >
+          {t('tab.edit')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="mobile-tab"
+          classList={{
+            'mobile-tab--active': props.mobileTab() === 'preview',
+          }}
+          aria-selected={props.mobileTab() === 'preview'}
+          onClick={() => props.setMobileTab('preview')}
+        >
+          {t('tab.preview')}
+        </button>
+      </div>
+      <div class="panes panes--mobile">
+        <Show when={props.mobileTab() === 'edit'}>
+          <div class="editor-pane">
+            <EditorArea state={props.state} />
+          </div>
+        </Show>
+        <Show when={props.mobileTab() === 'preview'}>
+          <PreviewArea state={props.state} />
+        </Show>
+      </div>
+    </>
+  );
 }
 
 function AppShell(props: AppShellProps) {
@@ -71,12 +123,23 @@ function AppShell(props: AppShellProps) {
           </button>
         </div>
       </header>
-      <div class="panes">
-        <div class="editor-pane">
-          <EditorArea state={props.state} />
+      <Show
+        when={props.layout.viewport() === 'desktop'}
+        fallback={
+          <MobilePanes
+            state={props.state}
+            mobileTab={props.layout.mobileTab}
+            setMobileTab={props.layout.setMobileTab}
+          />
+        }
+      >
+        <div class="panes">
+          <div class="editor-pane">
+            <EditorArea state={props.state} />
+          </div>
+          <PreviewArea state={props.state} />
         </div>
-        <PreviewArea state={props.state} />
-      </div>
+      </Show>
     </main>
   );
 }
@@ -100,6 +163,7 @@ if (root) {
     const persist = createPersistence(state.text);
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
+    const layout = createLayout();
     return (
       <AppShell
         state={state}
@@ -107,6 +171,7 @@ if (root) {
         theme={theme}
         exporter={exporter}
         persist={persist}
+        layout={layout}
       />
     );
   }, root);

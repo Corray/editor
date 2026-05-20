@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5174',
     trace: 'on-first-retry',
   },
   projects: [
@@ -31,9 +31,12 @@ export default defineConfig({
     // },
   ],
   webServer: {
-    command: 'pnpm dev',
-    port: 5173,
-    reuseExistingServer: !process.env.CI,
+    // Use a dedicated port so we don't accidentally reuse another local Vite
+    // app's dev server on 5173 (real bite: another project's Calculator was
+    // running on 5173 and reuseExistingServer:true silently picked it up).
+    command: 'pnpm dev --port 5174 --strictPort',
+    port: 5174,
+    reuseExistingServer: false,
     timeout: 30_000,
   },
 });

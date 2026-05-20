@@ -26,13 +26,76 @@ test.describe('AC-4 移动端', () => {
     await context.close();
   });
 
-  test.skip('E2E-AC4-002: mobile tab switch (edit ↔ preview)', () => {
-    // SKIP — 依赖 GAP-001（M5 LayoutAPI 未实现，无 tab 切换 UI；
-    // 当前移动端用 CSS @media column 叠列）；待 GAP-001 修复后 unskip。
+  test('E2E-AC4-002: mobile tab switch (edit ↔ preview)', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      ...devices['iPhone SE'],
+    });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+
+    const textarea = page.getByRole('textbox', { name: 'Markdown editor' });
+    await textarea.fill('# title');
+
+    // Switch to preview tab
+    await page.getByRole('tab', { name: '预览' }).click();
+    await expect(
+      page.getByLabel('Preview').locator('h1'),
+    ).toHaveText('title');
+    // Editor textarea no longer mounted in DOM
+    await expect(
+      page.getByRole('textbox', { name: 'Markdown editor' }),
+    ).toHaveCount(0);
+
+    // Switch back to edit
+    await page.getByRole('tab', { name: '编辑' }).click();
+    await expect(
+      page.getByRole('textbox', { name: 'Markdown editor' }),
+    ).toHaveValue('# title');
+
+    await context.close();
   });
 
-  test.skip('E2E-AC4-003: iPhone 14 Pro full flow (edit + preview + download)', () => {
-    // SKIP — 依赖 GAP-001（同上）；
-    // 底层路径 AC-1/2/3 已在桌面 + iPhone SE 测试覆盖部分。
+  test('E2E-AC4-003: iPhone 14 Pro full flow (chromium emulation only)', async ({
+    browser,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'iPhone 14 Pro emulation runs on chromium project to avoid BHV-004 (mobile-safari + Vite dev instability)',
+    );
+    const context = await browser.newContext({
+      viewport: { width: 393, height: 852 }, // iPhone 14 Pro logical
+      deviceScaleFactor: 3,
+      isMobile: true,
+      hasTouch: true,
+    });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+
+    // Edit
+    await page
+      .getByRole('textbox', { name: 'Markdown editor' })
+      .fill('# mobile');
+
+    // Switch to preview
+    await page.getByRole('tab', { name: '预览' }).click();
+    await expect(
+      page.getByLabel('Preview').locator('h1'),
+    ).toHaveText('mobile');
+
+    // Switch back + download .md
+    await page.getByRole('tab', { name: '编辑' }).click();
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: '下载 .md' }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/^editor-\d{8}-\d{6}\.md$/);
+
+    await context.close();
   });
 });

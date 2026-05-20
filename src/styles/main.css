@@ -176,12 +176,42 @@
   max-width: 100%;
 }
 
-@media (max-width: 767px) {
-  .panes {
-    flex-direction: column;
-  }
-  .preview-pane {
-    border-left: none;
-    border-top: 1px solid var(--border);
-  }
+/* mobile layout — driven by M5 LayoutAPI reactive viewport (not @media) */
+.panes--mobile {
+  flex-direction: column;
+}
+
+.panes--mobile .preview-pane {
+  border-left: none;
+  border-top: none; /* mobile tabs row 已提供视觉分隔 */
+}
+
+.mobile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-tab {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background: var(--bg);
+  color: var(--muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.mobile-tab--active {
+  color: var(--fg);
+  border-bottom-color: var(--accent);
+}
+
+.mobile-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }

@@ -10,6 +10,7 @@ import {
   createPersistence,
   readStoredDocument,
 } from '@/modules/m3-persistence/store';
+import type { PersistenceAPI } from '@/modules/m3-persistence/api';
 import { createTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
 import { createExportAPI } from '@/modules/m4-export/api';
@@ -23,6 +24,7 @@ interface AppShellProps {
   editor: EditorAPI;
   theme: ThemeAPI;
   exporter: ExportAPI;
+  persist: PersistenceAPI;
 }
 
 function AppShell(props: AppShellProps) {
@@ -34,11 +36,21 @@ function AppShell(props: AppShellProps) {
     );
   };
 
+  const onClear = () => {
+    if (window.confirm(t('clear.confirm'))) {
+      props.editor.clear();
+      props.persist.clear();
+    }
+  };
+
   return (
     <main class="app-shell">
       <header class="app-header">
         <h1>{t('app.title')}</h1>
         <div class="header-actions">
+          <button type="button" class="header-button" onClick={onClear}>
+            {t('clear.button')}
+          </button>
           <button
             type="button"
             class="header-button"
@@ -85,7 +97,7 @@ if (root) {
     const initial = readStoredDocument();
     const state = createDocumentState(initial);
     const editor = createEditorAPI(state);
-    createPersistence(state.text);
+    const persist = createPersistence(state.text);
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
     return (
@@ -94,6 +106,7 @@ if (root) {
         editor={editor}
         theme={theme}
         exporter={exporter}
+        persist={persist}
       />
     );
   }, root);

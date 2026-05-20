@@ -56,7 +56,7 @@
 | GAP-001 | 2026-05-20 | proposed | MEDIUM | M5 LayoutAPI 整模块未实现（仅 CSS @media 列叠）| audit/2026-05-20-mvp-multiphase.md §1 |
 | GAP-002 | 2026-05-20 | proposed | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| 同上 |
 | GAP-003 | 2026-05-20 | proposed | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | 同上 |
-| GAP-004 | 2026-05-20 | proposed | MEDIUM | 清空按钮 + confirm 流程 UI 未实现（dict + API 工厂都已就位）| 同上 |
+| GAP-004 | 2026-05-20 | **resolved** (#11) | MEDIUM | 清空按钮 + confirm 实现 + E2E-AC2-002 unskip 通过 | #11 commit `<TBD>` |
 
 ### API 审查
 

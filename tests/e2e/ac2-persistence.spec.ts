@@ -21,8 +21,41 @@ test.describe('AC-2 持久化', () => {
     await expect(restored).toHaveValue('# persisted');
   });
 
-  test.skip('E2E-AC2-002: clear button empties textarea + persistence', () => {
-    // SKIP — 依赖 GAP-004（清空按钮 UI 未实现）；
-    // 待 GAP-004 修复后 unskip。
+  test('E2E-AC2-002: clear button empties textarea + persistence (with confirm)', async ({
+    page,
+  }) => {
+    // Accept window.confirm dialogs automatically
+    page.on('dialog', (dialog) => dialog.accept());
+
+    const textarea = page.getByRole('textbox', { name: 'Markdown editor' });
+    await textarea.fill('# to-be-cleared');
+    await page.waitForTimeout(800); // past M3 debounce
+
+    await page.getByRole('button', { name: '清空' }).click();
+    await expect(textarea).toHaveValue('');
+
+    // localStorage doc key should be removed
+    const stored = await page.evaluate(() =>
+      localStorage.getItem('editor.document.v1'),
+    );
+    expect(stored).toBeNull();
+
+    // Reload — still empty
+    await page.reload();
+    const reloaded = page.getByRole('textbox', { name: 'Markdown editor' });
+    await expect(reloaded).toHaveValue('');
+  });
+
+  test('E2E-AC2-002.dismiss: clear confirm dismissed → content stays', async ({
+    page,
+  }) => {
+    page.on('dialog', (dialog) => dialog.dismiss());
+
+    const textarea = page.getByRole('textbox', { name: 'Markdown editor' });
+    await textarea.fill('# keep-me');
+    await page.waitForTimeout(800);
+
+    await page.getByRole('button', { name: '清空' }).click();
+    await expect(textarea).toHaveValue('# keep-me');
   });
 });

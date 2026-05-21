@@ -129,6 +129,12 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 ### 反哺记录（spec-to-code-flow 实现层反馈到 spec 层）
 
 - **2026-05-19 / #7**：M3 `init()` chicken-and-egg → 加 `readStoredDocument()` 静态导出；`init()` 兼容保留。api-spec §3.3 同步增补。
+- **2026-05-19 / #8**：M2 集成实现追溯回填——api-spec §3.2 PreviewArea 行；module-list M2 status → in-dev/done。属"实现追溯"类（spec 契约不变，状态同步）。
+- **2026-05-20 / #9**：M4 export 依赖契约调整——api-spec §3.4 把 `ExportAPI` 依赖从 ~~`M2.getRootElement()?.innerHTML`~~ 改为直接调 `pipeline.render(text)`（解耦 M2 DOM 挂载状态）；`getRootElement` 标 deferred → GAP-002（backlog #14）。**契约层反哺**，不是状态同步。
+- **2026-05-20 / #12**：M5 LayoutAPI 实现追溯表——api-spec §3.5 加 `createLayout` / `AppShell viewport 分支` / `MobilePanes` 三行；module-list M5 status → done。属"实现追溯"类（API-M5-001 resolved）。
+- **2026-05-20 / #13**：ADR-004 deploy 重启 → architecture §7 部署章节更新（URL / GH Pages source / vite base / HTTPS / workflow 引用）。属"ADR 决策落地到架构图"类。
+
+> 备注：#10（E2E）/ #11（clear button）/ 仅更新 `audit/findings-registry.md` 状态字段，未触及 spec 文件，不计入反哺。
 
 ---
 

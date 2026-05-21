@@ -197,3 +197,6 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 | 2026-05-19 | 测试计划 v0.1 draft 落档（docs/spec/test-plan-v0.1.md），AC 矩阵 6 条 + 6 类家族维度（family-A~F）+ ~50 用例，TBD-T1~T4 待评审 |
 | 2026-05-19 | 测试计划 v0.1 → v1.0 评审通过（Corray 全盘接受 TBD-T1~T4）；**spec-to-code-flow 上游全部 accepted**，进入代码实现阶段 |
 | 2026-05-19 | 工程脚手架：package.json + tsconfig + Vite + Vitest + Playwright + index.html + src/main.tsx + reset/variables.css；compile_cmd 升级为 `pnpm typecheck`；`pnpm install` 待用户执行 |
+| 2026-05-19 | 代码实现期：#1 M2 渲染管线 / #2 M3 持久化 / #3 M7 i18n / #4 M3 i18n integration (tech-debt) / #5 M6 主题 / #6 M1 editor / #7 main 整合 + 反哺 M3.readStoredDocument / #8 M2 集成 — 8 commit 落档 |
+| 2026-05-20 | v0.1.0 release：#9 M4 export 落档 → multiphase audit（spec/api/behavior/issue-process）11 findings → /fix 三轮 resolve 5 条（#10 E2E HIGH / #11 clear MEDIUM / #12 M5 MEDIUM×3，对应 BHV-001/GAP-004/GAP-001/API-M5-001/BHV-002）→ retrospective 落档 → ADR-004 重启（A1 PUBLIC + GH Pages workflow + arch §7 同步 / #13）→ tag `v0.1.0` 发布，部署 https://corray.github.io/editor/ |
+| 2026-05-21 | v0.1.0 收尾：Issue #1–#12 批量 `fe-confirmed` + release comment + close；findings-registry 变更记录追加（resolved 关联 Issue 全部关闭；残余 6 条 LOW —— GAP-002/003 / API-T-001 / BHV-003/004 / IPR-001/IPR-T-001 —— 留 v0.1.x / v0.2 处理）|

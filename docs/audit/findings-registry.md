@@ -54,8 +54,8 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | GAP-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 LayoutAPI 完整实现（createLayout + matchMedia reactive + mobile tabs UI）| #12 commit `a9fc822` |
-| GAP-002 | 2026-05-20 | proposed | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| 同上 |
-| GAP-003 | 2026-05-20 | proposed | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | 同上 |
+| GAP-002 | 2026-05-20 | proposed (backlog) | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| backlog #14 |
+| GAP-003 | 2026-05-20 | proposed (backlog) | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | backlog #15 |
 | GAP-004 | 2026-05-20 | **resolved** (#11) | MEDIUM | 清空按钮 + confirm 实现 + E2E-AC2-002 unskip 通过 | #11 commit `fec015b` |
 
 ### API 审查
@@ -63,23 +63,23 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | API-M5-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 api.ts / LayoutAPI 完整实现 | #12 commit `a9fc822` |
-| API-T-001 | 2026-05-20 | proposed | LOW | shared/toast 完整 UI follow-up Issue 未建（tech-debt 跟踪占位）| 同上 |
+| API-T-001 | 2026-05-20 | proposed (backlog) | LOW | shared/toast 完整 UI follow-up Issue 未建（tech-debt 跟踪占位）| backlog #14 |
 
 ### Behavior 审查
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | BHV-001 | 2026-05-20 | **resolved** (#10) | HIGH | E2E 全集未跑 → chromium + webkit 跑通（21 pass / 7 skip / 0 fail）；mobile-safari emulation 不稳定单列 BHV-004 | audit §3；#10 commit `f03e170` |
-| BHV-004 | 2026-05-20 | deferred | LOW | mobile-safari emulation 本地 page.goto 30s 超时 — config 暂注释；移动 viewport 已用 iPhone SE context 单独覆盖 AC-4-001 | #10 |
+| BHV-004 | 2026-05-20 | deferred (backlog) | LOW | mobile-safari emulation 本地 page.goto 30s 超时 — config 暂注释；移动 viewport 已用 iPhone SE context 单独覆盖 AC-4-001 | #10 / backlog #15 |
 | BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `a9fc822` |
-| BHV-003 | 2026-05-20 | proposed | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| 同上 |
+| BHV-003 | 2026-05-20 | proposed (backlog) | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| backlog #15 |
 
 ### Issue-process 审查
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
-| IPR-001 | 2026-05-20 | proposed | LOW | 9 Issues 全部跳过 raised → fe-reviewed 中间态直接 pm-reviewed（项目级 deviation，body 有理由）| audit §4 |
-| IPR-T-001 | 2026-05-20 | proposed | LOW | Issue 收尾 comment 预写 commit hash 占位错误 ×1（#8 自捕获修正）— process pattern | 同上 |
+| IPR-001 | 2026-05-20 | proposed (backlog) | LOW | 9 Issues 全部跳过 raised → fe-reviewed 中间态直接 pm-reviewed（项目级 deviation，body 有理由）| audit §4 / backlog #16 |
+| IPR-T-001 | 2026-05-20 | proposed (backlog) | LOW | Issue 收尾 comment 预写 commit hash 占位错误 ×1（#8 自捕获修正）— process pattern | audit §4 / backlog #16 |
 
 ---
 
@@ -89,3 +89,4 @@
 |------|------|
 | 2026-05-20 | 初建 + 首次 multiphase audit 落 11 条 findings（GAP×4 / API×2 / BHV×3 / IPR×2）|
 | 2026-05-21 | v0.1.0 收尾：Issue #1–#12 批量切 `fe-confirmed` + close（释 release v0.1.0 / commit `a9fc822..c80d2e5`）；resolved findings 关联 Issue 已全部关闭，proposed/deferred findings（GAP-002/003、API-T-001、BHV-003/004、IPR-001/IPR-T-001）保留至 v0.1.x / v0.2 处理 |
+| 2026-05-21 | 残余 6 条 LOW findings backlog 化：建 3 个 umbrella Issue —— #14 tech-debt（GAP-002 + API-T-001）/ #15 deferred-feature（GAP-003 + BHV-003 + BHV-004）/ #16 process（IPR-001 + IPR-T-001）；关联列已更新，状态保留 proposed/deferred 标 (backlog) 副词，等触发条件后逐条转 fixing |

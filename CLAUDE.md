@@ -181,7 +181,21 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 
 > 本段仅当项目有 standard 未覆盖的特殊约束时填，**不重复定义 standard rules 已有内容**。
 
-- 无（简单项目通常无项目特定 rules）
+### PR-001 — 一人多角色场景下三通道豁免
+
+**前提声明：** 本项目 Corray 一人同时承担 PM + FE + QA，CLAUDE.md `role: FE` 是会话默认角色，不是组织事实。
+
+standard 三通道默认假设多角色协作；本项目按下表豁免，audit 时引本段 + 对应 PP 作合规依据。**违反前提（团队加入第二人）即失效**，必须移除本豁免段。
+
+| 通道 | standard 默认载体 | 本项目等价载体 | 豁免依据 |
+|------|----------------|--------------|---------|
+| issue-process 状态机 | `raised → fe-reviewed → pm-reviewed` 完整流转 | 新 Issue 直接打 `pm-reviewed` label，body 含「状态机说明」段显式跳过 fe-reviewed | PP-001 / IPR-001 / FB-004 SP-A |
+| problem-registry | `docs/problems/problem-registry.md` 独立账本 | `docs/audit/findings-registry.md`（audit 产出）+ `docs/problems/fb-index.md`（规则级反馈）+ `docs/problems/project-patterns.md`（项目 tendency）三 registry 分工承担；`problem-registry.md` 保留 schema 文档但不强制实条目 | PP-004 / FB-004 SP-B |
+| handoff | `docs/handoff/{pending,in-progress,completed}/` 三态文件流 | GitHub Issue（含 label + comment）承担 PM → EL 推送动作；HIGH findings 直接转 Issue，不另起 handoff 文件 | PP-004 / FB-004 SP-C |
+
+**audit 引用方式：** 任一 phase 检查到本豁免段覆盖的"通道空但等价载体有内容"时，改判"豁免合规"而非"违规"，报告对应 finding 直接标 `dismissed` + reason 引本段。
+
+**升级触发：** standard `problem-handling-pattern.md` / `artifact-based-handoff.md` 任一新增"单人多角色豁免段"后，本段标 `applied → standard`，可缩减为单行引用。
 
 ---
 

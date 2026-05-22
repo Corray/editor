@@ -68,19 +68,19 @@
 - **scan_when**: 新项目 vitest config 初始化时；新增模块 api.ts 含 runtime 时
 - **related**: PP-003
 
-## FB-004 — 一人多角色项目 raised → fe-reviewed 中间态跳过的合规判定
-- **date**: 2026-05-20
-- **file**: (audit 报告 §4 IPR-001 / PP-001)
+## FB-004 — 一人多角色项目合规判据家族（issue-process / problem-registry / handoff 三通道豁免）
+- **date**: 2026-05-20（首例 SP-A）；2026-05-22（扩 SP-B/SP-C）
+- **file**: ../feedback/2026-05-22-single-person-multi-role-exemption.md
 - **category**: process
 - **skills**: issue / audit
 - **modules**: (all)
 - **phases**: —
 - **severity**: low
 - **status**: candidate
-- **occurrences**: 1
-- **guidance**: issue-process 状态机 `raised → [role]-reviewed → pm-reviewed` 默认假设多人协作；一人多角色场景实际跳过 fe-reviewed 合理；standard 增补合规判据：Issue body 含"状态机说明"段 + project-patterns 落档 = 豁免
-- **scan_when**: 一人/小团队 + spec-first 项目 audit phase 1（Label 状态机合规）时
-- **related**: PP-001
+- **occurrences**: 1 项目（editor）三 sub-pattern
+- **guidance**: 一人多角色项目（PM=EL=QA 同体）下，standard 三通道默认假设多人协作 → 一律给豁免路径：(SP-A) issue-process 跳过 fe-reviewed 中间态；(SP-B) problem-registry 通道由 findings-registry + fb-index 承担；(SP-C) handoff 通道由 GitHub Issue 承担。豁免条件 = CLAUDE.md §项目特定 rules 显式声明 + 等价载体实际有内容 + project-patterns 落档
+- **scan_when**: 一人/小团队 + spec-first 项目 audit 任一 phase 判"通道空但工作正常"时；standard 三 rule 文件（problem-handling-pattern / artifact-based-handoff / task-lifecycle）更新 PR 时
+- **related**: PP-001 (SP-A) / PP-004 (SP-B + SP-C) / IPR-001 / CLAUDE.md §项目特定 rules
 
 ## FB-005 — Playwright mobile device emulation + Vite dev server 不稳定
 - **date**: 2026-05-20

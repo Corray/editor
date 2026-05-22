@@ -58,6 +58,28 @@
 
 ---
 
+### PP-004 — problem-registry + handoff 通道由等价载体承担（一人多角色家族延伸）
+
+- **首次出现**：2026-05-22（fb-scan 自查 / FB-004 scope 扩展）
+- **家族 first instance**：PP-001（issue-process 状态机豁免）—— 同根因（PM=EL=QA 同体）的不同通道延伸
+- **模式描述**：standard `problem-handling-pattern.md` 期望 `docs/problems/problem-registry.md` 作为问题全景账本（六环节"记录"环节的固定载体）；`artifact-based-handoff.md` 期望 `docs/handoff/` 作为 PM → EL 推送动作的载体（HIGH 强制 handoff）。一人多角色项目中两个载体退化为"自己写给自己看"，实际由：
+  - `findings-registry.md`（audit 产出 → 22 条 / v0.1.0 周期）
+  - `fb-index.md`（规则级反馈 → 5 条 FB candidate）
+  - `project-patterns.md`（项目 tendency → 本文件）
+  - GitHub Issue（PM → EL 推送 → 13 closed + 3 backlog open）
+  四个等价载体承担。`problem-registry.md` 留 schema 骨架不强制实条目；`docs/handoff/` 三目录留协议 README 不强制实文件
+- **危害**：严格按 standard 形式判定 problem-registry 0 条 = "记录优先于处理"违反；handoff 三目录空 = "HIGH 必须独立 handoff"违反。但等价载体实际承担职责，强行补两份空账本是 ceremony 大于价值（formalization-timing.md §"过早形式化"反面警告）
+- **remediation**：
+  - CLAUDE.md §项目特定 rules PR-001 段显式声明三通道豁免 + 等价载体清单 + audit 引用方式
+  - audit 检查通道时先验证"通道空 + 等价载体实际有内容"双条件，满足则改判 `dismissed` + reason 引 PR-001
+  - 团队加入第二人时立刻删除 PR-001 段 + 真启用 problem-registry + handoff 两通道（违反前提即失效）
+- **实例**：
+  - SP-B: `wc -l docs/problems/problem-registry.md` = 46 行（全为 schema 文档 + 模板占位），但同期 findings-registry 22 条 + fb-index 5 条 + project-patterns 4 条 = 等价载体 31 实条目
+  - SP-C: BHV-001 HIGH（E2E 全集未跑）resolution path = audit → Issue #10 → commit `f03e170`，无 handoff 文件；audit 报告本身已含完整 finding → fix path 链路
+- **跨项目升级路径**：本 PP + PP-001 共享 FB-004 出口（已扩 scope 含三 sub-pattern）；第 2 个单人项目复现任一 sub-pattern → FB-004 升 `observing` → standard 三 rule 文件考虑增补豁免段
+
+---
+
 ## 维护节奏
 
 - 每完成一个大型阶段（multiphase audit / release）时 PM 检查是否有新模式抽象

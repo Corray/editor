@@ -42,7 +42,7 @@
 
 ## FB-002 — Issue closing comment commit hash 应用 `$(git rev-parse)` 动态注入
 - **date**: 2026-05-20
-- **file**: (本项目内 audit 报告 §3.1 + project-patterns PP-002)
+- **file**: ../feedback/2026-05-20-issue-closing-comment-hash.md
 - **category**: process
 - **skills**: issue
 - **modules**: (all)

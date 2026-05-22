@@ -84,7 +84,7 @@
 
 ## FB-005 — Playwright mobile device emulation + Vite dev server 不稳定
 - **date**: 2026-05-20
-- **file**: (audit 报告 §3 BHV-004 / PP-003)
+- **file**: ../feedback/2026-05-20-playwright-mobile-safari-vite-dev-server.md
 - **category**: meta
 - **skills**: install (playwright template)
 - **modules**: (all)

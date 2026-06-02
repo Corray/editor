@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history — doc commit-hash check resolves old hashes
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -33,6 +35,9 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
+
+      - name: Doc commit-hash integrity (根治 IPR-T-001)
+        run: pnpm check:hashes
 
       - name: Typecheck
         run: pnpm typecheck

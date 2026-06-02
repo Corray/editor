@@ -49,12 +49,12 @@
 - **modules**: (all)
 - **phases**: —
 - **severity**: low
-- **status**: candidate
-- **occurrences**: 1
-- **guidance**: standard issue-process skill 的 commit hash grep self-check 仅验证格式不验证 hash 真实性 → comment 模板应给 explicit shell pattern 用 `ACTUAL=$(git rev-parse --short HEAD)` 动态注入，禁止预写占位
-- **scan_when**: 写 Issue closing comment 时；standard issue skill 更新 PR 时
-- **related**: PP-002
-- **upstream_issue**: https://github.com/chatlabs-ai/agent-dev-standard/issues/8 (filed 2026-05-22)
+- **status**: applied (2026-06-02 本地机械闸 `pnpm check:hashes`)
+- **occurrences**: 2
+- **guidance**: commit hash 引用纯纪律（动态注入）防不住 amend 改号 → 根治 = 机械闸 `pnpm check:hashes`（scripts/check-doc-hashes.mjs）扫 docs+CLAUDE.md 的 `commit \`<hash>\`` 逐个 git rev-parse 验证，已接入 CI；铁律：work commit 先落地 → 文档独立后续 commit 回填 hash，不引用会被 amend 改号的自身 commit
+- **scan_when**: 写 Issue closing comment 时；文档引用 commit hash 时；standard issue skill 更新 PR 时
+- **related**: PP-002 / IPR-T-001
+- **upstream_issue**: https://github.com/chatlabs-ai/agent-dev-standard/issues/8 (filed 2026-05-22) — 本地已加机械闸根治；upstream 待 standard issue skill 增补 comment 模板 + CI gate
 
 ## FB-003 — vitest config coverage.exclude 不应泛 `**/api.ts`
 - **date**: 2026-05-20
@@ -112,8 +112,8 @@
 | high | 0 |
 | medium | 0 |
 | low | 5 |
-| candidate 状态 | 5 |
-| applied 状态 | 0 |
+| candidate 状态 | 4 |
+| applied 状态 | 1 |
 | observing 状态 | 0 |
 
 ---

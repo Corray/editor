@@ -25,15 +25,24 @@
 - **首次出现**：IPR-T-001（Issue #8 自纠 + multiphase audit 2026-05-20）
 - **模式描述**：写 Issue closing comment 时，commit hash 是 commit 后才知道的（chicken-and-egg）；如果在 commit 前预写草稿放占位 hash 或猜的 hash，commit 完成后忘记替换 → comment 含错误 hash 永久落库
 - **危害**：commit hash grep self-check（issue-process skill 内置）只验证格式不验证 hash 真实性 → 错误 hash 永久 drift；下游 audit / /release 反查"哪个 commit 实现了 #N" 时拿到无效 hash
-- **remediation**：
-  - 写 closing comment 必须用 bash 动态：`ACTUAL=$(git rev-parse --short HEAD) && cat > tmp <<EOF ... commit: \`${ACTUAL}\` ... EOF`
-  - **禁止**在 comment 草稿里预写形如 `commit: \`a1b2c3d\`` 的占位 — 占位忘改 = 错误落库
-  - amend 回填 hash 也算一种处理（同一逻辑单元 + 未 push），但 standard 偏好新 commit
+- **remediation**（v2 / 2026-06-02 二次复发后升级 — 加机械闸，不再只靠纪律）：
+  - **机械根治（首选）**：`pnpm check:hashes`（`scripts/check-doc-hashes.mjs`）扫所有
+    `docs/**.md` + `CLAUDE.md` 里 `commit \`<hash>\`` 引用，逐个 `git rev-parse --verify`
+    验证 commit 真实存在 → 占位 / 猜错 / amend 失效 / typo 全部 fail。已接入
+    `deploy.yml`（CI，checkout `fetch-depth: 0`）+ 可本地跑
+  - 写 closing comment 仍用 bash 动态：`ACTUAL=$(git rev-parse --short HEAD)` 注入
+  - **禁止**预写占位 `commit: \`a1b2c3d\``；**禁止** amend 一个其 hash 已被文档引用的 commit
+  - **顺序铁律**：work commit 先落地拿真实 hash → 文档在**独立后续 commit** 回填
+    （绝不让文档引用"包含该文档改动的同一个 commit"的 hash — 会被 amend/rebase 改号）
 - **实例**：
-  - #8 2026-05-19：预写 `7d4abd5`，实际 commit `3becbc9` → 自捕获 → 删错 comment 重发
+  - #8 2026-05-19：预写 `7d4abd5`，实际 commit `3becbc9` → 自捕获 → 删错 comment 重发（占位变体）
+  - **2026-06-02 二次复发（amend 自引用变体）**：findings-registry 预写 `8b87f29`，
+    `git commit --amend` 把本 commit 改号成 `6bc2977` → 引用失效 → follow-up `dc0320b` 修。
+    此变体证明"动态注入"纪律防不住 amend → 触发机械闸根治
   - #10 / #11：使用 `$(git rev-parse)` 模式，无错误
   - 5d7b82c / 25a5557：hash backfill 用 follow-up commit（不 amend）
-- **跨项目升级路径**：升级为 standard issue-process skill 的 comment 模板示例 → FB-002 候选
+- **跨项目升级路径**：二次复发达 FB-002 形式化阈值 → FB-002 candidate → applied（本项目机械闸为
+  本地 remediation；standard issue skill 的 comment 模板 + CI gate 增补走 FB-002 upstream）
 
 ### PP-003 — 测试基础设施陷阱集
 

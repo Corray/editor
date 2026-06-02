@@ -3,9 +3,9 @@
 | 字段 | 值 |
 |------|----|
 | **date** | 2026-05-20 |
-| **status** | candidate |
+| **status** | applied (2026-06-02, 本地机械闸) |
 | **severity** | low |
-| **occurrences** | 1 |
+| **occurrences** | 2 |
 | **category** | process |
 | **skills** | issue |
 | **modules** | (all) |
@@ -84,8 +84,27 @@ git cat-file -e ${HASH} 2>/dev/null || echo "WARN: hash ${HASH} 不存在于本�
 - **IPR-T-001** (`docs/audit/2026-05-20-mvp-multiphase.md` §3.1)—— audit phase 产出条目
 - **findings-registry**: IPR-T-001 (proposed → backlog)
 
+## 二次复发 + 机械闸根治（2026-06-02 / #15 推进期间）
+
+**第 2 次发生（amend 自引用新变体）：** #15 GAP-003 收尾时，findings-registry 预写
+hash `8b87f29`（本以为是 work commit 的 hash），随后 `git commit --amend` 把该 commit
+改号成 `6bc2977` → registry 引用失效 → 需 follow-up commit `dc0320b` 修。
+
+**为什么旧 remediation 防不住：** FB-002 v1 的 remediation 是「用 `$(git rev-parse)`
+动态注入 + 禁止预写占位」。但本次 hash 不是占位也不是猜的——是 commit 时真实存在的
+hash，**被 amend 改号后才失效**。纯纪律（动态注入）无法覆盖 amend / rebase 改号。
+
+**根治（机械闸，不依赖纪律）：** `scripts/check-doc-hashes.mjs`（`pnpm check:hashes`）
+扫 `docs/**.md` + `CLAUDE.md` 的 `commit \`<hash>\`` 引用，逐个 `git rev-parse --verify`
+验证 commit 真实存在。占位 / 猜错 / amend 失效 / typo 一网打尽。已接入 `deploy.yml`
+（CI，checkout `fetch-depth: 0` 拿全 history）。负向测试已验证（注入 `deadbee` +
+`<pending9>` → exit 1）。
+
+**新增顺序铁律（写入 PP-002 remediation v2）：** work commit 先落地 → 文档在**独立后续
+commit** 回填 hash，绝不让文档引用"含该文档改动的同一 commit"的 hash（必被 amend 改号）。
+
 ## 升级路径
 
-- 若再有第 2 个项目复现 → `occurrences = 2` → 状态升 `observing`
-- 上游 standard `issue` skill comment 模板补充后 → 状态标 `applied`
-- applied 后实际拦截真实问题（新项目第一次写 closing comment 就用动态注入）→ 标 `verified`
+- ~~若再有第 2 个项目复现 → `occurrences = 2`~~ → **本项目内二次复发（同项目不同变体）已达形式化阈值**（formalization-timing 类型 A：同模式 ≥2 次 + 旧规则失效）→ 本地机械闸落地，status → `applied`
+- 上游 standard `issue` skill comment 模板 + CI gate 增补 → 走 FB-002 upstream issue（#8）
+- applied 后实际拦截真实问题（CI 第一次 fail 在 push 含失效 hash 的文档时）→ 标 `verified`

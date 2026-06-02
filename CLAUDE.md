@@ -134,6 +134,8 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 - **2026-05-20 / #12**：M5 LayoutAPI 实现追溯表——api-spec §3.5 加 `createLayout` / `AppShell viewport 分支` / `MobilePanes` 三行；module-list M5 status → done。属"实现追溯"类（API-M5-001 resolved）。
 - **2026-05-20 / #13**：ADR-004 deploy 重启 → architecture §7 部署章节更新（URL / GH Pages source / vite base / HTTPS / workflow 引用）。属"ADR 决策落地到架构图"类。
 
+- **2026-06-02 / #15 GAP-003**：F1.2 行号 + F1.3 字号控件落地 → api-spec §3.1 新增 `EditorPrefsAPI` 接口块（chrome-only，不进跨模块契约）+ 实现追溯行 ⏳→✓。新增 `m1-editor/prefs.ts`（signal + createEffect 镜像 CSS var + localStorage 持久化，照 M6 范式）；行号 gutter 关软换行精确对齐（决策 Q1）；字号 A-/A+ 三档 13/15/17（Q2）；行高跟随字号 1.6 倍不单独调（Q3）。属"契约层反哺"（新增 API surface）。
+
 > 备注：#10（E2E）/ #11（clear button）/ 仅更新 `audit/findings-registry.md` 状态字段，未触及 spec 文件，不计入反哺。
 
 ---
@@ -220,3 +222,4 @@ standard 三通道默认假设多角色协作；本项目按下表豁免，audit
 | 2026-05-19 | 代码实现期：#1 M2 渲染管线 / #2 M3 持久化 / #3 M7 i18n / #4 M3 i18n integration (tech-debt) / #5 M6 主题 / #6 M1 editor / #7 main 整合 + 反哺 M3.readStoredDocument / #8 M2 集成 — 8 commit 落档 |
 | 2026-05-20 | v0.1.0 release：#9 M4 export 落档 → multiphase audit（spec/api/behavior/issue-process）11 findings → /fix 三轮 resolve 5 条（#10 E2E HIGH / #11 clear MEDIUM / #12 M5 MEDIUM×3，对应 BHV-001/GAP-004/GAP-001/API-M5-001/BHV-002）→ retrospective 落档 → ADR-004 重启（A1 PUBLIC + GH Pages workflow + arch §7 同步 / #13）→ tag `v0.1.0` 发布，部署 https://corray.github.io/editor/ |
 | 2026-05-21 | v0.1.0 收尾：Issue #1–#12 批量 `fe-confirmed` + release comment + close；findings-registry 变更记录追加（resolved 关联 Issue 全部关闭；残余 6 条 LOW —— GAP-002/003 / API-T-001 / BHV-003/004 / IPR-001/IPR-T-001 —— 留 v0.1.x / v0.2 处理）|
+| 2026-06-02 | #15 GAP-003 推进：F1.2 行号 gutter + F1.3 字号 A-/A+ 三档实现（新增 `m1-editor/prefs.ts` + `EditorPrefsAPI`）；19 新单测 + typecheck + build + Playwright 视觉验证全绿；api-spec §3.1 / findings-registry GAP-003→resolved 同步反哺。#15 残余 BHV-003/004 仍 backlog |

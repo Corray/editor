@@ -67,14 +67,25 @@ export interface EditorAPI {
   /** 清空内容（M3 / chrome 调用） */
   clear(): void;
 
-  /** 字号 / 行高 / 行号显示 - 内部状态，不导出 */
+  /** 字号 / 行高 / 行号显示 — 见 EditorPrefsAPI（chrome-only，不进跨模块契约）*/
 }
+
+// modules/m1-editor/prefs.ts — F1.2 行号 / F1.3 字号（#15 GAP-003，2026-06-02）
+export interface EditorPrefsAPI {
+  readonly fontSize: Accessor<number>;        // px，恒为 FONT_SIZE_PRESETS 之一
+  readonly showLineNumbers: Accessor<boolean>; // F1.2，默认开
+  increaseFontSize(): void;  // 跨档 +1，封顶不动
+  decreaseFontSize(): void;  // 跨档 -1，触底不动
+  toggleLineNumbers(): void;
+}
+export const FONT_SIZE_PRESETS = [13, 15, 17] as const; // 极简三档，默认 15
 ```
 
 **消费方：**
 - M2 `subscribe(text)` → 触发渲染
 - M3 `subscribe(text)` → debounce 写入
 - M4 读 `text()` 当下值用于导出
+- **EditorPrefsAPI：仅 chrome（AppShell header + EditorArea）消费，不导出给 M2/M3/M4**（保持 §3.1「内部状态，不导出」语义 = 不进跨模块契约；行高跟随字号按 line-height:1.6 倍数，未单独暴露 — GAP-003 决策 Q3）
 
 **实现追溯：**
 
@@ -82,7 +93,7 @@ export interface EditorAPI {
 |------|------|---------------|
 | `createDocumentState()` / `createEditorAPI()` 工厂 | ✓ 已实现（2026-05-19）| #6 — 三层分离 (state / api / EditorArea)；textarea + onInput → state.setText；EditorAPI 不暴露 setText (按 spec)；14 单测 + 组件测全集，m1-editor 100% 覆盖 |
 | `EditorArea` 组件 | ✓ 已实现 | spellcheck="false" 字符串（非 boolean，因 spellcheck enumerated）；aria-label "Markdown editor" |
-| F1.2 行号 / F1.3 字号控件 | ⏳ 后续 Issue | PRD 标"可选"/"默认值即可"，MVP 不阻塞 |
+| F1.2 行号 / F1.3 字号控件 | ✓ 已实现（2026-06-02）| #15 GAP-003 — `createEditorPrefs()` + `EditorPrefsAPI`；行号 gutter（关软换行，逻辑行精确对齐，scrollTop 同步）+ 字号 A-/A+ 三档(13/15/17，默认15)；localStorage `editor.prefs.v1` 持久化 + anti-poisoning；行高跟随字号(1.6 倍)。19 新单测（UT-PREF×11 / CT-M1-005~008） |
 
 ### 3.2 M2 Preview
 

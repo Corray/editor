@@ -4,8 +4,8 @@ import type { Accessor, Setter } from 'solid-js';
 import { render } from 'solid-js/web';
 import { createDocumentState } from '@/modules/m1-editor/state';
 import type { DocumentState } from '@/modules/m1-editor/state';
-import { createEditorAPI } from '@/modules/m1-editor/api';
-import type { EditorAPI } from '@/modules/m1-editor/api';
+import { createEditorAPI, createEditorPrefs } from '@/modules/m1-editor/api';
+import type { EditorAPI, EditorPrefsAPI } from '@/modules/m1-editor/api';
 import { EditorArea } from '@/modules/m1-editor/EditorArea';
 import { PreviewArea } from '@/modules/m2-preview/PreviewArea';
 import {
@@ -30,12 +30,14 @@ interface AppShellProps {
   exporter: ExportAPI;
   persist: PersistenceAPI;
   layout: LayoutAPI;
+  prefs: EditorPrefsAPI;
 }
 
 interface MobilePanesProps {
   state: DocumentState;
   mobileTab: Accessor<MobileTab>;
   setMobileTab: Setter<MobileTab>;
+  showLineNumbers: Accessor<boolean>;
 }
 
 function MobilePanes(props: MobilePanesProps) {
@@ -68,7 +70,10 @@ function MobilePanes(props: MobilePanesProps) {
       <div class="panes panes--mobile">
         <Show when={props.mobileTab() === 'edit'}>
           <div class="editor-pane">
-            <EditorArea state={props.state} />
+            <EditorArea
+              state={props.state}
+              showLineNumbers={props.showLineNumbers}
+            />
           </div>
         </Show>
         <Show when={props.mobileTab() === 'preview'}>
@@ -115,6 +120,34 @@ function AppShell(props: AppShellProps) {
           </button>
           <button
             type="button"
+            class="header-button"
+            onClick={() => props.prefs.decreaseFontSize()}
+            aria-label={t('editor.fontDecrease')}
+          >
+            A−
+          </button>
+          <button
+            type="button"
+            class="header-button"
+            onClick={() => props.prefs.increaseFontSize()}
+            aria-label={t('editor.fontIncrease')}
+          >
+            A+
+          </button>
+          <button
+            type="button"
+            class="header-button"
+            classList={{
+              'header-button--active': props.prefs.showLineNumbers(),
+            }}
+            aria-pressed={props.prefs.showLineNumbers()}
+            onClick={() => props.prefs.toggleLineNumbers()}
+            aria-label={t('editor.lineNumbers')}
+          >
+            #
+          </button>
+          <button
+            type="button"
             class="theme-toggle"
             onClick={() => props.theme.toggle()}
             aria-label={t('theme.toggle')}
@@ -130,12 +163,16 @@ function AppShell(props: AppShellProps) {
             state={props.state}
             mobileTab={props.layout.mobileTab}
             setMobileTab={props.layout.setMobileTab}
+            showLineNumbers={props.prefs.showLineNumbers}
           />
         }
       >
         <div class="panes">
           <div class="editor-pane">
-            <EditorArea state={props.state} />
+            <EditorArea
+              state={props.state}
+              showLineNumbers={props.prefs.showLineNumbers}
+            />
           </div>
           <PreviewArea state={props.state} />
         </div>
@@ -164,6 +201,7 @@ if (root) {
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
     const layout = createLayout();
+    const prefs = createEditorPrefs();
     return (
       <AppShell
         state={state}
@@ -172,6 +210,7 @@ if (root) {
         exporter={exporter}
         persist={persist}
         layout={layout}
+        prefs={prefs}
       />
     );
   }, root);

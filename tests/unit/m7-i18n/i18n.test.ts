@@ -3,7 +3,7 @@ import { i18n, t } from '@/modules/m7-i18n/i18n';
 import { zhCNDict } from '@/modules/m7-i18n/zh-CN.dict';
 
 // 各模块预期的 chrome key 白名单 —— 新增 key 时同步本数组。
-// 当前覆盖：app / M2 preview / chrome buttons / M5 tabs / M3 toast / M4 toast.
+// 当前覆盖：app / M2 preview / chrome buttons / M1 prefs / M5 tabs / M3 toast / M4 toast.
 const EXPECTED_KEYS = [
   'app.title',
   'preview.placeholder',
@@ -13,6 +13,9 @@ const EXPECTED_KEYS = [
   'download.button',
   'copy.button',
   'theme.toggle',
+  'editor.fontDecrease',
+  'editor.fontIncrease',
+  'editor.lineNumbers',
   'tab.edit',
   'tab.preview',
   'storage.quota',

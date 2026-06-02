@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { createSignal } from 'solid-js';
 import { render, fireEvent, cleanup } from '@solidjs/testing-library';
 import { createDocumentState } from '@/modules/m1-editor/state';
 import { EditorArea } from '@/modules/m1-editor/EditorArea';
@@ -67,5 +68,50 @@ describe('M1 EditorArea — CT-M1 (component tests)', () => {
     const { getByRole } = render(() => <EditorArea state={state} />);
     const textarea = getByRole('textbox') as HTMLTextAreaElement;
     expect(textarea.value).toBe('start');
+  });
+
+  it('CT-M1-005: no gutter when showLineNumbers omitted (backward compat)', () => {
+    const state = createDocumentState('a\nb\nc');
+    const { container } = render(() => <EditorArea state={state} />);
+    expect(container.querySelector('.editor-gutter')).toBeNull();
+    expect(container.querySelector('.editor-area--nowrap')).toBeNull();
+  });
+
+  it('CT-M1-006: gutter renders one number per logical line when on', () => {
+    const state = createDocumentState('line1\nline2\nline3');
+    const [on] = createSignal(true);
+    const { container } = render(() => (
+      <EditorArea state={state} showLineNumbers={on} />
+    ));
+    const lines = container.querySelectorAll('.editor-gutter__line');
+    expect(lines.length).toBe(3);
+    expect([...lines].map((el) => el.textContent)).toEqual(['1', '2', '3']);
+    // line numbers on → textarea soft-wrap disabled
+    expect(container.querySelector('.editor-area--nowrap')).not.toBeNull();
+  });
+
+  it('CT-M1-007: gutter line count updates reactively with text', async () => {
+    const state = createDocumentState('only one line');
+    const [on] = createSignal(true);
+    const { container } = render(() => (
+      <EditorArea state={state} showLineNumbers={on} />
+    ));
+    expect(container.querySelectorAll('.editor-gutter__line').length).toBe(1);
+    state.setText('a\nb\nc\nd');
+    await flushMicrotasks();
+    expect(container.querySelectorAll('.editor-gutter__line').length).toBe(4);
+  });
+
+  it('CT-M1-008: toggling showLineNumbers off removes the gutter', async () => {
+    const state = createDocumentState('a\nb');
+    const [on, setOn] = createSignal(true);
+    const { container } = render(() => (
+      <EditorArea state={state} showLineNumbers={on} />
+    ));
+    expect(container.querySelector('.editor-gutter')).not.toBeNull();
+    setOn(false);
+    await flushMicrotasks();
+    expect(container.querySelector('.editor-gutter')).toBeNull();
+    expect(container.querySelector('.editor-area--nowrap')).toBeNull();
   });
 });

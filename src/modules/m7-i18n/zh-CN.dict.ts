@@ -22,6 +22,11 @@ export const zhCNDict = {
   'copy.button': '复制 HTML',
   'theme.toggle': '切换主题',
 
+  // M1 editor prefs (F1.2 行号 / F1.3 字号)
+  'editor.fontDecrease': '减小字号',
+  'editor.fontIncrease': '增大字号',
+  'editor.lineNumbers': '切换行号',
+
   // M5 mobile tab
   'tab.edit': '编辑',
   'tab.preview': '预览',

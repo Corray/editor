@@ -55,7 +55,7 @@
 |------|---------|---------|---------|------|------|
 | GAP-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 LayoutAPI 完整实现（createLayout + matchMedia reactive + mobile tabs UI）| #12 commit `a9fc822` |
 | GAP-002 | 2026-05-20 | proposed (backlog) | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| backlog #14 |
-| GAP-003 | 2026-05-20 | proposed (backlog) | LOW | F1.2 行号 / F1.3 字号控件 PRD 列了未实现，无 Issue 跟踪 | backlog #15 |
+| GAP-003 | 2026-05-20 | **resolved** (#15) | LOW | F1.2 行号 gutter + F1.3 字号 A-/A+ 三档实现（EditorPrefsAPI + localStorage 持久化）| #15 commit `8b87f29` |
 | GAP-004 | 2026-05-20 | **resolved** (#11) | MEDIUM | 清空按钮 + confirm 实现 + E2E-AC2-002 unskip 通过 | #11 commit `fec015b` |
 
 ### API 审查
@@ -90,3 +90,4 @@
 | 2026-05-20 | 初建 + 首次 multiphase audit 落 11 条 findings（GAP×4 / API×2 / BHV×3 / IPR×2）|
 | 2026-05-21 | v0.1.0 收尾：Issue #1–#12 批量切 `fe-confirmed` + close（释 release v0.1.0 / commit `a9fc822..c80d2e5`）；resolved findings 关联 Issue 已全部关闭，proposed/deferred findings（GAP-002/003、API-T-001、BHV-003/004、IPR-001/IPR-T-001）保留至 v0.1.x / v0.2 处理 |
 | 2026-05-21 | 残余 6 条 LOW findings backlog 化：建 3 个 umbrella Issue —— #14 tech-debt（GAP-002 + API-T-001）/ #15 deferred-feature（GAP-003 + BHV-003 + BHV-004）/ #16 process（IPR-001 + IPR-T-001）；关联列已更新，状态保留 proposed/deferred 标 (backlog) 副词，等触发条件后逐条转 fixing |
+| 2026-06-02 | #15 GAP-003 推进：F1.2 行号 gutter（关软换行精确对齐）+ F1.3 字号 A-/A+ 三档落地（EditorPrefsAPI + localStorage 持久化 + anti-poisoning）；19 新单测全绿 + typecheck + build + Playwright 视觉验证；GAP-003 → resolved。#15 残余 BHV-003（perf bench）/ BHV-004（mobile-safari）仍 backlog |

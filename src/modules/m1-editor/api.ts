@@ -17,3 +17,6 @@ export function createEditorAPI(state: DocumentState): EditorAPI {
 
 export { createDocumentState } from './state';
 export type { DocumentState } from './state';
+
+export { createEditorPrefs, FONT_SIZE_PRESETS } from './prefs';
+export type { EditorPrefsAPI } from './prefs';

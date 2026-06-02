@@ -55,6 +55,12 @@
   outline-offset: 2px;
 }
 
+/* toggle-style header button in the "on" state (line-number toggle) */
+.header-button--active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* panes — desktop row, mobile column */
 .panes {
   display: flex;
@@ -82,19 +88,56 @@
   font-style: italic;
 }
 
-/* editor-area inside editor-pane fills the flex slot */
+/* editor + optional line-number gutter share the editor-pane flex slot */
+.editor-with-gutter {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* line-number gutter (F1.2) — overflow:hidden, vertical scroll driven by
+   textarea onScroll → scrollTop sync. Metrics mirror .editor-area exactly
+   (same font-size var + line-height + vertical padding) so numbers align. */
+.editor-gutter {
+  flex: 0 0 auto;
+  overflow: hidden;
+  padding: 1rem 0.5rem 1rem 0.75rem;
+  text-align: right;
+  background: var(--bg);
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--editor-font-size, 0.9375rem);
+  line-height: 1.6;
+  user-select: none;
+}
+
+.editor-gutter__line {
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+
+/* editor-area inside editor-with-gutter fills the remaining row slot */
 .editor-area {
   flex: 1;
   width: 100%;
+  min-width: 0;
   padding: 1rem;
   background: var(--bg);
   color: var(--fg);
   border: none;
   outline: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.9375rem;
+  font-size: var(--editor-font-size, 0.9375rem);
   line-height: 1.6;
   resize: none;
+}
+
+/* line numbers on → kill soft-wrap so 1 logical line = 1 visual line
+   (GAP-003 Q1: gutter precision over prose wrapping). */
+.editor-area--nowrap {
+  white-space: pre;
+  overflow-x: auto;
 }
 
 /* preview-content basic markdown typography */

@@ -70,9 +70,10 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | BHV-001 | 2026-05-20 | **resolved** (#10) | HIGH | E2E 全集未跑 → chromium + webkit 跑通（21 pass / 7 skip / 0 fail）；mobile-safari emulation 不稳定单列 BHV-004 | audit §3；#10 commit `f03e170` |
-| BHV-004 | 2026-05-20 | deferred (backlog) | LOW | mobile-safari emulation 本地 page.goto 30s 超时 — config 暂注释；移动 viewport 已用 iPhone SE context 单独覆盖 AC-4-001 | #10 / backlog #15 |
+| BHV-004 | 2026-05-20 | **resolved** (#15) | LOW | mobile-safari page.goto 30s 超时随 Playwright 1.43→1.60 升级消失；移除 AC4-003 chromium-only skip → 在 webkit + isMobile context 跑通（真 webkit-mobile 覆盖）；dead mobile-safari project config 清理 | #15 commit `20ad1c5` |
 | BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `a9fc822` |
 | BHV-003 | 2026-05-20 | proposed (backlog) | LOW | AC-5 Lighthouse / 真实 perf bench 未跑（按 TBD-T1 留 release 前）| backlog #15 |
+| BHV-005 | 2026-06-02 | **resolved** (#15) | MEDIUM | **GAP-003 回归**：header 加 A-/A+/# 3 按钮后 7 按钮在 320px 不换行 → document 横向溢出（破 AC-4-001）；BHV-004 跑 e2e 时捕获（GAP-003 当时只跑 unit+desktop visual 漏 e2e）。修：`.header-actions { flex-wrap: wrap }` | #15 commit `eac71bb` |
 
 ### Issue-process 审查
 
@@ -91,3 +92,4 @@
 | 2026-05-21 | v0.1.0 收尾：Issue #1–#12 批量切 `fe-confirmed` + close（释 release v0.1.0 / commit `a9fc822..c80d2e5`）；resolved findings 关联 Issue 已全部关闭，proposed/deferred findings（GAP-002/003、API-T-001、BHV-003/004、IPR-001/IPR-T-001）保留至 v0.1.x / v0.2 处理 |
 | 2026-05-21 | 残余 6 条 LOW findings backlog 化：建 3 个 umbrella Issue —— #14 tech-debt（GAP-002 + API-T-001）/ #15 deferred-feature（GAP-003 + BHV-003 + BHV-004）/ #16 process（IPR-001 + IPR-T-001）；关联列已更新，状态保留 proposed/deferred 标 (backlog) 副词，等触发条件后逐条转 fixing |
 | 2026-06-02 | #15 GAP-003 推进：F1.2 行号 gutter（关软换行精确对齐）+ F1.3 字号 A-/A+ 三档落地（EditorPrefsAPI + localStorage 持久化 + anti-poisoning）；19 新单测全绿 + typecheck + build + Playwright 视觉验证；GAP-003 → resolved。#15 残余 BHV-003（perf bench）/ BHV-004（mobile-safari）仍 backlog |
+| 2026-06-02 | #15 BHV-004 推进：原 page.goto 超时随 Playwright 1.60 消失 → 移除 AC4-003 chromium-only skip（webkit-mobile 覆盖）+ 清理 dead mobile-safari project config；BHV-004 → resolved。**附带捕获 BHV-005**（GAP-003 header 7 按钮 320px 横向溢出回归，根因 = GAP-003 漏跑 e2e）→ `.header-actions{flex-wrap}` 修复，full e2e 29 pass/1 skip（chromium+webkit）。#15 仅剩 BHV-003 |

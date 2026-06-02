@@ -29,6 +29,11 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  /* wrap on narrow viewports — 7 chrome buttons overflow 320px otherwise
+     (regression guard for AC-4-001 no-horizontal-scroll after GAP-003). */
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
 }
 
 .theme-toggle,

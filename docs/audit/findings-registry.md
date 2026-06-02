@@ -54,7 +54,7 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | GAP-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 LayoutAPI 完整实现（createLayout + matchMedia reactive + mobile tabs UI）| #12 commit `a9fc822` |
-| GAP-002 | 2026-05-20 | proposed (backlog) | LOW | M2 PreviewAPI.getRootElement 未实现（M4 已绕过 pipeline.render）| backlog #14 |
+| GAP-002 | 2026-05-20 | **resolved** (#14) | LOW | `getRootElement` 零消费方（M4 #9 已绕过）→ 删声明（PreviewAPI + api-spec §3.2 + 5.5 流程图）消除契约/实现 drift；未来按需连消费方补回 | #14 commit `b7ef028` |
 | GAP-003 | 2026-05-20 | **resolved** (#15) | LOW | F1.2 行号 gutter + F1.3 字号 A-/A+ 三档实现（EditorPrefsAPI + localStorage 持久化）| #15 commit `6bc2977` |
 | GAP-004 | 2026-05-20 | **resolved** (#11) | MEDIUM | 清空按钮 + confirm 实现 + E2E-AC2-002 unskip 通过 | #11 commit `fec015b` |
 
@@ -63,7 +63,7 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | API-M5-001 | 2026-05-20 | **resolved** (#12) | MEDIUM | M5 api.ts / LayoutAPI 完整实现 | #12 commit `a9fc822` |
-| API-T-001 | 2026-05-20 | proposed (backlog) | LOW | shared/toast 完整 UI follow-up Issue 未建（tech-debt 跟踪占位）| backlog #14 |
+| API-T-001 | 2026-05-20 | **resolved** (#14) | LOW | shared/toast console stub → 真 DOM UI（lazy-mount container + 自动消失 + enter/leave 动画 + aria-live polite，无 lib，接口冻结不变）；7 单测 | #14 commit `b7ef028` |
 
 ### Behavior 审查
 
@@ -95,3 +95,4 @@
 | 2026-06-02 | #15 BHV-004 推进：原 page.goto 超时随 Playwright 1.60 消失 → 移除 AC4-003 chromium-only skip（webkit-mobile 覆盖）+ 清理 dead mobile-safari project config；BHV-004 → resolved。**附带捕获 BHV-005**（GAP-003 header 7 按钮 320px 横向溢出回归，根因 = GAP-003 漏跑 e2e）→ `.header-actions{flex-wrap}` 修复，full e2e 29 pass/1 skip（chromium+webkit）。#15 仅剩 BHV-003 |
 | 2026-06-02 | #15 BHV-003 推进（scope=跑基线+轻量 bundle 闸，尊重 TBD-T1 不上 Lighthouse CI）：一次性跑通 MANUAL-PERF-001~003 → Lighthouse 92 / input→preview 34ms(chromium) / bundle 64.26KB gz，三项全过；落 docs/perf/baseline-v0.1.0.md；deploy.yml 加 `pnpm size` 闸 + E2E-AC5-002 延迟实测。BHV-003 → resolved。**#15 三 finding（GAP-003/BHV-004/BHV-003）全 resolved → umbrella 可关闭** |
 | 2026-06-02 | #16 推进 → umbrella 可关闭：IPR-T-001 二次复发（amend 自引用变体）达形式化阈值 → 机械闸根治 `scripts/check-doc-hashes.mjs`（`pnpm check:hashes` + CI fetch-depth:0），FB-002→applied / PP-002 v2 → resolved；IPR-001 一人多角色 deviation 由 PR-001 永久接受 → dismissed。**#16 两 finding 全处置** |
+| 2026-06-02 | #14 推进 → umbrella 可关闭：GAP-002 删 `getRootElement` 声明（零消费方，消除 drift）→ resolved；API-T-001 toast console stub → 真 DOM UI（无 lib，接口冻结，7 单测）→ resolved。api-spec §3.2/5.5/§4.1 同步。**v0.1.0 audit 三 umbrella #14/#15/#16 全关闭** |

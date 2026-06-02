@@ -59,14 +59,12 @@ test.describe('AC-4 移动端', () => {
     await context.close();
   });
 
-  test('E2E-AC4-003: iPhone 14 Pro full flow (chromium emulation only)', async ({
+  test('E2E-AC4-003: iPhone 14 Pro full flow (chromium + webkit mobile context)', async ({
     browser,
-    browserName,
   }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'iPhone 14 Pro emulation runs on chromium project to avoid BHV-004 (mobile-safari + Vite dev instability)',
-    );
+    // BHV-004 resolved (Playwright 1.60)：webkit + mobile context page.goto 不再
+    // 超时，故移除 chromium-only skip —— 本用例现在同时在 chromium / webkit 跑，
+    // webkit 引擎下 isMobile context 提供真正的 mobile-safari 覆盖。
     const context = await browser.newContext({
       viewport: { width: 393, height: 852 }, // iPhone 14 Pro logical
       deviceScaleFactor: 3,

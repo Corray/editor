@@ -25,10 +25,9 @@ export default defineConfig({
     // 移动端 viewport 已在 AC-4 用 iPhone SE context 单独覆盖。
     // TODO(follow-up): 启用 mobile-safari 需调研 webServer 兼容性或换成
     //   Vite preview build（更接近生产）。
-    // {
-    //   name: 'mobile-safari',
-    //   use: { ...devices['iPhone 14 Pro'] },
-    // },
+    // mobile-safari 不再需要独立 project：webkit project + 测试内自建 mobile
+    // context（isMobile/hasTouch）即可覆盖 webkit + 移动 viewport（见 AC4-003）。
+    // 原 BHV-004 的 page.goto 30s 超时已随 Playwright 1.43→1.60 升级消失（2026-06-02）。
   ],
   webServer: {
     // Use a dedicated port so we don't accidentally reuse another local Vite

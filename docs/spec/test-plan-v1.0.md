@@ -278,6 +278,12 @@
 
 > MVP 不上 Lighthouse CI（架构 §3.4 / TBD-T1 待定）。
 
+> **2026-06-02 执行追溯（#15 BHV-003）：** 三项已一次性跑通并记基线 →
+> `docs/perf/baseline-v0.1.0.md`（Lighthouse **92** / input→preview **34ms**(chromium) / bundle **64.26 KB gz**，全过预算）。
+> MANUAL-PERF-002 已自动化为 `E2E-AC5-002`（performance.now + MutationObserver，口径=input→preview DOM mutation）；
+> MANUAL-PERF-003 已加 CI 闸（`pnpm size` in `deploy.yml`）。
+> **TBD-T1 不变**：完整 Lighthouse CI 仍留 v1.1+（只加了轻量 bundle-size 闸，非 Lighthouse CI）。
+
 ### 7.6 AC-6 主题 (`e2e/ac6-theme.spec.ts`)
 
 | ID | 场景 | 步骤 | 预期 |

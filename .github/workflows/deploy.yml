@@ -43,6 +43,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Bundle size budget (gzip < 150KB / MANUAL-PERF-003)
+        run: pnpm size
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

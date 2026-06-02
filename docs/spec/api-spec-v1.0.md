@@ -102,9 +102,8 @@ export const FONT_SIZE_PRESETS = [13, 15, 17] as const; // 极简三档，默认
 export interface PreviewAPI {
   /** 渲染管线：markdown 源文 → 安全 HTML 字符串 */
   render(markdown: string): string;  // 已 sanitize（DOMPurify）
-
-  /** 获取当前预览区根 DOM（M4 导出 HTML 时用） */
-  getRootElement(): HTMLElement | null;
+  // getRootElement() 已删除（#14 GAP-002）—— 零消费方，M4 #9 改直接调
+  // pipeline.render；未来需直接访问预览 DOM 时连同消费方 + 测试一起补回
 }
 ```
 
@@ -118,7 +117,7 @@ export interface PreviewAPI {
 |------|------|---------------|
 | `render()` (pipeline.ts) | ✓ 已实现（2026-05-19）| #1 — markdown-it v14 + DOMPurify v3 双保险，17 单测全绿，覆盖率 100% |
 | `PreviewArea` 组件挂载 | ✓ 已实现（2026-05-19）| #8 — createMemo + Show fallback (placeholder) + innerHTML 注入（唯一源 render，标 SECURITY REVIEW）|
-| `getRootElement()` | ⏳ 留 M4 导出 Issue 实现 ref 转发 | 后续 |
+| ~~`getRootElement()`~~ | ✂ **已删除（#14 GAP-002）** | 零消费方（M4 #9 绕过）→ 删声明消除契约/实现 drift；未来按需连消费方补回 |
 
 ### 3.3 M3 Persistence
 
@@ -273,7 +272,7 @@ export const toast: ToastAPI;
 
 | 入口 | 状态 | Issue / commit |
 |------|------|---------------|
-| `toast.show()` | ⚠ MVP **stub**（console.{info,warn,error} 转发）| #2 — 接口稳定，TODO(post-mvp): full DOM toast UI（后续单独 Issue）|
+| `toast.show()` | ✓ **真 DOM UI（#14 API-T-001）** | 接口冻结不变（消费方零改动）；lazy-mount `.toast-container` on body + 自动消失（durationMs）+ enter/leave 动画 + `aria-live=polite`；非 DOM env no-op；7 单测覆盖 |
 
 **约定：**
 - M3 配额满 → `toast.show(t('storage.quota.full'), 'error')`
@@ -348,7 +347,7 @@ M4.downloadMarkdown()
 user click "复制 HTML"
   ↓
 M4.copyHtml()
-  ├─ M2.getRootElement()?.innerHTML            → html
+  ├─ pipeline.render(text())                   → sanitized html (#9 反哺；不再用 getRootElement)
   ├─ navigator.clipboard.writeText(html)       → Promise
   │    ↓ ok   → toast.show(t('clipboard.ok'), 'info')
   │    ↓ err  → toast.show(t('clipboard.fail'), 'warn'); return false

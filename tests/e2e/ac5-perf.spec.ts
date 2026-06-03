@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('AC-5 性能（自动断言部分）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('./');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });

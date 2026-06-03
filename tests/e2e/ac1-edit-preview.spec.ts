@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('AC-1 编辑 + 预览闭环', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('./');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });

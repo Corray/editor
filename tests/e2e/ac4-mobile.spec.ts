@@ -8,7 +8,7 @@ test.describe('AC-4 移动端', () => {
       ...devices['iPhone SE'],
     });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('./');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
 
@@ -33,7 +33,7 @@ test.describe('AC-4 移动端', () => {
       ...devices['iPhone SE'],
     });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('./');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
 
@@ -72,7 +72,7 @@ test.describe('AC-4 移动端', () => {
       hasTouch: true,
     });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('./');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
 

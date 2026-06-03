@@ -5,11 +5,19 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Cap local parallelism: default (= all cores) saturates an 8-core machine
+  // with parallel webkit+chromium navigations → page.goto 30s timeouts +
+  // inflated render latency (the real flake root cause; CI stays serial =
+  // workers:1, hence stable). 2 local workers keeps contention low and the
+  // run deterministic without going fully serial.
+  workers: process.env.CI ? 1 : 2,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5174',
+    // base includes Vite `base: '/editor/'` — preview serves strictly under it
+    // (dev was lenient / 302-redirected '/'); specs use page.goto('./').
+    baseURL: 'http://localhost:5174/editor/',
     trace: 'on-first-retry',
+    navigationTimeout: 60_000, // absorb transient load on cold navigation
   },
   projects: [
     {
@@ -20,22 +28,18 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-    // mobile-safari 在本地 Vite dev server + iPhone 14 Pro emulation 下
-    // page.goto 稳定超时（webkit engine + mobile UA 触发的 navigation 卡顿）。
-    // 移动端 viewport 已在 AC-4 用 iPhone SE context 单独覆盖。
-    // TODO(follow-up): 启用 mobile-safari 需调研 webServer 兼容性或换成
-    //   Vite preview build（更接近生产）。
-    // mobile-safari 不再需要独立 project：webkit project + 测试内自建 mobile
-    // context（isMobile/hasTouch）即可覆盖 webkit + 移动 viewport（见 AC4-003）。
-    // 原 BHV-004 的 page.goto 30s 超时已随 Playwright 1.43→1.60 升级消失（2026-06-02）。
+    // mobile-safari 不需要独立 project：webkit project + 测试内自建 mobile
+    // context（isMobile/hasTouch）即覆盖 webkit + 移动 viewport（见 AC4-003）。
   ],
   webServer: {
-    // Use a dedicated port so we don't accidentally reuse another local Vite
-    // app's dev server on 5173 (real bite: another project's Calculator was
-    // running on 5173 and reuseExistingServer:true silently picked it up).
-    command: 'pnpm dev --port 5174 --strictPort',
+    // FB-005 fix（2026-06-03）：用 `vite preview`（生产 build）而非 `vite dev`。
+    // dev server 按需编译 + 冷启动，并行 worker 首次 page.goto 偶发 >30s 超时
+    // （PP-003 / 本地 retries:0 → flake 变硬失败）。preview 静态服务无编译，
+    // 导航确定性快。专用端口 5174 避免误用其它本地 Vite app（曾被 5173 的
+    // Calculator dev server 通过 reuseExistingServer 静默命中）。
+    command: 'pnpm build && pnpm preview --port 5174 --strictPort',
     port: 5174,
     reuseExistingServer: false,
-    timeout: 30_000,
+    timeout: 120_000, // 覆盖 build + preview 启动
   },
 });

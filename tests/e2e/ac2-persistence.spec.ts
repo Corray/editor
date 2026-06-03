@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('AC-2 持久化', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('./');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });

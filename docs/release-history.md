@@ -4,6 +4,55 @@
 
 ---
 
+## v0.1.1 — backlog 清理 + 过程加固（2026-06-03）
+
+**Tag:** `v0.1.1` @ commit `e9555e7`
+**Range:** `c80d2e5..e9555e7`（v0.1.0 以来）
+**部署:** https://corray.github.io/editor/（GitHub Pages，自动部署）
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.1.1
+
+### Scope — v0.1.0 audit 三 backlog umbrella 全清（#14 / #15 / #16）
+
+| finding | Issue | Commit | 说明 |
+|---------|-------|--------|------|
+| GAP-003 行号 / 字号 | #15 | `6bc2977` | F1.2 行号 gutter（可 toggle，关软换行精确对齐）+ F1.3 字号 A-/A+ 三档（13/15/17）；`EditorPrefsAPI` + localStorage |
+| BHV-004 mobile-safari | #15 | `20ad1c5` | Playwright 1.60 解 page.goto 超时 → AC4-003 webkit-mobile 覆盖 + 清 dead config |
+| BHV-005 header 回归 | #15 | `eac71bb` | GAP-003 加 3 按钮致 320px 横向溢出（破 AC-4-001）→ `.header-actions{flex-wrap}` |
+| BHV-003 perf 基线 | #15 | `13a7dce` | Lighthouse 92 / input→preview 34ms / bundle 64.26KB gz 落档；`pnpm size` CI 闸 + E2E-AC5-002 |
+| IPR-T-001 commit-hash 根治 | #16 | `ab2927c` | 机械闸 `pnpm check:hashes`（扫文档 hash 引用 + git rev-parse 验证）接入 CI |
+| IPR-001 fe-reviewed 跳过 | #16 | — | dismissed：一人多角色 deviation 由 PR-001 永久接受 |
+| GAP-002 getRootElement | #14 | `b7ef028` | 删无消费方声明（消除契约 drift）|
+| API-T-001 toast UI | #14 | `b7ef028` | console stub → 真 DOM toast（自动消失 + 动画 + aria-live，无 lib，接口冻结）|
+
+### Quality Gates [已验证: 2026-06-03 本机]
+
+- 125 unit tests pass，line coverage 95.47%
+- 31 e2e pass / 1 skip（chromium + webkit，含 webkit + mobile context；1 skip = AC3-002 clipboard chromium-only）
+- Bundle 64.64KB gzipped（预算 150KB，CI `pnpm size` 闸守护）
+- TS strict `pnpm typecheck` 0 error
+- 新增 CI 闸：bundle-size（gzip<150KB）+ doc commit-hash 引用完整性
+
+### 过程改进（本版沉淀）
+
+- **commit-hash 机械闸**（IPR-T-001 二次复发达形式化阈值）：`scripts/check-doc-hashes.mjs`，FB-002 candidate→applied / PP-002 remediation v2
+- **perf 基线**：`docs/perf/baseline-v0.1.0.md`（Lighthouse / input-latency / bundle 三项 + 复测命令）
+- **scope 守 TBD-T1**：只加轻量 bundle 闸，完整 Lighthouse CI 仍留 v1.1+
+
+### Known Limitations（v0.1.1 仍不做）
+
+- 完整 Lighthouse CI（LCP/TBT 阈值闸）留 v1.1+（TBD-T1；本版只做一次性基线 + bundle 闸）
+- toast 无队列 / 上限（低频消费点，MVP 接受）
+- 行号默认开时移动端长行需 textarea 内横滑（document 不溢出）
+- 真机 iOS Safari 未测（webkit emulation + mobile context 覆盖）
+
+### Closure
+
+- 三 umbrella #14 / #15 / #16 全部 `gh issue close --completed`，open 队列归零
+- findings-registry：11 原始 findings + BHV-005 全部 resolved/dismissed
+- package.json version 0.0.0 → 0.1.1（补齐 v0.1.0 遗留）
+
+---
+
 ## v0.1.0 — MVP（2026-05-20）
 
 **Tag:** `v0.1.0` @ commit `c80d2e5`

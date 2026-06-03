@@ -74,6 +74,11 @@
 | BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `a9fc822` |
 | BHV-003 | 2026-05-20 | **resolved** (#15) | LOW | perf bench 一次性跑通并记基线（docs/perf/baseline-v0.1.0.md）：Lighthouse 92 / input→preview 34ms / bundle 64.26KB gz，三项全过预算；deploy.yml 加 bundle-size CI 闸（`pnpm size`）+ E2E-AC5-002 延迟实测。Lighthouse CI 仍按 TBD-T1 留 v1.1 | #15 commit `13a7dce` |
 | BHV-005 | 2026-06-02 | **resolved** (#15) | MEDIUM | **GAP-003 回归**：header 加 A-/A+/# 3 按钮后 7 按钮在 320px 不换行 → document 横向溢出（破 AC-4-001）；BHV-004 跑 e2e 时捕获（GAP-003 当时只跑 unit+desktop visual 漏 e2e）。修：`.header-actions { flex-wrap: wrap }` | #15 commit `eac71bb` |
+| BHV-006 | 2026-06-03 | deferred (v1.1) | LOW | 字号 A−/A+ 在 13/17 边界点击 no-op 但按钮无 disabled/视觉态 → 无反馈（UX 打磨）| 2026-06-03 增量 audit |
+| BHV-007 | 2026-06-03 | deferred (v1.1) | LOW | 行号 toggle off→on 时若 textarea 已滚动，gutter 从 scrollTop 0 起，下次 scroll 才同步 → 短暂错位 | 2026-06-03 增量 audit |
+| BHV-008 | 2026-06-03 | deferred (v1.1) | LOW | gutter 每逻辑行 1 DOM 节点，近 1MB 大文档放大渲染/内存成本（静态推断，未压测）| 2026-06-03 增量 audit |
+| BHV-009 | 2026-06-03 | deferred (v1.1) | LOW | toast 容器统一 aria-live=polite；error/warn 语义宜 assertive（a11y，未真机验）| 2026-06-03 增量 audit |
+| BHV-010 | 2026-06-03 | deferred (v1.1) | LOW | F1.2 行号 / F1.3 字号 / toast 仅 unit+手测，无 e2e 验收覆盖（PRD §F1 功能，回归风险）| 2026-06-03 增量 audit |
 
 ### Issue-process 审查
 
@@ -96,3 +101,4 @@
 | 2026-06-02 | #15 BHV-003 推进（scope=跑基线+轻量 bundle 闸，尊重 TBD-T1 不上 Lighthouse CI）：一次性跑通 MANUAL-PERF-001~003 → Lighthouse 92 / input→preview 34ms(chromium) / bundle 64.26KB gz，三项全过；落 docs/perf/baseline-v0.1.0.md；deploy.yml 加 `pnpm size` 闸 + E2E-AC5-002 延迟实测。BHV-003 → resolved。**#15 三 finding（GAP-003/BHV-004/BHV-003）全 resolved → umbrella 可关闭** |
 | 2026-06-02 | #16 推进 → umbrella 可关闭：IPR-T-001 二次复发（amend 自引用变体）达形式化阈值 → 机械闸根治 `scripts/check-doc-hashes.mjs`（`pnpm check:hashes` + CI fetch-depth:0），FB-002→applied / PP-002 v2 → resolved；IPR-001 一人多角色 deviation 由 PR-001 永久接受 → dismissed。**#16 两 finding 全处置** |
 | 2026-06-02 | #14 推进 → umbrella 可关闭：GAP-002 删 `getRootElement` 声明（零消费方，消除 drift）→ resolved；API-T-001 toast console stub → 真 DOM UI（无 lib，接口冻结，7 单测）→ resolved。api-spec §3.2/5.5/§4.1 同步。**v0.1.0 audit 三 umbrella #14/#15/#16 全关闭** |
+| 2026-06-03 | v0.1.1 增量 audit（报告 `2026-06-03-v0.1.1-increment.md`）：增量无 critical/high/medium，无安全/契约/架构违规；新增 5 条 LOW（BHV-006~010，UX/a11y/perf/coverage）全 deferred v1.1。最值得做 = BHV-010（F1.2/F1.3/toast 无 e2e）|

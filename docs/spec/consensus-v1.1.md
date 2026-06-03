@@ -2,12 +2,13 @@
 
 > **定位：** v1.0 共识（`consensus-v1.0.md`，accepted 2026-05-18）的**增量 delta**，仅描述 v1.1 持久化升级带来的行为变化。v1.0 其余条款不变、继续生效。
 >
-> **状态：** `draft`（待 PM 评审 TBD-v11-1~5）
-> **spec-to-code-flow 位置：** v1.1 入口节点（共识）→ 评审通过后进 module-list delta → 架构 + ADR-005 → api+data-model v2 → test-plan delta → 实现
+> **状态：** `accepted`（2026-06-03 Corray 全盘接受 TBD-v11-1~5 的 AI 倾向 (a)）
+> **spec-to-code-flow 位置：** v1.1 入口节点（共识 ✓ accepted）→ **module-list delta** → 架构 + ADR-005 → api+data-model v2 → test-plan delta → 实现
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
-| v1.1-draft | 2026-06-03 | 持久化 localStorage → IndexedDB；5 条 TBD 待 accept |
+| v1.1 | 2026-06-03 | 持久化 localStorage → IndexedDB；TBD-v11-1~5 全 accept (a)：异步 hydrate / 迁移后删旧 key（先写后删幂等）/ IDB 不可用降级 localStorage / 取消 1MB 提示 / init 改异步 |
+| v1.1-draft | 2026-06-03 | 初稿，5 TBD 待 accept |
 | v1.0 | 2026-05-18 | MVP 初版（accepted）|
 
 ---

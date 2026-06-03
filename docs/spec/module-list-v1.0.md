@@ -87,15 +87,15 @@
 
 | 维度 | 内容 |
 |------|------|
-| **核心职责** | M1 状态变更后 debounce 500ms 写入 localStorage；页面打开时还原；提供清空操作 |
+| **核心职责** | M1 状态变更后 debounce 500ms 写入；页面打开时**异步**还原；提供清空操作；**〔v1.1〕首次加载迁移旧 localStorage → IndexedDB** |
 | **输入** | M1 的 `onChange` 事件流、清空按钮触发 |
-| **输出** | 初始化时返回还原的源文给 M1；写入失败时 toast 提示 |
+| **输出** | **〔v1.1〕异步** hydrate 还原的源文给 M1（不再同步 init）；写入失败时 toast 提示 |
 | **PRD 功能项** | F3.1 debounce 写入 / F3.2 还原 / F3.3 清空 |
-| **AC 覆盖** | AC-2 (持久化往返) |
-| **状态机** | IDLE / DIRTY / SAVING / ERROR（见共识 §5）|
-| **localStorage key** | `editor.document.v1` |
-| **错误处理** | QuotaExceededError → toast（共识 TBD-3）|
-| **不做** | 不做云同步 / 不做 IndexedDB（v1.1+ 切换）|
+| **AC 覆盖** | AC-2（持久化往返）+ **〔v1.1〕AC-v11-1~5**（迁移 / 异步态 / 大文档 / IDB 降级 / 清空）|
+| **状态机** | IDLE / DIRTY / SAVING / ERROR（见共识 §5；〔v1.1〕SAVING 变真异步态）|
+| **存储后端** | ~~localStorage `editor.document.v1`~~ → **〔v1.1〕IndexedDB**（schema/库见 data-model v2 + ADR-005）；旧 key 迁移后删除（共识 TBD-v11-2）|
+| **错误处理** | 写失败 → toast；**〔v1.1〕IDB 不可用（隐私模式/老浏览器）→ 降级 localStorage + toast（共识 TBD-v11-3）** |
+| **不做** | 不做云同步（v2.0）/ 不做多文档（v1.2+）/ ~~不做 IndexedDB~~（〔v1.1〕已纳入）|
 
 ### M4 导出
 

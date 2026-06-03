@@ -1,257 +1,232 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createRoot, createSignal } from 'solid-js';
-import {
-  createPersistence,
-  readStoredDocument,
-} from '@/modules/m3-persistence/store';
-import type { PersistenceAPI } from '@/modules/m3-persistence/api';
-import { toast } from '@/shared/toast';
+import 'fake-indexeddb/auto';
+import { IDBFactory } from 'fake-indexeddb';
+import { openDB } from 'idb';
 import { t } from '@/modules/m7-i18n/i18n';
 
-interface TestContext {
-  api: PersistenceAPI;
-  setText: (v: string) => void;
-  dispose: () => void;
-}
+const DOC_KEY = 'editor.document.v1';
+const NOTICE_KEY = 'editor.notice.large-doc.v1';
 
-function setup(initial = ''): TestContext {
-  const [text, setText] = createSignal(initial);
-  let api!: PersistenceAPI;
-  let dispose!: () => void;
-  createRoot((d) => {
-    dispose = d;
-    api = createPersistence(text);
-  });
-  return { api, setText, dispose };
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
-
 async function flushMicrotasks(): Promise<void> {
-  // Solid effects schedule on microtasks; flush twice to cover nested updates.
   await Promise.resolve();
   await Promise.resolve();
 }
 
-describe('M3 persistence — UT-PR (state machine + invariants)', () => {
-  beforeEach(() => {
-    localStorage.clear();
-    vi.useFakeTimers();
-    vi.spyOn(toast, 'show').mockImplementation(() => {});
-  });
+/**
+ * Fresh store module per test — store.ts memoizes dbPromise / idbUnavailable /
+ * degradedNotified at module level; resetModules isolates backend state.
+ */
+async function freshStore(): Promise<
+  typeof import('@/modules/m3-persistence/store')
+> {
+  vi.resetModules();
+  return import('@/modules/m3-persistence/store');
+}
 
+/** Open the same IDB the store uses, for direct assertions. */
+async function idbDoc(): Promise<unknown> {
+  const db = await openDB('editor', 1, {
+    upgrade(d) {
+      if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+    },
+  });
+  return db.get('kv', 'document');
+}
+async function seedIdb(value: string): Promise<void> {
+  const db = await openDB('editor', 1, {
+    upgrade(d) {
+      if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+    },
+  });
+  await db.put('kv', value, 'document');
+}
+
+describe('M3 persistence v1.1 — IndexedDB + migration', () => {
+  beforeEach(() => {
+    globalThis.indexedDB = new IDBFactory(); // fresh DB per test
+    localStorage.clear();
+  });
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  it('UT-PR-001 / F-C1: IDLE + input → DIRTY', async () => {
-    const { api, setText, dispose } = setup();
+  // ---------- loadStoredDocument + migration ----------
+
+  it('UT-MIG-001: migrates legacy localStorage → IDB, deletes old key', async () => {
+    localStorage.setItem(DOC_KEY, '# old');
+    const { loadStoredDocument } = await freshStore();
+    const result = await loadStoredDocument();
+    expect(result).toBe('# old');
+    expect(await idbDoc()).toBe('# old'); // written to IDB
+    expect(localStorage.getItem(DOC_KEY)).toBeNull(); // old key deleted
+  });
+
+  it('UT-MIG-002: idempotent — IDB has doc → skips migration, legacy untouched', async () => {
+    await seedIdb('# existing');
+    localStorage.setItem(DOC_KEY, '# should-not-win');
+    const { loadStoredDocument } = await freshStore();
+    const result = await loadStoredDocument();
+    expect(result).toBe('# existing'); // IDB wins
+    expect(localStorage.getItem(DOC_KEY)).toBe('# should-not-win'); // not migrated, not deleted
+  });
+
+  it('UT-MIG-003: IDB put fails mid-migration → keeps old localStorage (no data loss)', async () => {
+    localStorage.setItem(DOC_KEY, '# keep');
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+      throw new Error('put fail');
+    });
+    const { loadStoredDocument } = await freshStore();
+    const result = await loadStoredDocument();
+    expect(result).toBe('# keep'); // fallback to legacy value
+    expect(localStorage.getItem(DOC_KEY)).toBe('# keep'); // NOT deleted
+  });
+
+  it('UT-MIG-004: new user (all empty) → returns ""', async () => {
+    const { loadStoredDocument } = await freshStore();
+    expect(await loadStoredDocument()).toBe('');
+  });
+
+  it('UT-MIG-005: empty-string legacy value still migrates (null vs "")', async () => {
+    localStorage.setItem(DOC_KEY, ''); // present but empty
+    const { loadStoredDocument } = await freshStore();
+    expect(await loadStoredDocument()).toBe('');
+    expect(await idbDoc()).toBe(''); // migrated (key was present)
+    expect(localStorage.getItem(DOC_KEY)).toBeNull();
+  });
+
+  // ---------- IDB unavailable → localStorage fallback (TBD-v11-3) ----------
+
+  it('UT-FALLBACK-004: IDB unavailable → localStorage read + degraded toast', async () => {
+    // @ts-expect-error simulate privacy mode / no IDB
+    globalThis.indexedDB = undefined;
+    localStorage.setItem(DOC_KEY, '# fb');
+    const { loadStoredDocument } = await freshStore();
+    const { toast } = await import('@/shared/toast');
+    const spy = vi.spyOn(toast, 'show').mockImplementation(() => {});
+    const result = await loadStoredDocument();
+    expect(result).toBe('# fb');
+    expect(spy).toHaveBeenCalledWith(t('storage.degraded'), 'warn');
+  });
+
+  it('UT-FALLBACK-006: IDB unavailable → write lands in localStorage', async () => {
+    // @ts-expect-error simulate no IDB
+    globalThis.indexedDB = undefined;
+    const { createPersistence } = await freshStore();
+    const { toast } = await import('@/shared/toast');
+    vi.spyOn(toast, 'show').mockImplementation(() => {});
+    const [text, setText] = createSignal('');
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      createPersistence(text);
+    });
+    setText('# fb-write');
+    await sleep(650);
+    await flushMicrotasks();
+    expect(localStorage.getItem(DOC_KEY)).toBe('# fb-write');
+    dispose();
+  });
+
+  // ---------- write round-trip + state machine ----------
+
+  it('UT-IDB-001: edit → debounce → IDB has value; status IDLE', async () => {
+    const { createPersistence } = await freshStore();
+    const [text, setText] = createSignal('');
+    let api!: import('@/modules/m3-persistence/api').PersistenceAPI;
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      api = createPersistence(text);
+    });
     expect(api.status()).toBe('IDLE');
-    setText('hello');
+    setText('# hi');
     await flushMicrotasks();
     expect(api.status()).toBe('DIRTY');
-    dispose();
-  });
-
-  it('UT-PR-002 / F-C3: DIRTY + input → DIRTY (timer reset)', async () => {
-    const { api, setText, dispose } = setup();
-    setText('a');
+    await sleep(650);
     await flushMicrotasks();
-    expect(api.status()).toBe('DIRTY');
-
-    vi.advanceTimersByTime(400);
-    setText('ab');
-    await flushMicrotasks();
-    expect(api.status()).toBe('DIRTY');
-
-    // 400ms since reset — not yet 500
-    vi.advanceTimersByTime(400);
-    await flushMicrotasks();
-    expect(api.status()).toBe('DIRTY');
-    dispose();
-  });
-
-  it('UT-PR-003 / F-C4: DIRTY + 500ms → SAVING → IDLE', async () => {
-    const { api, setText, dispose } = setup();
-    setText('saved');
-    await flushMicrotasks();
-
-    vi.advanceTimersByTime(500);
-    await flushMicrotasks();
-
-    expect(localStorage.getItem('editor.document.v1')).toBe('saved');
+    expect(await idbDoc()).toBe('# hi');
     expect(api.status()).toBe('IDLE');
     dispose();
   });
 
-  it('UT-PR-004 / F-C8: SAVING + QuotaExceeded → ERROR + toast', async () => {
-    const setItemSpy = vi
-      .spyOn(Storage.prototype, 'setItem')
-      .mockImplementationOnce(() => {
-        throw new DOMException('quota', 'QuotaExceededError');
-      });
-
-    const { api, setText, dispose } = setup();
-    setText('x');
+  it('UT-IDB-003: large doc (>5MB) round-trips through IDB', async () => {
+    const big = 'x'.repeat(5_000_000);
+    const { createPersistence } = await freshStore();
+    const [text, setText] = createSignal('');
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      createPersistence(text);
+    });
+    setText(big);
+    await sleep(650);
     await flushMicrotasks();
-    vi.advanceTimersByTime(500);
-    await flushMicrotasks();
-
-    expect(api.status()).toBe('ERROR');
-    expect(toast.show).toHaveBeenCalledWith(t('storage.quota'), 'error');
-    expect(setItemSpy).toHaveBeenCalled();
+    expect(await idbDoc()).toBe(big);
     dispose();
   });
 
-  it('UT-PR-005 / F-C12: ERROR + 5s idle → IDLE', async () => {
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+  it('UT-PR-ERROR: write failure → ERROR + quota toast', async () => {
+    // @ts-expect-error force fallback to localStorage
+    globalThis.indexedDB = undefined;
+    const { createPersistence } = await freshStore();
+    const { toast } = await import('@/shared/toast');
+    vi.spyOn(toast, 'show').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('quota', 'QuotaExceededError');
     });
-
-    const { api, setText, dispose } = setup();
+    const [text, setText] = createSignal('');
+    let api!: import('@/modules/m3-persistence/api').PersistenceAPI;
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      api = createPersistence(text);
+    });
     setText('x');
-    await flushMicrotasks();
-    vi.advanceTimersByTime(500);
+    await sleep(650);
     await flushMicrotasks();
     expect(api.status()).toBe('ERROR');
-
-    vi.advanceTimersByTime(5000);
-    await flushMicrotasks();
-    expect(api.status()).toBe('IDLE');
+    expect(toast.show).toHaveBeenCalledWith(t('storage.quota'), 'error');
     dispose();
   });
 
-  it('UT-PR-006 / F-C5: DIRTY + clear → IDLE + removeItem', async () => {
-    localStorage.setItem('editor.document.v1', 'old');
-    const { api, setText, dispose } = setup();
-    setText('a');
-    await flushMicrotasks();
-    expect(api.status()).toBe('DIRTY');
-
-    api.clear();
-    expect(localStorage.getItem('editor.document.v1')).toBeNull();
-    expect(api.status()).toBe('IDLE');
-    dispose();
-  });
-
-  it('UT-PR-007: invariant — setItem(KEY_DOC) only on DIRTY→SAVING', async () => {
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
-    const { api, setText, dispose } = setup();
-
-    setText('a');
-    await flushMicrotasks();
-    setText('ab');
-    await flushMicrotasks();
-    setText('abc');
-    await flushMicrotasks();
-
-    // 多次 input 不应触发 DOC key setItem（每次都 reset debounce）
-    const beforeAdvanceCalls = setItemSpy.mock.calls.filter(
-      (c) => c[0] === 'editor.document.v1',
-    );
-    expect(beforeAdvanceCalls.length).toBe(0);
-
-    vi.advanceTimersByTime(500);
-    await flushMicrotasks();
-
-    const docCalls = setItemSpy.mock.calls.filter(
-      (c) => c[0] === 'editor.document.v1',
-    );
-    expect(docCalls.length).toBe(1);
-    expect(docCalls[0]?.[1]).toBe('abc');
-    expect(api.status()).toBe('IDLE');
-    dispose();
-  });
-
-  it('UT-PR-008: init returns stored value', () => {
-    localStorage.setItem('editor.document.v1', 'restored');
-    const { api, dispose } = setup();
-    expect(api.init()).toBe('restored');
-    dispose();
-  });
-
-  it('UT-PR-009: init returns empty when key absent', () => {
-    const { api, dispose } = setup();
-    expect(api.init()).toBe('');
-    dispose();
-  });
-
-  it('UT-PR-010 / F-D21: large doc (>1MB) triggers toast once + sets notice key', async () => {
-    const { setText, dispose } = setup();
-    const huge = 'x'.repeat(1_000_001);
-    setText(huge);
-    await flushMicrotasks();
-
-    expect(toast.show).toHaveBeenCalledWith(t('doc.large'), 'info', 8000);
-    expect(localStorage.getItem('editor.notice.large-doc.v1')).toBe('1');
-    dispose();
-  });
-
-  it('UT-PR-011 / F-D21: large doc toast suppressed when notice key already set', async () => {
-    localStorage.setItem('editor.notice.large-doc.v1', '1');
-    const { setText, dispose } = setup();
-    const huge = 'x'.repeat(1_000_001);
-
-    setText(huge);
-    await flushMicrotasks();
-    setText(huge + 'y');
-    await flushMicrotasks();
-
-    expect(toast.show).not.toHaveBeenCalled();
-    dispose();
-  });
-
-  it('clear() also resets notice key (large-doc toast can fire again after clear)', async () => {
-    localStorage.setItem('editor.notice.large-doc.v1', '1');
-    const { api, setText, dispose } = setup();
-    api.clear();
-    expect(localStorage.getItem('editor.notice.large-doc.v1')).toBeNull();
-
-    const huge = 'x'.repeat(1_000_001);
-    setText(huge);
-    await flushMicrotasks();
-    expect(toast.show).toHaveBeenCalledWith(t('doc.large'), 'info', 8000);
-    dispose();
-  });
-
-  // ---------- readStoredDocument (static, no instance) ----------
-
-  it('readStoredDocument: returns stored value when key present', () => {
-    localStorage.setItem('editor.document.v1', 'restored-from-static');
-    expect(readStoredDocument()).toBe('restored-from-static');
-  });
-
-  it('readStoredDocument: returns empty string when key absent', () => {
-    expect(readStoredDocument()).toBe('');
-  });
-
-  it('readStoredDocument: returns empty when localStorage throws (privacy mode)', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new DOMException('disabled', 'SecurityError');
+  it('disable() stops debounced writes (nothing reaches IDB)', async () => {
+    const { createPersistence } = await freshStore();
+    const [text, setText] = createSignal('');
+    let api!: import('@/modules/m3-persistence/api').PersistenceAPI;
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      api = createPersistence(text);
     });
-    expect(readStoredDocument()).toBe('');
-  });
-
-  it('createPersistence init() equals readStoredDocument() (parity)', () => {
-    localStorage.setItem('editor.document.v1', 'parity-check');
-    const { api, dispose } = setup();
-    expect(api.init()).toBe(readStoredDocument());
-    expect(api.init()).toBe('parity-check');
-    dispose();
-  });
-
-  it('disable() stops debounced writes', async () => {
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
-    const { api, setText, dispose } = setup();
     api.disable();
     setText('x');
+    await sleep(650);
     await flushMicrotasks();
-    vi.advanceTimersByTime(500);
-    await flushMicrotasks();
+    expect(await idbDoc()).toBeUndefined();
+    dispose();
+  });
 
-    const docCalls = setItemSpy.mock.calls.filter(
-      (c) => c[0] === 'editor.document.v1',
-    );
-    expect(docCalls.length).toBe(0);
+  // ---------- clear (TBD-v11-5: IDB + legacy keys) ----------
+
+  it('UT-CLEAR-005: clear deletes IDB doc + leftover legacy keys', async () => {
+    localStorage.setItem(NOTICE_KEY, '1'); // leftover from v1.0
+    await seedIdb('# x');
+    const { createPersistence } = await freshStore();
+    const [text] = createSignal('');
+    let api!: import('@/modules/m3-persistence/api').PersistenceAPI;
+    let dispose!: () => void;
+    createRoot((d) => {
+      dispose = d;
+      api = createPersistence(text);
+    });
+    await api.clear();
+    expect(await idbDoc()).toBeUndefined();
+    expect(localStorage.getItem(NOTICE_KEY)).toBeNull();
+    expect(api.status()).toBe('IDLE');
     dispose();
   });
 });

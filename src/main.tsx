@@ -10,7 +10,7 @@ import { EditorArea } from '@/modules/m1-editor/EditorArea';
 import { PreviewArea } from '@/modules/m2-preview/PreviewArea';
 import {
   createPersistence,
-  readStoredDocument,
+  loadStoredDocument,
 } from '@/modules/m3-persistence/store';
 import type { PersistenceAPI } from '@/modules/m3-persistence/api';
 import { createTheme } from '@/modules/m6-theme/theme';
@@ -95,8 +95,8 @@ function AppShell(props: AppShellProps) {
 
   const onClear = () => {
     if (window.confirm(t('clear.confirm'))) {
-      props.editor.clear();
-      props.persist.clear();
+      props.editor.clear(); // 同步清 UI
+      void props.persist.clear(); // 异步删 IDB + 遗留 key（fire-and-forget）
     }
   };
 
@@ -183,25 +183,30 @@ function AppShell(props: AppShellProps) {
 
 const root = document.getElementById('root');
 if (root) {
-  // 启动序列（架构 v1.0 §4.1）：
-  //   1. readStoredDocument 静态读取（不依赖 reactive state）
-  //   2. createDocumentState(initial) — M1 SoT
-  //   3. createEditorAPI(state) — 对外契约（chrome 主动调 clear / setTextFromStorage）
-  //   4. createPersistence(state.text) — 订阅 text，debounce 500ms 写回
-  //   5. createTheme() — 三级 fallback + DOM 同步
-  //   6. render AppShell
+  // 启动序列（v1.1 异步 / api-spec v1.1 §2 / ADR-005 D4）：
+  //   1. createDocumentState('') — 先空（IDB 异步，首帧拿不到文档）
+  //   2. createEditorAPI / createPersistence(state.text) — 订阅 text debounce 写 IDB
+  //   3. 其余 chrome（theme / exporter / layout / prefs）同步装配
+  //   4. loadStoredDocument() 异步 hydrate（含一次性迁移）→ resolve 后 setTextFromStorage
+  //      （共识 TBD-v11-1 (a)：空 editor 闪现后填入；IDB 单 key 读通常 <50ms）
   //
-  // createPersistence / createTheme 内部都跑 createEffect，必须在 createRoot 内；
-  // render() 内部已包 createRoot，所以装配放在 render 的回调里。
+  // createPersistence / createTheme 内部跑 createEffect，须在 createRoot 内；
+  // render() 已包 createRoot，装配放回调里。
   render(() => {
-    const initial = readStoredDocument();
-    const state = createDocumentState(initial);
+    const state = createDocumentState('');
     const editor = createEditorAPI(state);
     const persist = createPersistence(state.text);
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
     const layout = createLayout();
     const prefs = createEditorPrefs();
+
+    // 异步还原（不阻塞首帧）。**竞争防护**：若用户在 hydrate 窗口（<50ms）内已
+    // 输入，state.text() 非空 → 不还原，避免 setTextFromStorage 覆盖用户输入（数据丢失）。
+    // 还原命中时 setText 会触发 persist effect 写回同值到 IDB（幂等无害）。
+    void loadStoredDocument().then((stored) => {
+      if (stored && state.text() === '') editor.setTextFromStorage(stored);
+    });
     return (
       <AppShell
         state={state}

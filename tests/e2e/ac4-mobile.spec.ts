@@ -1,4 +1,5 @@
 import { test, expect, devices } from '@playwright/test';
+import { resetStorage } from './_storage';
 
 test.describe('AC-4 移动端', () => {
   test('E2E-AC4-001: 320px iPhone SE — no horizontal scroll', async ({
@@ -9,7 +10,7 @@ test.describe('AC-4 移动端', () => {
     });
     const page = await context.newPage();
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
 
     const textarea = page.getByRole('textbox', { name: 'Markdown editor' });
@@ -34,7 +35,7 @@ test.describe('AC-4 移动端', () => {
     });
     const page = await context.newPage();
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
 
     const textarea = page.getByRole('textbox', { name: 'Markdown editor' });
@@ -73,7 +74,7 @@ test.describe('AC-4 移动端', () => {
     });
     const page = await context.newPage();
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
 
     // Edit

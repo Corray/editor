@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { resetStorage } from './_storage';
 
 test.describe('AC-6 主题', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
   });
 
@@ -37,7 +38,7 @@ test.describe('AC-6 主题', () => {
   }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     // Clear and reload so M6 readInitial picks up matchMedia
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
 
     const theme = await page.evaluate(

@@ -20,7 +20,7 @@ const EXPECTED_KEYS = [
   'tab.preview',
   'storage.quota',
   'storage.unavailable',
-  'doc.large',
+  'storage.degraded',
   'clipboard.ok',
   'clipboard.fail',
 ] as const;

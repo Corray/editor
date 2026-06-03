@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { resetStorage } from './_storage';
 
 test.describe('AC-5 性能（自动断言部分）', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
   });
 

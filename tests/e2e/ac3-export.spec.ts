@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { resetStorage } from './_storage';
 import { readFile } from 'node:fs/promises';
 
 test.describe('AC-3 导出', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await resetStorage(page);
     await page.reload();
   });
 

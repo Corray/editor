@@ -1,39 +1,121 @@
 import { createSignal, createEffect, on, type Accessor } from 'solid-js';
+import { openDB, type IDBPDatabase } from 'idb';
 import { debounce } from './debounce';
 import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
 import type { PersistenceAPI, SaveStatus } from './api';
 
-const KEY_DOC = 'editor.document.v1';
-const KEY_LARGE_NOTICE = 'editor.notice.large-doc.v1';
+/**
+ * M3 持久化 — IndexedDB 后端（ADR-005 / data-model v1.1）。
+ *
+ * - 主后端 IndexedDB（DB `editor` v1 / store `kv` / key `document`）
+ * - IDB 不可用（隐私模式 / 老浏览器）→ 降级 localStorage（共识 TBD-v11-3）
+ * - 首次加载迁移旧 `editor.document.v1` → IDB（先写后删幂等，TBD-v11-2）
+ * - 状态机 IDLE/DIRTY/SAVING/ERROR 保留（SAVING 现为真异步态）
+ */
+const DB_NAME = 'editor';
+const DB_VERSION = 1;
+const STORE = 'kv';
+const DOC_KEY = 'document';
+
+const LEGACY_DOC_KEY = 'editor.document.v1';
+const LEGACY_NOTICE_KEY = 'editor.notice.large-doc.v1';
+
 const DEBOUNCE_MS = 500;
 const ERROR_FALLBACK_MS = 5000;
-const LARGE_DOC_THRESHOLD = 1_000_000;
 
-/**
- * Module-level static read (does not require a PersistenceAPI instance).
- *
- * Use this from main.tsx **before** creating reactive state, breaking the
- * chicken-and-egg between `init()` and `createPersistence(text)` — see
- * api-spec §3.3.
- */
-export function readStoredDocument(): string {
+// --- IDB 连接（lazy + memoized）+ 可用性探测 ---
+let dbPromise: Promise<IDBPDatabase> | null = null;
+let idbUnavailable = false;
+let degradedNotified = false;
+
+function openEditorDb(): Promise<IDBPDatabase> {
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      },
+    });
+  }
+  return dbPromise;
+}
+
+/** 取 IDB；不可用（无 API / open 抛错，如 Firefox 隐私模式）→ null（调用方降级 localStorage）。 */
+async function tryGetDb(): Promise<IDBPDatabase | null> {
+  if (idbUnavailable) return null;
+  if (typeof indexedDB === 'undefined') {
+    idbUnavailable = true;
+    return null;
+  }
   try {
-    return localStorage.getItem(KEY_DOC) ?? '';
+    return await openEditorDb();
   } catch {
-    // privacy mode / storage disabled — treat as absent
-    return '';
+    idbUnavailable = true;
+    dbPromise = null;
+    return null;
+  }
+}
+
+function notifyDegradedOnce(): void {
+  if (degradedNotified) return;
+  degradedNotified = true;
+  toast.show(t('storage.degraded'), 'warn');
+}
+
+// --- localStorage fallback / legacy helpers ---
+/** raw 读（key 缺失 = null，用于区分"无旧数据"与"空字符串"）。 */
+function lsGetRaw(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function lsRemove(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // best-effort
   }
 }
 
 /**
- * Build a PersistenceAPI bound to a Solid text signal.
+ * 异步加载初始文档（替代 v1.0 同步 readStoredDocument）。
+ * 顺带跑一次性迁移（旧 localStorage → IDB，先写后删幂等）。
+ * 失败链：IDB 不可用 / 读错 → localStorage fallback → ''。
+ */
+export async function loadStoredDocument(): Promise<string> {
+  const db = await tryGetDb();
+  if (!db) {
+    notifyDegradedOnce();
+    return lsGetRaw(LEGACY_DOC_KEY) ?? '';
+  }
+  try {
+    const existing = await db.get(STORE, DOC_KEY);
+    if (typeof existing === 'string') return existing; // 已迁移 / 已有，幂等跳过
+
+    // IDB 空 → 迁移旧 localStorage（仅当 key 存在）
+    const legacy = lsGetRaw(LEGACY_DOC_KEY);
+    if (legacy !== null) {
+      await db.put(STORE, legacy, DOC_KEY); // 先写新
+      // put resolve = 写成功确认 → 删旧（不可逆前确认）
+      lsRemove(LEGACY_DOC_KEY);
+      lsRemove(LEGACY_NOTICE_KEY);
+      return legacy;
+    }
+    return ''; // 新用户
+  } catch {
+    // IDB 读 / 迁移失败 → 不删旧 key（数据不丢）→ fallback
+    return lsGetRaw(LEGACY_DOC_KEY) ?? '';
+  }
+}
+
+/**
+ * 构建 PersistenceAPI（异步后端）。须在 Solid reactive root 内调用。
  *
- * State machine per data-model v1.0 §5.2:
- *   IDLE ── text change ──→ DIRTY ── 500ms idle ──→ SAVING ── ok ──→ IDLE
- *                                                          └ err ──→ ERROR ── 5s ──→ IDLE
- *
- * Must be called inside a Solid reactive root (`createRoot` or component).
+ * 状态机（data-model v1.0 §5.2，SAVING 现为真异步态）：
+ *   IDLE ─text→ DIRTY ─500ms→ SAVING ─ok→ IDLE
+ *                                    └err→ ERROR ─5s→ IDLE
  */
 export function createPersistence(text: Accessor<string>): PersistenceAPI {
   const [status, setStatus] = createSignal<SaveStatus>('IDLE');
@@ -47,42 +129,43 @@ export function createPersistence(text: Accessor<string>): PersistenceAPI {
     }
   }
 
-  function performWrite(): void {
+  function enterError(): void {
+    setStatus('ERROR');
+    toast.show(t('storage.quota'), 'error');
+    clearErrorTimer();
+    errorTimer = setTimeout(() => {
+      errorTimer = null;
+      if (status() === 'ERROR') setStatus('IDLE');
+    }, ERROR_FALLBACK_MS);
+  }
+
+  async function performWrite(): Promise<void> {
     if (!enabled) return;
     setStatus('SAVING');
+    const value = text();
     try {
-      localStorage.setItem(KEY_DOC, text());
+      const db = await tryGetDb();
+      if (db) {
+        await db.put(STORE, value, DOC_KEY);
+      } else {
+        notifyDegradedOnce();
+        localStorage.setItem(LEGACY_DOC_KEY, value); // fallback（可能抛 quota）
+      }
       setStatus('IDLE');
     } catch {
-      // Treat any setItem throw as quota (the only realistic cause).
-      setStatus('ERROR');
-      toast.show(t('storage.quota'), 'error');
-      clearErrorTimer();
-      errorTimer = setTimeout(() => {
-        errorTimer = null;
-        if (status() === 'ERROR') setStatus('IDLE');
-      }, ERROR_FALLBACK_MS);
+      enterError();
     }
   }
 
   const debouncedWrite = debounce(performWrite, DEBOUNCE_MS);
 
-  function maybeNotifyLarge(value: string): void {
-    if (value.length <= LARGE_DOC_THRESHOLD) return;
-    if (localStorage.getItem(KEY_LARGE_NOTICE) === '1') return;
-    toast.show(t('doc.large'), 'info', 8000);
-    localStorage.setItem(KEY_LARGE_NOTICE, '1');
-  }
-
-  // Subscribe to text changes (defer: true skips initial run).
   createEffect(
     on(
       text,
-      (current) => {
+      () => {
         if (!enabled) return;
         clearErrorTimer();
         setStatus('DIRTY');
-        maybeNotifyLarge(current);
         debouncedWrite();
       },
       { defer: true },
@@ -90,13 +173,18 @@ export function createPersistence(text: Accessor<string>): PersistenceAPI {
   );
 
   return {
-    init: () => readStoredDocument(),
     status,
-    clear: () => {
+    clear: async () => {
       clearErrorTimer();
       debouncedWrite.cancel();
-      localStorage.removeItem(KEY_DOC);
-      localStorage.removeItem(KEY_LARGE_NOTICE);
+      try {
+        const db = await tryGetDb();
+        if (db) await db.delete(STORE, DOC_KEY);
+      } catch {
+        // best-effort；fallback / 遗留 key 仍清理
+      }
+      lsRemove(LEGACY_DOC_KEY);
+      lsRemove(LEGACY_NOTICE_KEY);
       setStatus('IDLE');
     },
     enable: () => {

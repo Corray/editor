@@ -34,7 +34,7 @@ export const zhCNDict = {
   // M3 persistence toast
   'storage.quota': '存储配额已满，无法保存',
   'storage.unavailable': '持久化不可用，请勿关闭页面',
-  'doc.large': '内容较长（>1MB），性能可能下降',
+  'storage.degraded': '已降级到基础存储，大文档可能受限',
 
   // M4 export toast
   'clipboard.ok': '已复制到剪贴板',

@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | **draft**（待 Decider 选库 D1 + 确认 D2~D5）|
+| **Status** | **accepted**（2026-06-03 Corray：D1 选 B `idb`+手写 fallback；D2~D5 提议确认）|
 | **Date** | 2026-06-03 |
 | **Decider** | FE (Corray) |
 | **Context** | 共识 v1.1（accepted）/ module-list M3 delta / 架构 §4.1 启动序列 |
@@ -40,7 +40,7 @@
 - **Pros:** localStorage-like 异步 API（getItem/setItem）；**内置自动降级** IDB→WebSQL→localStorage（直接满足 TBD-v11-3，零额外代码）
 - **Cons:** 较大（~8 KB gz `[推断]`）；为单文档场景引入多后端抽象偏重；WebSQL 分支已废弃属死代码
 
-### 倾向：**B (`idb`) + 手写 localStorage fallback**
+### 决策：**B (`idb`) + 手写 localStorage fallback**〔Decider accepted 2026-06-03〕
 单文档单 key 场景，idb 的 1KB + 10 行 fallback 比 localForage 8KB 抽象更轻、更可控，且 fallback 逻辑显式可测。**反例**：若未来要存多对象 / 复杂查询 / 想要零 fallback 代码，localForage (C) 的自动降级更省心 —— 届时可换。raw (A) 仅在"绝不加依赖"硬约束下选。
 
 > **第三方一手文档（research-first MUST）**：选定后 install 时核对 `idb` 官方 README 的 API 签名 + 实测 bundle gz；ADR References 附链接 + 访问日期。

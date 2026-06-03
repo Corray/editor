@@ -78,7 +78,7 @@ loadStoredDocument()
 
 | 入口 | 状态 | Issue / commit |
 |------|------|---------------|
-| `loadStoredDocument()` + 迁移 | ⏳ 待实现 | v1.1 |
-| `createPersistence` 异步写 IDB + fallback | ⏳ 待实现 | v1.1 |
-| `clear()` 异步 | ⏳ 待实现 | v1.1 |
-| main.tsx 启动序列重写 | ⏳ 待实现 | v1.1 |
+| `loadStoredDocument()` + 迁移 | ✓ 已实现（2026-06-03）| commit `5252add` — idb get + 先写后删幂等迁移；12 单测 + E2E-v11-001 |
+| `createPersistence` 异步写 IDB + fallback | ✓ 已实现 | commit `5252add` — idb put；IDB 不可用降级 localStorage + storage.degraded toast |
+| `clear()` 异步 | ✓ 已实现 | commit `5252add` — idb delete + 遗留 localStorage key 清理 |
+| main.tsx 启动序列重写 | ✓ 已实现 | commit `5252add` — 异步 hydrate（空闪现）+ 竞争防护（已输入不覆盖）|

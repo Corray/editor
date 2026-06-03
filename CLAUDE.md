@@ -124,7 +124,7 @@ standard_path: /Users/chat/backend-ai-workflow/agent-dev-standard
 - **框架** Solid.js 1.8+（ADR-003 accepted）
 - **部署目标** 🕒 推迟（ADR-004 deferred；MVP 实现期不出 deploy.yml；release 前重启，待 PUBLIC / Pro / Vercel 三选一）
 - **构建工具** Vite，**状态管理** Solid Signals 原生，**CSS** Variables + BEM，**测试** Vitest + Playwright
-- **持久化策略** localStorage（MVP）→ IndexedDB（v1.1+）
+- **持久化策略** ~~localStorage（MVP）~~ → **IndexedDB（v1.1 已实现，commit `5252add`；旧 localStorage 自动迁移 + 不可用降级）**
 
 ### 反哺记录（spec-to-code-flow 实现层反馈到 spec 层）
 
@@ -227,3 +227,4 @@ standard 三通道默认假设多角色协作；本项目按下表豁免，audit
 | 2026-06-02 | #15 BHV-003 推进 → **umbrella #15 全 resolved 可关闭**：跑通 perf bench 三项（Lighthouse 92 / input→preview 34ms / bundle 64.26KB gz）落 docs/perf/baseline-v0.1.0.md；新增 `scripts/check-bundle-size.mjs` + deploy.yml `pnpm size` 闸 + E2E-AC5-002。scope=尊重 TBD-T1（Lighthouse CI 仍 v1.1），只加轻量 bundle 闸。full e2e 31 pass/1 skip |
 | 2026-06-02 | #16 根治 commit-hash 占位（IPR-T-001 二次复发：amend 自引用变体）→ **umbrella #16 可关闭**：机械闸 `scripts/check-doc-hashes.mjs`（`pnpm check:hashes`）扫文档 `commit \`<hash>\`` 逐个 `git rev-parse --verify`，接入 deploy.yml（fetch-depth:0）；FB-002 candidate→applied / PP-002 remediation v2（加机械闸+顺序铁律）。IPR-001 由 PR-001 永久接受 → dismissed |
 | 2026-06-02 | #14 tech-debt → **umbrella #14 可关闭（v0.1.0 audit 三 umbrella 全清）**：GAP-002 删 `getRootElement` 声明（零消费方，消除契约 drift）；API-T-001 toast console stub → 真 DOM UI（lazy-mount + 自动消失 + 动画 + aria-live，无 lib，接口冻结，7 单测）。api-spec §3.2/5.5/§4.1 同步反哺 |
+| 2026-06-03 | **v1.1 启动 + 实现**：scope=持久化 localStorage→IndexedDB（解 R2 配额）。走完 spec-to-code-flow：共识 v1.1（TBD-v11-1~5 accept）→ module-list M3 delta → ADR-005（D1=idb+手写 fallback）→ api/data-model/test-plan v1.1 → 实现 commit `5252add`。idb@8.0.3 + fake-indexeddb；异步契约 + 一次性迁移（先写后删幂等）+ 不可用降级 + 启动异步 hydrate（竞争防护）；bundle 66.1KB gz；unit 120 + e2e 33 全绿 |

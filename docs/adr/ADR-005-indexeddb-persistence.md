@@ -104,4 +104,7 @@ const persist = createPersistence(state.text)
 ## References
 
 - 共识 v1.1 TBD-v11-1~5
-- （待补）`idb` / `localForage` 官方文档链接 + 访问日期（选定后 install 时附）
+- `idb` v8.0.3（github.com/jakearchibald/idb）—— API 对照已安装包 `node_modules/idb/build/entry.d.ts` 核实（2026-06-03）：`openDB(name,version,{upgrade})` / `db.get(store,key)` / `db.put(store,value,key)` / `db.delete(store,key)`
+- **实测 bundle 影响**：idb 引入后 64.64 → 66.08 KB gz（+~1.5KB；ADR 估 ~1KB 略低）；远低于 150KB 闸
+- `fake-indexeddb` v6.2.5（dev）—— jsdom 无 IDB，单测用 `fake-indexeddb/auto` + `new IDBFactory()` per-test 隔离
+- 实现 commit `5252add`

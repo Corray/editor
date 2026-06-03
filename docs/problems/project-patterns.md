@@ -51,17 +51,19 @@
   1. **jsdom 平台 API 缺**：URL.createObjectURL / Blob.text() / textarea.spellcheck IDL / matchMedia 等 → 必须 stub 或绕路
   2. **Solid effect microtask + setTimeout fake timer 双时间轴**：单独 flush 才能让状态机推进
   3. **vi.fn() 类型推断窄于 ReturnType<typeof vi.fn>**：变量类型用 `Mock<any[], unknown>` 但 init 写法导致 narrow 推断 → 改 `.mockReturnValue()` 模式
-  4. **Playwright mobile device emulation 在 Vite dev server 不稳定**：mobile-safari project page.goto 30s 超时 → 暂禁
+  4. **Playwright full 并行 suite page.goto 30s 超时 / 延迟膨胀**：根因 = **并行 worker CPU 竞争**（8 核 default workers 饱和），非 dev-server / webkit-mobile-UA（2026-06-03 重定性，commit `b840aeb`；换 vite preview 未解决，限 `workers:CI?1:2` + `navigationTimeout:60s` 才稳）。CI 稳因 workers:1。先前归因 mobile-safari / dev-server / Playwright 版本均被 confounded
 - **危害**：testing 阶段反复中断节奏，但实际不影响业务正确性 — 是 infrastructure noise
 - **remediation**：
   - 新模块单测开始前先 quick check：测试目标 API 是否依赖 jsdom 不实现的接口？
   - 平台 API stub 时用 `as unknown as typeof X` 双跳 cast 而非 `as any`
   - Solid 测试 setup helper 标准化：`setup() { createRoot(...); return { dispose }; }`
   - Playwright 跨浏览器：`test.skip(browserName !== 'chromium', '...')` 适用任何 chromium-specific 权限
+  - **Playwright 本地并发**：`workers: CI?1:2` + `navigationTimeout:60s` —— page.goto 超时先怀疑 worker 竞争（CPU 饱和），别先归因 server/engine；e2e 跑真实 build 产物用 `vite preview` webServer（base 严格 → `goto('./')`）
 - **实例**：
   - #6 spellcheck enumerated 不是 boolean → 用 `"false"` 字符串 + `getAttribute`
   - #9 Blob.text() 不可用 → 拦截 Blob constructor
-  - #10 mobile-safari 30s 超时 → 注释 + TODO follow-up
+  - #10 mobile-safari 30s 超时 → 注释（后 2026-06-03 重定性为 worker 竞争，commit `b840aeb`）
+  - 2026-06-03 release 补跑：full 并行 suite flaky（page.goto 30s + 延迟 225ms）→ 限 workers 后 3× 连跑确定性 31/1
   - #2 / #5 fake timers + flushMicrotasks
 - **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选
 

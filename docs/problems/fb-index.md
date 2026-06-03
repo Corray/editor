@@ -96,8 +96,8 @@
 - **severity**: low
 - **status**: candidate
 - **occurrences**: 1
-- **guidance**: standard playwright.config.ts 模板 default 注释掉 mobile-safari (`devices['iPhone 14 Pro']`) project + TODO 推荐用 `vite preview` 替代 `vite dev` 作为 webServer（更接近生产 + 避免 dev HMR client 触发的 mobile UA navigation 卡顿）
-- **scan_when**: 新项目 playwright 配置初始化时
+- **guidance**: ⚠ 根因 2026-06-03 重定性（见 FB 文件）：page.goto 30s 超时主因是**并行 worker CPU 竞争**（非 dev-server / webkit-mobile-UA）；换 vite preview 未解决，限 `workers`（CI?1:N）+ `navigationTimeout:60s` 才解决。教训：导航超时先怀疑并发度，别先归因 server/engine/版本。preview 仍建议（production fidelity）但非 flake fix
+- **scan_when**: 新项目 playwright 配置初始化时；e2e 出现 page.goto 超时 flake 时（先查 workers / 机器负载）
 - **related**: PP-003
 - **upstream_issue**: declined-await-2nd-occurrence (评估 2026-05-22；项目强相关 + root cause 未清 — Playwright/Vite/webkit 三方互动 bug 未排查；workaround 已落定 chromium + iPhone SE context；触发条件 = 第 2 个 Vite + Playwright 项目复现 或 root cause 定性为 standard 可修)
 

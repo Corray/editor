@@ -104,9 +104,22 @@ webServer: {
 - **backlog Issue #15** — deferred-feature umbrella，BHV-004 触发条件归集
 - **Issue #10** — E2E 跑通 commit `f03e170`，首例发现
 
+## 根因重定性（2026-06-03 / commit `b840aeb` / 重要更正）
+
+**原 FB-005 三个假设（dev-server HMR / pre-bundling / webkit-mobile-UA）方向错了。** 补跑 v0.1.1 release 数字时，同一个 `page.goto 30s 超时` 在 **Desktop webkit + Desktop chromium**（非 mobile）上复现，且：
+
+1. **换 `vite preview`（FB-005 原"未验证假设"）并未解决** —— preview webServer 下 full 并行 suite 仍 2 failed（page.goto 30s + 延迟膨胀）。证伪"dev-server 编译/HMR 是根因"。
+2. **真正根因 = 并行 worker CPU 竞争**：8 核机器 default `workers`（≈全核）并行跑 webkit+chromium 重导航 + 1000 行渲染 → CPU 饱和 → 导航超时 + `input→preview` 延迟从 idle 34ms 膨胀到 225ms。
+3. **CI 一直稳，正因 `workers: 1`（串行无竞争）** —— 这条之前被忽略的事实是关键反证。
+4. **fix（已验证 3× 连跑确定性 31 pass/1 skip）**：`workers: CI?1:2` + `use.navigationTimeout: 60s` + 放宽负载敏感的 perf bound。preview 改动保留（测真实 build 产物，production fidelity），但**它不是 flake fix**。
+
+**对 BHV-004 的回溯影响**：之前判"mobile-safari 超时随 Playwright 1.60 升级消失"可能被 confounded —— 当时验证 BHV-004 是小批量/隔离跑（低竞争）才过，未必是版本修复。更可能 mobile-safari 原超时也含竞争成分。未做隔离对照，标 `[推断]`。
+
+**教训**：page.goto 30s 超时优先怀疑**并发竞争**（先看 workers / 机器负载），不要先归因 server 类型 / engine / 版本。FB-005 原假设全部跳过了"测自身并发度"这个最廉价的对照。
+
 ## 升级路径
 
-- **当前**: candidate；occurrences = 1，单项目实证
+- **当前**: candidate；occurrences = 1，单项目实证（根因已于 2026-06-03 重定性为 worker 竞争）
 - **observing 阈值**: 第 2 个 Vite + Playwright + mobile-safari 项目复现 → `occurrences = 2`
 - **applied**: standard playwright preset / install 模板补默认配置 + scan_when 检查项 → 标 `applied`
 - **verified**: applied 后新项目首次 playwright init 即避开此坑（不需手动排查）→ 标 `verified`

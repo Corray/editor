@@ -58,12 +58,12 @@
   - 平台 API stub 时用 `as unknown as typeof X` 双跳 cast 而非 `as any`
   - Solid 测试 setup helper 标准化：`setup() { createRoot(...); return { dispose }; }`
   - Playwright 跨浏览器：`test.skip(browserName !== 'chromium', '...')` 适用任何 chromium-specific 权限
-  - **Playwright 本地并发**：`workers: CI?1:2` + `navigationTimeout:60s` —— page.goto 超时先怀疑 worker 竞争（CPU 饱和），别先归因 server/engine；e2e 跑真实 build 产物用 `vite preview` webServer（base 严格 → `goto('./')`）
+  - **Playwright 本地并发**：`workers: CI?1:2` + `navigationTimeout:60s` —— page.goto 超时先怀疑 worker 竞争（CPU 饱和），别先归因 server/engine。（preview webServer 试过又回退 `19226c6` —— 非 flake fix，dev 无 per-run build 更快）
 - **实例**：
   - #6 spellcheck enumerated 不是 boolean → 用 `"false"` 字符串 + `getAttribute`
   - #9 Blob.text() 不可用 → 拦截 Blob constructor
   - #10 mobile-safari 30s 超时 → 注释（后 2026-06-03 重定性为 worker 竞争，commit `b840aeb`）
-  - 2026-06-03 release 补跑：full 并行 suite flaky（page.goto 30s + 延迟 225ms）→ 限 workers 后 3× 连跑确定性 31/1
+  - 2026-06-03 release 补跑：full 并行 suite flaky（page.goto 30s + 延迟 225ms）→ 限 workers 后 3× 连跑确定性 31/1（preview webServer 试过非 fix 已回退 `19226c6`）
   - #2 / #5 fake timers + flushMicrotasks
 - **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选
 

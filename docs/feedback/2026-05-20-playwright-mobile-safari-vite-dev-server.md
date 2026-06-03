@@ -111,7 +111,7 @@ webServer: {
 1. **换 `vite preview`（FB-005 原"未验证假设"）并未解决** —— preview webServer 下 full 并行 suite 仍 2 failed（page.goto 30s + 延迟膨胀）。证伪"dev-server 编译/HMR 是根因"。
 2. **真正根因 = 并行 worker CPU 竞争**：8 核机器 default `workers`（≈全核）并行跑 webkit+chromium 重导航 + 1000 行渲染 → CPU 饱和 → 导航超时 + `input→preview` 延迟从 idle 34ms 膨胀到 225ms。
 3. **CI 一直稳，正因 `workers: 1`（串行无竞争）** —— 这条之前被忽略的事实是关键反证。
-4. **fix（已验证 3× 连跑确定性 31 pass/1 skip）**：`workers: CI?1:2` + `use.navigationTimeout: 60s` + 放宽负载敏感的 perf bound。preview 改动保留（测真实 build 产物，production fidelity），但**它不是 flake fix**。
+4. **fix（已验证 3× 连跑确定性 31 pass/1 skip）**：`workers: CI?1:2` + `use.navigationTimeout: 60s` + 放宽负载敏感的 perf bound。preview 改动**已回退**（commit `19226c6`）—— 它非 flake fix，且 dev webServer 无 per-run build 更快（dev+workers 3× 跑 48s/49s/33s vs preview+build 1.9m/1.3m/55s）。
 
 **对 BHV-004 的回溯影响**：之前判"mobile-safari 超时随 Playwright 1.60 升级消失"可能被 confounded —— 当时验证 BHV-004 是小批量/隔离跑（低竞争）才过，未必是版本修复。更可能 mobile-safari 原超时也含竞争成分。未做隔离对照，标 `[推断]`。
 

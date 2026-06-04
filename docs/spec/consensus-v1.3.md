@@ -2,12 +2,15 @@
 
 > v1.0 共识增量 delta（路线图 "v1.1" 遗留的渲染插件项）。仅描述本次行为变化，前序条款不变。
 >
-> **状态：** `draft`（待 PM 评审 TBD-v13-1~5）
+> **状态：** `draft`（TBD-v13-1 已决 **(b) 先 KaTeX，Mermaid 推 v1.4**；v13-2~5 待确认，已按 KaTeX-only 重构）
 > **flow 位置：** v1.3 入口（共识）→ module-list M2 delta → 架构 + ADR-007 → api+data-model+test-plan delta → 实现
 > **命名：** semver tag 将是 **v0.4.0**（同先例）。
+>
+> **scope 收窄（2026-06-04 降风险）：** 本版**仅 KaTeX 公式**；Mermaid（异步 + SVG sanitize 大头风险）**推迟 v1.4**。张力 A（异步管线）基本消解（KaTeX 同步，仅一次性懒加载异步）；张力 B（安全）缩小为放行 KaTeX MathML/HTML（非任意 SVG）。
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.3-draft2 | 2026-06-04 | TBD-v13-1=(b) 先 KaTeX；Mermaid→v1.4；按 KaTeX-only 重构 v13-2~5 |
 | v1.3-draft | 2026-06-04 | Mermaid + KaTeX 懒加载；5 TBD 待 accept |
 
 ---
@@ -35,24 +38,21 @@ KaTeX 输出含特定 HTML/MathML 标签+类；Mermaid 输出 SVG（含 `foreign
 
 ## 3. 待确认项（TBD-v13-x；"做什么"层，HOW 在 ADR-007）
 
-### TBD-v13-1 — 范围：两个都做 vs 先一个
-- **(a) Mermaid + KaTeX 都做**〔AI 倾向，scope 既定〕
-- (b) 先 KaTeX（同步、不破管线、风险小），Mermaid 推迟 v1.4
+### TBD-v13-1 — 范围 ✅ 已决 **(b) 先 KaTeX，Mermaid 推迟 v1.4**
+〔2026-06-04 Corray 降风险拍板〕本版仅 KaTeX 公式。Mermaid（异步 + SVG sanitize 大头风险）单列 v1.4。下面 v13-2~5 已按 KaTeX-only 重构。
 
-**AI 倾向 (a)** 但**强烈建议考虑 (b) 作为降风险路径**：KaTeX 同步 + sanitize 面小（MathML/HTML），Mermaid 异步 + SVG sanitize 是大头风险。若要稳，(b) 先落 KaTeX。反例：scope 已定"渲染增强"含两者，(a) 一次到位。**这条请你重点拍。**
+### TBD-v13-2 — KaTeX 懒加载后的渲染衔接（张力 A 已消解为一次性 load）
+KaTeX 渲染**同步**，唯一异步是首次遇公式时**动态 import 插件**（一次性）。
+- **(a) 同步基底即时出 markdown；首次检测到 math 且插件未载 → 异步 load → load 完成后 re-render（公式从 raw `$...$` 闪现为渲染态，仅首次）**〔AI 倾向〕
+- (b) 不懒加载，KaTeX 进首屏 bundle → render 全程同步无闪现（但破 150KB 闸，见 v13-4）
 
-### TBD-v13-2 — 预览管线异步化（张力 A）
-- **(a) 管线整体支持异步：同步渲染 markdown + KaTeX 先出，Mermaid 块先占位（"渲染中"）→ 异步 render 完成替换**〔AI 倾向〕
-- (b) 全异步 render（含 markdown）→ 首帧延迟
-- (c) 只做 KaTeX（同步），不引入异步（= 退化为 TBD-v13-1 (b)）
+**AI 倾向 (a)**：保持 markdown 同步即时；KaTeX 插件一次性懒加载 + load 后 re-render。无 Mermaid 那种 per-block 异步/占位/竞态复杂度——仅一个"插件是否已加载"的模块级状态 + 加载完触发一次 re-render。反例：首次出现公式有一次"raw→渲染"闪现（<一次 import 时间）。
 
-**AI 倾向 (a)**：markdown + KaTeX 同步即时出，仅 Mermaid 占位异步填充，体验最好；M2 从"纯同步 memo"扩为"同步基底 + 异步增强"。反例：异步替换需管理"渲染中→完成/失败"态 + 防竞态（文本又变了）。
+### TBD-v13-3 — sanitize 策略（张力 B，安全；范围缩小为 KaTeX MathML/HTML）
+- **(a) 仍 DOMPurify 二次 sanitize，配置放行 KaTeX 输出的安全子集（MathML `<math>`/`<semantics>`/… + `<span class=katex>` 结构）；不放行任意 SVG/script/事件属性**〔AI 倾向〕
+- (b) 对 KaTeX 输出跳过 sanitize → **拒绝**（破 XSS 红线）
 
-### TBD-v13-3 — sanitize 策略（张力 B，安全红线）
-- **(a) 保持 DOMPurify 二次 sanitize，配置放行 KaTeX(MathML/HTML) + Mermaid(SVG) 的安全子集；Mermaid 用 `securityLevel:'strict'`；不输出未 sanitize 的 SVG**〔AI 倾向〕
-- (b) 对 mermaid/katex 输出跳过 sanitize（信任库）→ **拒绝**（破 XSS 红线）
-
-**AI 倾向 (a)**：双保险不破——markdown 链路仍默认严格 sanitize；KaTeX/Mermaid 输出走**受控放行**（DOMPurify SVG/MathML profile + 库自身 securityLevel）。**此项必须人工 security review**（标 `[SECURITY REVIEW REQUIRED]`）；具体 allowlist/profile 在 ADR-007。反例：放行 SVG 仍有残余面（foreignObject / use / 事件属性），需 ADR 精确界定。
+**AI 倾向 (a)**：双保险不破——markdown 链路仍默认严格 sanitize；KaTeX 输出走**受控放行**（MathML/HTML 子集，**不含 SVG/foreignObject**，比含 Mermaid 时安全面小得多）。**仍需人工 security review**（标 `[SECURITY REVIEW REQUIRED]`）；具体 allowlist 在 ADR-007（含验证：KaTeX 输出不含可执行向量）。反例：MathML 历史上也有过 XSS（`<maction>` 等），需 ADR 精确界定放行集 + 测恶意 `$...$` 注入。
 
 ### TBD-v13-4 — 懒加载触发
 - **(a) 内容含 mermaid 块 / math 语法时才动态 import 对应库**〔AI 倾向〕— 首屏不含 mermaid(~大)/katex(+CSS)，Vite code-split chunk
@@ -72,20 +72,19 @@ KaTeX 输出含特定 HTML/MathML 标签+类；Mermaid 输出 SVG（含 `foreign
 
 | 节点 | 产物 | 触点 |
 |------|------|------|
-| module-list | M2 渲染管线 delta（+异步 + 插件挂载）| §M2 |
-| 架构 + **ADR-007** | 插件选型（mermaid / katex 插件）+ 异步渲染设计 + **DOMPurify 放行 profile（安全核心）** + 懒加载 code-split | L3 + security |
-| api-spec delta | M2 render 契约：同步 → 同步基底 + 异步 Mermaid（PreviewArea 渲染态）| 契约 |
-| test-plan delta | 家族：`内容(纯md / +katex / +mermaid / 混合 / 恶意 SVG·math XSS) × 加载(懒加载首次/已载) × 异步态(占位/完成/失败/竞态)`；**XSS 矩阵必扩**（mermaid SVG / katex 注入）| 覆盖 |
+| module-list | M2 渲染管线 delta（+KaTeX 插件挂载 + 懒加载 + load 后 re-render）| §M2 |
+| 架构 + **ADR-007** | KaTeX 插件选型（markdown-it-katex 类）+ **DOMPurify KaTeX 放行 allowlist（安全核心）** + 懒加载 code-split + KaTeX CSS | L2-L3 + security |
+| api-spec delta | M2 render 契约：保持同步基底；新增"KaTeX 插件懒加载 + 加载完 re-render"衔接 | 契约 |
+| test-plan delta | 家族：`内容(纯md / +inline math / +block math / 混合 / 含 $ 非公式 / 恶意 $ 注入) × 加载(懒加载首次/已载)`；**XSS 矩阵扩 KaTeX/MathML 注入** | 覆盖 |
 
 ---
 
 ## 5. 验收条件（v1.3 新增 AC，待 test-plan 细化）
 
-- AC-v13-1：` ```mermaid ` 流程图 → 预览渲染出图（懒加载，占位→完成）
-- AC-v13-2：`$E=mc^2$` / `$$...$$` → 渲染数学公式
-- AC-v13-3：纯文本/普通 markdown 文档 → **不加载** mermaid/katex（首屏 bundle 不变，<150KB 闸）
-- AC-v13-4：**恶意 mermaid/katex 输入**（SVG `<script>` / `onerror` / foreignObject / katex 注入）→ sanitize 后无脚本执行（XSS 红线，security review）
-- AC-v13-5：Mermaid 渲染失败（语法错）→ 友好降级（错误提示，不崩）
-- AC-v13-6：文本在 Mermaid 异步渲染中又变更 → 不串图（防竞态）
+- AC-v13-1：`$E=mc^2$`（inline）/ `$$...$$`（block）→ 预览渲染出数学公式
+- AC-v13-2：纯文本/普通 markdown 文档 → **不加载** KaTeX（首屏 bundle 不变，<150KB 闸）
+- AC-v13-3：**恶意 `$...$` 注入**（试图经 KaTeX/MathML 注入 script / 事件属性 / 危险标签）→ sanitize 后无脚本执行（XSS 红线，security review，发布门槛）
+- AC-v13-4：首次出现公式 → 懒加载插件 → load 后公式渲染（raw→渲染 仅首次闪现，可接受）
+- AC-v13-5：非公式文本含 `$`（如 "$5 和 $10"）→ 不误判为公式（KaTeX 插件转义/双 `$` 规则，TBD-v13-5）
 
-> 待 TBD-v13-1~5 accept 后细化进 test-plan delta；AC-v13-4 是发布门槛（安全）。
+> Mermaid 相关 AC 随 Mermaid 推迟 v1.4。AC-v13-3 是发布门槛（安全）。待 v13-2~5 accept 后细化进 test-plan delta。

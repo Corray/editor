@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | **draft**（待 Decider 选 D1 SVG sanitize 方案 + 确认 D2~D5；D1 security review）|
+| **Status** | **accepted**（2026-06-04：D1=C profile+显式 FORBID foreignObject/事件；D2~D5 提议；D1 实现时 security review）|
 | **Date** | 2026-06-04 |
 | **Decider** | FE (Corray) |
 | **Context** | 共识 v1.4（accepted）/ module-list M2 delta / ADR-002 sanitize 红线 / ADR-007 (KaTeX 懒加载范式) |
@@ -38,7 +38,7 @@
 - **Pros:** 用维护良好的 profile（不漂移）+ 显式禁 foreignObject/事件属性（堵 strict 万一回退的面）；profile 修 CVE + 项目加固双层
 - **Cons:** 仍带 profile 的较宽基线（但 FORBID 收口关键面）
 
-### 倾向：**C（profile + 显式 FORBID foreignObject/事件）**
+### 决策：**C（profile + 显式 FORBID foreignObject/事件）**〔Decider accepted 2026-06-04〕
 不手卷（避免 mermaid 版本漂移导致图破）+ 显式堵 foreignObject（XSS 大头）/ 事件属性。与 securityLevel:strict 三层叠加。**必须人工 security review**：跑恶意 mermaid（图定义注入 `<script>`/`onerror`/foreignObject/外链 `<use href>`/`<image href=javascript>`）→ DOM 级断言无执行。具体 FORBID 清单实现时定稿。反例：profile 基线宽于手卷 (B)，若审出 profile 放行了不该放的，再收紧。
 
 > research-first：选定后核 DOMPurify svg profile 实际放行集 + mermaid strict 输出元素 + 恶意注入测试。

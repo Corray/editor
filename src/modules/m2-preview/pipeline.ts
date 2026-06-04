@@ -10,6 +10,27 @@ const MD_OPTS = {
 
 /** 基底渲染器（无 KaTeX）—— KaTeX 未懒加载时用。 */
 const baseMd = new MarkdownIt(MD_OPTS);
+installMermaidFence(baseMd);
+
+/**
+ * 给 markdown-it 装 ` ```mermaid ` fence 规则：同步输出**占位** div（不在 render 里
+ * 异步）。源文 escapeHtml 后存 data-mermaid，PreviewArea 异步逐块渲染替换（ADR-008 D2）。
+ * 占位本身（div + class + data-*）过 render 的 DOMPurify 无害。
+ */
+function installMermaidFence(md: MarkdownIt): void {
+  const defaultFence =
+    md.renderer.rules.fence ??
+    ((tokens, idx, opts, _env, self) => self.renderToken(tokens, idx, opts));
+  md.renderer.rules.fence = (tokens, idx, opts, env, self) => {
+    const token = tokens[idx];
+    if (token && token.info.trim() === 'mermaid') {
+      // 源文作占位 div 的**文本内容**（escaped）—— 文本永远过 sanitize（安全），
+      // 比 data-* 属性更稳（不依赖 ALLOW_DATA_ATTR）。PreviewArea 读 textContent。
+      return `<div class="mermaid-pending">${md.utils.escapeHtml(token.content)}</div>`;
+    }
+    return defaultFence(tokens, idx, opts, env, self);
+  };
+}
 
 /** 挂了 KaTeX 插件的渲染器；懒加载完成后赋值（ADR-007 D3）。 */
 let katexMd: MarkdownIt | null = null;
@@ -58,9 +79,70 @@ export function ensureKatex(): Promise<void> {
         output: 'html',
         trust: false,
       });
+      installMermaidFence(katexMd); // katex 渲染器也要认 mermaid fence
     })();
   }
   return loadPromise;
+}
+
+// —— Mermaid（v1.4 / ADR-008）——
+
+let mermaidMod: typeof import('mermaid').default | null = null;
+let mermaidLoad: Promise<void> | null = null;
+let mermaidTheme: 'default' | 'dark' = 'default';
+let mermaidSeq = 0;
+
+/** 文本是否含 ` ```mermaid ` 代码块（决定是否懒加载 mermaid）。 */
+export function hasMermaid(markdown: string): boolean {
+  return /(^|\n)```mermaid\b/.test(markdown);
+}
+
+/**
+ * 一次性懒加载 mermaid（动态 import，memoized / ADR-008 D4）+ initialize
+ * （securityLevel:'strict' + htmlLabels:false 砍 foreignObject；theme 跟随 M6）。
+ * theme 变化时重 initialize（已存图由 PreviewArea 代次令牌触发重渲染）。
+ */
+export async function ensureMermaid(theme: 'default' | 'dark'): Promise<void> {
+  if (!mermaidLoad) {
+    mermaidLoad = (async () => {
+      const mod = await import('mermaid');
+      mermaidMod = mod.default;
+      mermaidMod.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        htmlLabels: false,
+        theme,
+      });
+      mermaidTheme = theme;
+    })();
+  }
+  await mermaidLoad;
+  if (mermaidMod && theme !== mermaidTheme) {
+    mermaidMod.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      htmlLabels: false,
+      theme,
+    });
+    mermaidTheme = theme;
+  }
+}
+
+/**
+ * 渲染单个 mermaid 源 → **sanitized** SVG。失败抛错（调用方 catch 显错占位）。
+ *
+ * [SECURITY REVIEW REQUIRED] 三层 sanitize（ADR-008 D1）：
+ *   1. mermaid securityLevel:'strict'（库内 sanitize）
+ *   2. htmlLabels:false（标签走 SVG text，不产 foreignObject）
+ *   3. DOMPurify SVG profile + 显式 FORBID foreignObject（堵 XSS 大头；事件属性/js: URL 默认剥离）
+ */
+export async function renderMermaid(src: string): Promise<string> {
+  if (!mermaidMod) throw new Error('mermaid not loaded');
+  const { svg } = await mermaidMod.render(`mmd-${++mermaidSeq}`, src);
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    FORBID_TAGS: ['foreignObject', 'script'],
+  });
 }
 
 /**

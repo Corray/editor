@@ -8,6 +8,7 @@ const EXPECTED_KEYS = [
   'app.title',
   'preview.placeholder',
   'render.fail',
+  'mermaid.error',
   'clear.button',
   'clear.confirm',
   'download.button',

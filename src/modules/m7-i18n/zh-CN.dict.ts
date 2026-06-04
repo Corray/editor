@@ -14,6 +14,7 @@ export const zhCNDict = {
   // M2 preview
   'preview.placeholder': '在左侧输入 Markdown，这里会显示预览',
   'render.fail': '渲染失败',
+  'mermaid.error': '图渲染失败（请检查 mermaid 语法）',
 
   // chrome buttons
   'clear.button': '清空',

@@ -24,6 +24,14 @@ const EXPECTED_KEYS = [
   'storage.loadError',
   'clipboard.ok',
   'clipboard.fail',
+  'share.button',
+  'import.button',
+  'share.ok',
+  'share.tooLarge',
+  'share.linkInvalid',
+  'share.overwrite.confirm',
+  'import.overwrite.confirm',
+  'import.readFail',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

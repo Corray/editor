@@ -40,6 +40,16 @@ export const zhCNDict = {
   // M4 export toast
   'clipboard.ok': '已复制到剪贴板',
   'clipboard.fail': '复制失败，请手动选择预览区内容复制',
+
+  // M4 share / import (v1.2)
+  'share.button': '分享',
+  'import.button': '导入',
+  'share.ok': '分享链接已复制（含明文内容，勿分享敏感信息）',
+  'share.tooLarge': '文档过大，无法生成分享链接，请改用下载 .md',
+  'share.linkInvalid': '分享链接无效或不受支持',
+  'share.overwrite.confirm': '打开分享内容将替换当前文档，是否继续？',
+  'import.overwrite.confirm': '导入将替换当前文档，是否继续？',
+  'import.readFail': '文件读取失败',
 } as const;
 
 export type DictKey = keyof typeof zhCNDict;

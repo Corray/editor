@@ -2,13 +2,14 @@
 
 > v1.0 共识的增量 delta（路线图 PRD §153 / architecture §249 的 v1.2 里程碑）。仅描述本次行为变化，v1.0/v1.1 其余条款不变。
 >
-> **状态：** `draft`（待 PM 评审 TBD-v12-1~5）
-> **spec-to-code-flow 位置：** v1.2 入口节点（共识）→ 评审通过后 module-list delta → 架构 + ADR-006 → api+data-model delta → test-plan delta → 实现
+> **状态：** `accepted`（2026-06-04 Corray 全盘接受 TBD-v12-1~5 的 AI 倾向 (a)）
+> **spec-to-code-flow 位置：** 共识 ✓ accepted → **module-list delta** → 架构 + ADR-006 → api+data-model delta → test-plan delta → 实现
 > **命名：** 路线图称 "v1.2"；按 semver 将作为 tag **v0.3.0** 发布（同 v1.1→v0.2.0 先例）。
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
-| v1.2-draft | 2026-06-04 | URL 分享 + 导入 .md；5 条 TBD 待 accept |
+| v1.2 | 2026-06-04 | URL 分享 + 导入 .md；TBD-v12-1~5 全 accept (a)：压缩+超限拒绝 / hash fragment / 打开链接非空 confirm / 导入非空 confirm / 隐私明文 toast |
+| v1.2-draft | 2026-06-04 | 初稿，5 TBD 待 accept |
 
 ---
 

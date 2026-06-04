@@ -97,19 +97,22 @@
 | **错误处理** | 写失败 → toast；**〔v1.1〕IDB 不可用（隐私模式/老浏览器）→ 降级 localStorage + toast（共识 TBD-v11-3）** |
 | **不做** | 不做云同步（v2.0）/ 不做多文档（v1.2+）/ ~~不做 IndexedDB~~（〔v1.1〕已纳入）|
 
-### M4 导出
+### M4 导入 / 导出 I/O〔v1.2 职责扩，原「导出」〕
 
 | 维度 | 内容 |
 |------|------|
-| **核心职责** | 提供下载 .md 文件 + 复制 HTML 到剪贴板两个操作 |
-| **输入** | M1 的 `document.text`、M2 的渲染 DOM 节点（取 innerHTML） |
-| **输出** | 文件下载（浏览器触发）/ 剪贴板写入 |
-| **PRD 功能项** | F4.1 .md / F4.2 HTML |
-| **AC 覆盖** | AC-3 (下载文件名 + 内容 / 复制 HTML) |
-| **内部组件** | `ExportMd` / `CopyHtml` |
+| **核心职责** | 下载 .md + 复制 HTML + **〔v1.2〕URL 分享（内容编码进 hash）+ 导入 .md 文件** |
+| **输入** | M1 的 `document.text`；**〔v1.2〕本地 .md 文件（File.text）/ 打开链接的 `#doc=` hash 参数** |
+| **输出** | 文件下载 / 剪贴板写入；**〔v1.2〕分享 URL（复制到剪贴板）/ 导入内容写回 M1** |
+| **PRD 功能项** | F4.1 .md / F4.2 HTML / **〔v1.2〕URL 分享 + 导入 .md（§153）** |
+| **AC 覆盖** | AC-3 + **〔v1.2〕AC-v12-1~6** |
+| **内部组件** | `ExportMd` / `CopyHtml` / **〔v1.2〕`ShareUrl`（编码+压缩）/ `ImportFile`** |
 | **文件名** | `editor-YYYYMMDD-HHmmss.md`（本地时区，共识 TBD-6）|
 | **HTML 范围** | innerHTML 无 outer wrapper（共识 TBD-7）|
-| **错误处理** | Clipboard API 不可用时 toast 引导手动选择复制 |
+| **〔v1.2〕分享编码** | base64（含压缩）非加密；hash fragment `#doc=`（共识 TBD-v12-1/2，格式见 data-model delta + ADR-006）|
+| **〔v1.2〕覆盖保护** | 打开分享链接 / 导入，当前文档非空 → confirm 再替换（共识 TBD-v12-3/4，与 clear 同范式）|
+| **错误处理** | Clipboard 不可用 toast；**〔v1.2〕超限 toast 拒绝 / 非 .md / 读失败 toast / 隐私明文提示** |
+| **写回边界** | 导入/打开分享内容写 M1 走 `EditorAPI.setTextFromStorage`（既有契约，复用）；持久化由 M3 自动接管 |
 
 ### M5 布局
 

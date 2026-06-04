@@ -4,6 +4,60 @@
 
 ---
 
+## v0.2.0 — IndexedDB 持久化升级（路线图 v1.1 里程碑）（2026-06-04）
+
+**Tag:** `v0.2.0` @ commit `aa35ce9`
+**Range:** `e9555e7..aa35ce9`（v0.1.1 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.2.0
+**命名说明:** 路线图（PRD §152）称此里程碑 "v1.1"；按 semver 与 v0.1.x 连续发布为 **v0.2.0**（minor，新增功能，不跳号到 v1.1.0）。
+
+### Scope — 持久化 localStorage → IndexedDB（解 PRD R2 配额）
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| M3 IDB 后端 | `5252add` | idb@8.0.3；DB `editor`/store `kv`/key `document`；异步契约（移除同步 init → `loadStoredDocument`，clear→Promise）|
+| 一次性迁移 | `5252add` | 旧 `editor.document.v1` 首次加载迁入 IDB（先写→确认→删旧幂等；put 失败保旧不丢）|
+| 不可用降级 | `5252add` | IDB 不可用（隐私模式/老浏览器）→ localStorage + `storage.degraded` toast |
+| 启动异步 hydrate | `5252add` | 空 editor 闪现后填入 + 竞争防护（已输入不覆盖）|
+| 1MB 提示取消 | `5252add` | IDB 配额充裕，退役 `doc.large`（共识 TBD-v11-4）|
+| F-V11-1/2 修复 | `c26d1db` | IDB 读错 console.error + `storage.loadError` toast（不裸吞）；resetStorage schema-safe |
+
+### Quality Gates [已验证: 2026-06-04 本机]
+
+- 121 unit tests pass（M3 13：迁移/幂等/put失败保旧/读错/fallback/大文档/clear）
+- 33 e2e pass / 1 skip（chromium + webkit；含 E2E-v11-001 迁移验收；1 skip = AC3-002 clipboard chromium-only）
+- Bundle 66.17 KB gzipped（+idb ~1.5KB；预算 150 KB，`pnpm size` 闸守护）
+- TS strict `pnpm typecheck` 0 error
+- 文档 commit-hash 完整性闸 39 refs 全 resolve
+
+### Spec-to-Code-Flow（完整走通）
+
+共识 v1.1（TBD-v11-1~5 accept）→ module-list M3 delta → 架构 + **ADR-005**（D1=idb+手写 fallback）→ api-spec v1.1 + data-model v1.1 → test-plan v1.1 → 实现 → 验证。research-first：idb@8.0.3 API 对照 entry.d.ts 核实。
+
+### Audit（2026-06-04 增量）
+
+报告 `docs/audit/2026-06-04-v1.1-increment.md`：迁移核心逻辑正确（幂等+数据安全+竞争防护有测试佐证）。6 findings：
+- **F-V11-1 MEDIUM**（IDB 读错静默降级 + 潜在覆盖丢数据）→ **resolved**（`c26d1db`）
+- **F-V11-2 LOW**（resetStorage 竞争）→ **resolved**（`c26d1db`）
+- F-V11-3~6 LOW（clear 静默 / 冗余 write-back / 死 key / 写重叠）→ deferred v1.1.x
+
+### Known Limitations（v0.2.0 仍不做）
+
+- IDB 读错后仍"显空 + 可编辑覆盖"（已从静默升级为 toast 告知，未硬阻断编辑 — TBD-v11-1 空闪现的延伸，留 UX 决策）
+- AC-v11-4（IDB 不可用降级）仅 unit 覆盖，无真机隐私模式 e2e
+- 上轮 deferred 的 BHV-006~010（行号/字号 UX/a11y/perf + F1.2/F1.3/toast e2e）**未纳入本版**
+- 完整 Lighthouse CI 仍 deferred（TBD-T1）；本版未重跑 Lighthouse（bundle +idb 微小，perf 预期不变）
+- 多文档 / Service Worker / 滚动同步 / 云同步 各按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- findings-registry：F-V11-1/2 resolved，F-V11-3~6 + BHV-006~010 deferred
+- package.json 0.1.1 → 0.2.0
+
+---
+
 ## v0.1.1 — backlog 清理 + 过程加固（2026-06-03）
 
 **Tag:** `v0.1.1` @ commit `e9555e7`

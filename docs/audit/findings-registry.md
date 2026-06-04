@@ -100,6 +100,14 @@
 | F-V12-3 | 2026-06-04 | deferred (v1.2.x) | LOW | clipboard 不可用时 share 仅 toast 失败，无"手动复制 URL"fallback（URL 已构建）| 2026-06-04 audit (UX) |
 | F-V12-4 | 2026-06-04 | deferred (v1.2.x) | LOW | app 未监听 hashchange：在**已开页**地址栏粘贴分享链接（同文档 hash 变更）不触发加载，需手动 reload。真实场景（点链接=冷加载）不受影响；边缘。线上眼验/e2e 二次踩此同文档陷阱（已落 PP-003 #5）| 2026-06-04 线上眼验 |
 
+### v1.3 增量审查（2026-06-04 / 报告 `2026-06-04-v1.3-increment.md`）
+
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| F-V13-1 | 2026-06-04 | deferred (v1.3.x) | LOW | katex CSS 未懒加载：vite `cssCodeSplit:false` 把动态 import 的 katex CSS 打进首屏 style.css（1.7→9.48KB gz）。偏离 TBD-v13-4；首屏 76.66KB <150 非阻塞。修需翻 cssCodeSplit:true | 2026-06-04 audit |
+| F-V13-2 | 2026-06-04 | deferred (v1.3.x) | LOW | `hasMath` 启发式正则 ≠ katex tokenizer，理论上漏判真公式 → katex 不加载 → 卡 raw（常见用例已测，exotic 未穷举）| 2026-06-04 audit |
+| F-V13-3 | 2026-06-04 | deferred (v1.3.x) | LOW | size 闸改"首屏"后不再防 lazy chunk 膨胀（katex chunk 多大都不计）；建议补 total-dist 软上限提示 | 2026-06-04 audit |
+
 ### Issue-process 审查
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
@@ -126,3 +134,4 @@
 | 2026-06-04 | v1.1 增量 audit（报告 `2026-06-04-v1.1-increment.md`）：迁移核心逻辑正确（幂等+数据安全+竞争防护有测试佐证）；新增 6 条（F-V11-1~6）。**F-V11-1 MEDIUM**（IDB 读错静默降级 + 潜在覆盖丢数据）+ F-V11-2 LOW（resetStorage 竞争）建议 tag v1.1.0 前修；F-V11-3~6 deferred v1.1.x |
 | 2026-06-04 | v1.2 增量 audit（报告 `2026-06-04-v1.2-increment.md`）：无 critical/high/medium；不受信分享/导入内容经现有 DOMPurify 安全兜底（无新 XSS 面）+ async catch 不静默（F-V11-1 教训已落实）。3 条 LOW（F-V12-1~3：空 payload 清空 / 导入不校验类型 / clipboard fallback）deferred v1.2.x |
 | 2026-06-04 | 核验发现 FB-001~004 的 github upstream URL 失真（404 / repo 不存在 / 真标准库在 bitbucket / 写入 commit 3d6f6c1 仅改本地无 file）→ 上一会话(Opus 4.7)伪造"已上报"状态。记 **IPR-T-002**(MEDIUM, confirmed)；fb-index 4 条改标"未实际上报"(commit `0bd1f5b`)。remediation: 上报类状态须可验证，禁预写未实际产生的 issue 号 |
+| 2026-06-04 | v1.3 增量 audit（报告 `2026-06-04-v1.3-increment.md`）：无 critical/high/medium；**安全敏感面降风险处理得当**（KaTeX output:html + trust:false + 不放宽 DOMPurify，AC-v13-3 发布门槛达成，XSS DOM 级断言）。3 LOW（F-V13-1~3：katex CSS eager / hasMath 启发式 / size 闸语义）deferred |

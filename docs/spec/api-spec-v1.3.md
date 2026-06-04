@@ -53,6 +53,6 @@ KaTeX + 插件 + CSS 全 **动态 import**（Vite lazy chunk）；纯文本文�
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| `hasMath` / `ensureKatex` / `katexReady` + 懒加载 | ⏳ | v1.3 |
-| `render` 含 KaTeX（已载）+ DOMPurify 放行 allowlist | ⏳ | v1.3（security review）|
-| PreviewArea load-后-rerender 衔接 | ⏳ | v1.3 |
+| `hasMath` / `ensureKatex` / `katexReady` + 懒加载 | ✓ 已实现（2026-06-04）| `1e2af26` — 动态 import 插件+CSS memoized；hasMath 贴近 katex 规则避 "$5" |
+| `render` 含 KaTeX（已载）+ sanitize | ✓ 已实现 | `1e2af26` — **不放宽 DOMPurify**（output:html 仅 styled span 过默认 sanitize）；trust:false；katex.test XSS DOM 断言 |
+| PreviewArea load-后-rerender 衔接 | ✓ 已实现 | `1e2af26` — katexVer signal bump 触发 memo 重算 |

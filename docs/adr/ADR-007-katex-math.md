@@ -79,5 +79,11 @@ KaTeX 需其 CSS（字体度量）。随插件**动态 import** CSS（`import('k
 ## References
 
 - 共识 v1.3 TBD-v13-1~5（v13-1=b KaTeX-only）
-- （待补）KaTeX + 选定插件官方文档链接 + 版本 + 访问日期（install 时附）
+- `katex` 0.17.0 + `@vscode/markdown-it-katex` 1.1.2（2026-06-04 核实）：插件 default 导出 fn；
+  研究确认 `output:'html'` 仅产 styled span（无 MathML/SVG）；`trust:false` 中和 `\href{javascript:}`（渲染为红色错误文本）；`throwOnError:false` 非法 LaTeX 显错不崩
+- **D2 实测结论（降风险）**：output:'html' 的 styled span **过默认 DOMPurify 即存活**（span/class/style 默认放行）→ **无需放宽 allowlist**（最安全：零新增放行面）；XSS 用 DOM 级断言验（katex.test）
+- **实测 bundle**：katex JS 懒加载 chunk ~80KB gz（**不计首屏**）；首屏 66.83KB（无 katex）+ CSS 9.48KB = 76.66KB gz（<150）
+- **偏差（记 finding）**：katex CSS 因 vite `cssCodeSplit:false` 仍 eager 进首屏 style.css（TBD-v13-4 期望 CSS 懒加载）；首屏仍 <150 → 非阻塞，v1.3.x 评估翻 cssCodeSplit
+- **size 闸修正**：原 sum 整个 dist 含 lazy chunk → 改按 index.html 引用集算首屏（commit `1e2af26`）
+- 实现 commit `1e2af26`
 - ADR-002（sanitize 红线）/ ADR-001（插件挂载点）

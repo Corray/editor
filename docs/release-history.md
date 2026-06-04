@@ -4,6 +4,55 @@
 
 ---
 
+## v0.4.0 — KaTeX 数学公式（路线图 v1.3 里程碑）（2026-06-04）
+
+**Tag:** `v0.4.0` @ commit `d612431`
+**Range:** `1826561..d612431`（v0.3.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.4.0
+**命名:** 路线图 "v1.3" → semver **v0.4.0**（同先例）。Mermaid 降风险推迟 v1.4。
+
+### Scope — KaTeX 公式渲染（懒加载）
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| KaTeX 渲染 | `1e2af26` | `@vscode/markdown-it-katex` + katex 0.17；`$…$`/`$$…$$` |
+| 懒加载 | `1e2af26` | 含公式才动态 import katex（首屏不含）+ load 后 re-render |
+| 安全（降风险）| `1e2af26` | output:'html'（无 MathML/SVG）+ trust:false + **不放宽 DOMPurify**（styled span 过默认 sanitize）|
+| size 闸修正 | `1e2af26` | sum 整 dist → 按 index.html 首屏算（懒加载 chunk 不计）|
+
+### Quality Gates [已验证: 2026-06-04 本机]
+
+- 144 unit tests pass（KaTeX 10：渲染/懒加载探测/XSS DOM 断言/非公式 $）
+- 51 e2e pass / 1 skip（chromium + webkit；含 ac8 KaTeX 4 场景 ×2，**含 XSS 发布门槛 E2E-v13-003**）
+- 首屏 76.66 KB gzipped（katex JS ~80KB 懒加载不计；预算 150 KB）
+- TS strict typecheck 0 error；doc-hash + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.3（v13-1=b **KaTeX-only 降风险**，Mermaid→v1.4 / v13-2~5 accept）→ module-list M2 delta → 架构 + **ADR-007**（D1=@vscode/markdown-it-katex）→ api-spec v1.3 → test-plan v1.3 → 实现。无 data-model delta（公式不持久化）。research-first：katex 0.17 + 插件 1.1.2 API + 恶意公式中和 核实。
+
+### Audit（2026-06-04 增量，安全敏感版）
+
+报告 `docs/audit/2026-06-04-v1.3-increment.md`：**无 critical/high/medium**。关键正向：放行渲染输出的 XSS 面经**降风险路径**（KaTeX-only + output:html + trust:false + 不放宽 sanitize）最小化，AC-v13-3 发布门槛达成（XSS DOM 级断言，双引擎 e2e）。
+- F-V13-1~3 LOW（katex CSS eager / hasMath 启发式 / size 闸语义）→ deferred v1.3.x
+
+### Known Limitations（v0.4.0 仍不做）
+
+- Mermaid 图（异步 + SVG sanitize 大头风险）→ v1.4
+- katex CSS 因 cssCodeSplit:false 仍 eager 进首屏（<150 非阻塞，F-V13-1）
+- hasMath 启发式 ≠ katex tokenizer（exotic 边界可能漏判，F-V13-2）
+- 多文档 / Service Worker / 滚动同步 / 云同步 按 roadmap 推迟
+- 累计 deferred LOW backlog（F-V11-3~6 / BHV-006~010 / F-V12-1~4 / F-V13-1~3）
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- 降风险决策（TBD-v13-1 选 KaTeX-only）使安全敏感版无 MEDIUM
+- package.json 0.3.0 → 0.4.0
+
+---
+
 ## v0.3.0 — URL 分享 + 导入 .md（路线图 v1.2 里程碑）（2026-06-04）
 
 **Tag:** `v0.3.0` @ commit `1826561`

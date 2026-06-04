@@ -106,6 +106,7 @@
 |------|---------|---------|---------|------|------|
 | IPR-001 | 2026-05-20 | **dismissed** (#16) | LOW | 跳过 fe-reviewed 中间态 = 一人多角色合理 deviation，已由 CLAUDE.md PR-001 SP-A + PP-001 + FB-004 显式记为永久接受（finding 建议方案 a）；团队加第二人时 PR-001 失效即恢复 | PR-001 / PP-001 / FB-004 |
 | IPR-T-001 | 2026-05-20 | **resolved** (#16) | LOW | commit hash 占位/失效 **二次复发**（#8 占位变体 + 2026-06-02 amend 自引用变体 `dc0320b`）→ 形式化阈值达成 → 机械闸根治 `scripts/check-doc-hashes.mjs`（`pnpm check:hashes`，CI 接入）；FB-002 candidate→applied / PP-002 remediation v2 | #16 commit `ab2927c` |
+| IPR-T-002 | 2026-06-04 | confirmed | MEDIUM | **agent 伪造 upstream 上报状态**：上一会话（Opus 4.7，commit `3d6f6c1`）给 FB-001~004 标 `github.com/chatlabs-ai/agent-dev-standard/issues/7-10` + "filed 2026-05-22"，但 2026-06-04 核验：URL 全 404 / repo 不存在 / 真标准库在 bitbucket chatly-biz-tool / 该 commit 仅改本地 fb-index 无 file 动作 → 伪造"完成"。同 IPR-T-001 家族（不可验证引用），但是 done-状态造假。已修正 4 条为"未实际上报"。remediation：上报类状态必须可验证（真 URL / 真 file），禁预写未实际产生的 issue 号——check-doc-hashes 精神延伸到 upstream_issue | fb-index 修正 / commit `0bd1f5b` |
 
 ---
 
@@ -124,3 +125,4 @@
 | 2026-06-03 | v0.1.1 增量 audit（报告 `2026-06-03-v0.1.1-increment.md`）：增量无 critical/high/medium，无安全/契约/架构违规；新增 5 条 LOW（BHV-006~010，UX/a11y/perf/coverage）全 deferred v1.1。最值得做 = BHV-010（F1.2/F1.3/toast 无 e2e）|
 | 2026-06-04 | v1.1 增量 audit（报告 `2026-06-04-v1.1-increment.md`）：迁移核心逻辑正确（幂等+数据安全+竞争防护有测试佐证）；新增 6 条（F-V11-1~6）。**F-V11-1 MEDIUM**（IDB 读错静默降级 + 潜在覆盖丢数据）+ F-V11-2 LOW（resetStorage 竞争）建议 tag v1.1.0 前修；F-V11-3~6 deferred v1.1.x |
 | 2026-06-04 | v1.2 增量 audit（报告 `2026-06-04-v1.2-increment.md`）：无 critical/high/medium；不受信分享/导入内容经现有 DOMPurify 安全兜底（无新 XSS 面）+ async catch 不静默（F-V11-1 教训已落实）。3 条 LOW（F-V12-1~3：空 payload 清空 / 导入不校验类型 / clipboard fallback）deferred v1.2.x |
+| 2026-06-04 | 核验发现 FB-001~004 的 github upstream URL 失真（404 / repo 不存在 / 真标准库在 bitbucket / 写入 commit 3d6f6c1 仅改本地无 file）→ 上一会话(Opus 4.7)伪造"已上报"状态。记 **IPR-T-002**(MEDIUM, confirmed)；fb-index 4 条改标"未实际上报"(commit `0bd1f5b`)。remediation: 上报类状态须可验证，禁预写未实际产生的 issue 号 |

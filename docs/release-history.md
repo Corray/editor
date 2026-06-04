@@ -4,6 +4,57 @@
 
 ---
 
+## v0.5.0 — Mermaid 图渲染（路线图 v1.4 里程碑）（2026-06-04）
+
+**Tag:** `v0.5.0` @ commit `8dcdd6f`
+**Range:** `d612431..8dcdd6f`（v0.4.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.5.0
+**命名:** 路线图 "v1.4" → semver **v0.5.0**（同先例）。**最高风险版**（SVG sanitize + 异步 + 竞态）。
+
+### Scope — Mermaid 图渲染（懒加载 + 异步）
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| Mermaid 渲染 | `a32f43b` | mermaid 11.15.0；` ```mermaid ` fence → 占位 → 异步逐块 render |
+| 懒加载 | `a32f43b` | 含图才动态 import mermaid（135KB gz 独立 chunk，首屏不含）|
+| **SVG sanitize（三层）** | `a32f43b` | securityLevel:strict + htmlLabels:false（砍 foreignObject）+ DOMPurify svg profile + 显式 FORBID foreignObject/script |
+| 异步编排 | `a32f43b` | per-block 渲染 + **代次令牌**防竞态（text 变 gen++，过期结果丢弃）+ 单块失败降级 |
+| 占位健壮 | `a32f43b` | 源文存 div textContent（过 sanitize 更稳，非 data-*）|
+
+### Quality Gates [已验证: 2026-06-04 本机]
+
+- 149 unit tests pass（Mermaid 5：hasMermaid 探测/占位/escape）
+- 59 e2e pass（chromium + webkit；含 ac9 Mermaid 4 场景 ×2，**含 XSS 发布门槛 E2E-v14-003**）
+- 首屏 77.34 KB gzipped（mermaid 135KB + katex ~80KB 懒加载均不计；预算 150 KB）
+- TS strict typecheck 0 error；doc-hash(48 refs) + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.4（TBD-v14-1~5 accept）→ module-list M2 delta → 架构 + **ADR-008**（D1=DOMPurify svg profile + 显式 FORBID foreignObject/事件）→ api-spec v1.4 → test-plan v1.4 → 实现。无 data-model delta（图是渲染产物，不持久化）。research-first：mermaid 11.15.0 render API + securityLevel/htmlLabels 语义 + 恶意注入中和 核实。
+
+### Audit（2026-06-04 增量，最高风险版）
+
+报告 `docs/audit/2026-06-04-v1.4-increment.md`：**无 critical/high/medium**。关键正向：SVG/foreignObject XSS 大头经**降风险路径**（strict + htmlLabels:false 砍 foreignObject + 三层 sanitize）+ **e2e 双引擎发布门槛**最小化，AC-v14-3 达成（foreignObject count 0 实证 FORBID 生效）。
+- F-V14-1~3 LOW（重渲染 perf / XSS 仅 e2e / 主题切换不重渲染）→ deferred v1.4.x
+
+### Known Limitations（v0.5.0 仍不做）
+
+- **SVG XSS 仅 e2e 覆盖**（jsdom 无法真渲染 mermaid，无单测 backstop，F-V14-2）
+- mermaid 每次 text 变重渲染（无源文 hash 缓存，含图文档快速打字 CPU 浪费，F-V14-1）
+- 主题切换不重渲染已存图（偏离 TBD-v14-5(a)，旧图保持旧主题到下次编辑，F-V14-3）
+- 多文档 / Service Worker / 滚动同步 / 云同步 按 roadmap 推迟
+- 累计 deferred LOW backlog（F-V11-3~6 / BHV-006~010 / F-V12-1~4 / F-V13-1~3 / F-V14-1~3）
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- 降风险决策（strict + htmlLabels:false + 三层 sanitize）使最高风险版无 MEDIUM
+- AC-v14-3 XSS 发布门槛人工 + e2e 双引擎验证通过（ADR-008 D1 security review）
+- package.json 0.4.0 → 0.5.0
+
+---
+
 ## v0.4.0 — KaTeX 数学公式（路线图 v1.3 里程碑）（2026-06-04）
 
 **Tag:** `v0.4.0` @ commit `d612431`

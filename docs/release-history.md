@@ -4,6 +4,55 @@
 
 ---
 
+## v0.3.0 — URL 分享 + 导入 .md（路线图 v1.2 里程碑）（2026-06-04）
+
+**Tag:** `v0.3.0` @ commit `1826561`
+**Range:** `aa35ce9..1826561`（v0.2.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.3.0
+**命名说明:** 路线图（PRD §153）称 "v1.2"；按 semver 发布为 **v0.3.0**（minor，同 v1.1→v0.2.0 先例）。
+
+### Scope — URL 分享 + 导入 .md（I/O 闭环）
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| URL 分享 | `7e15d00` | lz-string 压缩 → `#doc=1.<payload>`（URL-safe）→ 剪贴板 + 隐私 toast；超 8000 字符拒绝 |
+| 打开分享链接 | `7e15d00` | hash 解码加载；本机非空 → confirm（取消保留本机）；`replaceState` 清 hash；加载优先级 分享>IDB |
+| 导入 .md | `7e15d00` | file picker（`File.text` 本地读，不上传）；当前非空 confirm |
+| M4 职责扩 | `7e15d00` | 「导出」→「导入/导出 I/O」 |
+
+### Quality Gates [已验证: 2026-06-04 本机]
+
+- 134 unit tests pass（ShareUrl 13：往返含 CJK/特殊字符 / 超限 / 无效链接 / share() 三结果）
+- 43 e2e pass / 1 skip（chromium + webkit；含 ac7 分享/打开/导入 5 场景 ×2；1 skip = AC3-002 clipboard chromium-only）
+- Bundle 68.21 KB gzipped（+lz-string ~2KB；预算 150 KB）
+- TS strict typecheck 0 error；文档 hash 闸 42 refs resolve
+
+### Spec-to-Code-Flow（完整走通）
+
+共识 v1.2（TBD-v12-1~5 accept）→ module-list M4 delta → 架构 + **ADR-006**（D1=lz-string）→ api-spec v1.2 + data-model v1.2 → test-plan v1.2 → 实现 → 验证。research-first：lz-string@1.5.0 API 往返核实。
+
+### Audit（2026-06-04 增量）
+
+报告 `docs/audit/2026-06-04-v1.2-increment.md`：**无 critical/high/medium**。关键正向结论：分享链接内容是**攻击者可控输入**，与导入文件内容一并经现有 markdown-it(html:false)+DOMPurify sanitize → **无新 XSS 面**；async catch 不静默（F-V11-1 教训已落实）。
+- F-V12-1~3 LOW（空 payload 清空 / 导入不校验类型 / clipboard fallback）→ deferred v1.2.x
+
+### Known Limitations（v0.3.0 仍不做）
+
+- 分享 URL 含明文内容（base64 非加密，已 toast 告知）
+- 大文档（>~8000 字符 URL）无法分享（toast 拒绝，引导用下载 .md）
+- 导入不校验文件类型（二进制读为乱码，DOMPurify 兜底无害）
+- 上轮 deferred 的 F-V11-3~6 + BHV-006~010 未纳入
+- 多文档 / Service Worker / Mermaid+KaTeX / 滚动同步 / 云同步 各按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- e2e 自捕获并修复 bug：分享覆盖 confirm 取消时未回填本机文档（main.tsx 启动逻辑）
+- package.json 0.2.0 → 0.3.0
+
+---
+
 ## v0.2.0 — IndexedDB 持久化升级（路线图 v1.1 里程碑）（2026-06-04）
 
 **Tag:** `v0.2.0` @ commit `aa35ce9`

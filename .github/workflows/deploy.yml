@@ -39,6 +39,9 @@ jobs:
       - name: Doc commit-hash integrity (根治 IPR-T-001)
         run: pnpm check:hashes
 
+      - name: FB upstream verifiability (机制化 IPR-T-002)
+        run: pnpm check:fb
+
       - name: Typecheck
         run: pnpm typecheck
 

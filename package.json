@@ -14,6 +14,7 @@
     "test:coverage": "vitest run --coverage",
     "size": "node scripts/check-bundle-size.mjs",
     "check:hashes": "node scripts/check-doc-hashes.mjs",
+    "check:fb": "node scripts/check-fb-upstream.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
   },

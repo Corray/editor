@@ -19,8 +19,10 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@vscode/markdown-it-katex": "^1.1.2",
     "dompurify": "^3.0.0",
     "idb": "^8.0.3",
+    "katex": "^0.17.0",
     "lz-string": "^1.5.0",
     "markdown-it": "^14.0.0",
     "solid-js": "^1.8.0"

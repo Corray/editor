@@ -101,7 +101,7 @@
 - **related**: PP-003
 - **upstream_issue**: declined-await-2nd-occurrence (评估 2026-05-22；项目强相关 + root cause 未清 — Playwright/Vite/webkit 三方互动 bug 未排查；workaround 已落定 chromium + iPhone SE context；触发条件 = 第 2 个 Vite + Playwright 项目复现 或 root cause 定性为 standard 可修)
 
-## FB-006 — hash-routing 功能的 Playwright 测试 / 验证必须冷加载
+## FB-006 — 线上眼验 / Playwright 验证的认知陷阱（hash 冷加载 + 破缓存 + console 干净）
 - **date**: 2026-06-04
 - **file**: ../feedback/2026-06-04-playwright-hash-routing-cold-load.md
 - **category**: meta
@@ -110,10 +110,10 @@
 - **phases**: —
 - **severity**: low
 - **status**: candidate
-- **occurrences**: 2（同项目同会话：e2e + 线上眼验）
-- **guidance**: 启动读 location.hash 的功能（hash-routing / URL 分享）只在整页加载执行 startup；从已加载页改 hash = 同文档导航（仅 hashchange，不重跑 startup）→ 功能"看似不生效"实为验证方式错，曾差点误判 prod bug。测试 `goto(hashUrl)` 后补 `reload()`；线上眼验 `about:blank`→hashUrl 冷加载；看到 hash 功能不生效先排除同文档导航
-- **scan_when**: 写/测/线上验任何 hash-routing / URL-state-at-startup 功能时；"URL 片段功能不生效 / 状态没还原"且 URL 含 hash 时
-- **related**: PP-003 #5 / F-V12-4 / FB-005（Playwright 陷阱家族，根因不同）
+- **occurrences**: 4（同项目同会话：hash e2e / hash 线上 / 破缓存 / console 干净——同元模式"验证方式错→误判"）
+- **guidance**: 三件套同源（看到"不生效"先质疑验证方式再质疑被测物）：① hash-routing/URL-state 功能只在整页加载跑 startup，从已加载页改 hash = 同文档导航不重跑 → 测 `goto(hashUrl)` 后补 `reload()` / 线上 `about:blank`→hashUrl 冷加载；② 部署修复后线上眼验破缓存（`?cb=` 或 curl 比对），重新导航仍报旧错先怀疑浏览器缓存别先归因没部署；③ 眼验固定查 console 截零（功能渲染 ≠ console 干净，红字即便不阻断也要定性）
+- **scan_when**: 写/测/线上验任何 hash-routing / URL-state-at-startup 功能时；"URL 片段功能不生效"且 URL 含 hash 时；部署修复后线上眼验时（破缓存）；任何线上/e2e 眼验收尾时（查 console）
+- **related**: PP-003 #5/#6/#7 / F-V12-4 / F-V13-4 / FB-005（Playwright 陷阱家族，根因不同）
 - **upstream_issue**: local-only（2026-06-04 决定暂不上报 standard）—— 候选已备妥（submit-fb 草拟 submissions/chenrui/2026-06-04-playwright-hash-routing-cold-load.md），但未 push 团队 Bitbucket 库；触发条件 = 第 2 项目复现 或 PM 决定上报。注：standard 实际 remote = bitbucket chatly-biz-tool/agent-dev-standard（早期 FB 标的 github URL 失真）
 
 ---

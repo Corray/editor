@@ -5,10 +5,12 @@
 | **date** | 2026-06-04 |
 | **status** | candidate |
 | **severity** | low |
-| **occurrences** | 2（同项目同会话：e2e + 线上眼验）|
+| **occurrences** | 4（同项目同会话：① e2e hash 导航 ② 线上眼验 hash 导航 ③ 线上眼验破缓存 ④ 眼验 console 干净——同属"验证方式错→误判"家族）|
 | **category** | meta |
 | **skills** | (testing / playwright) |
 | **modules** | (all) |
+
+> **scope（2026-06-04 v0.5.0 补）：** 本 FB 起于 hash-routing 冷加载（下文主体），但根因元模式更宽——**线上眼验 / Playwright 验证的导航与缓存陷阱，让正常功能或已生效修复被误判**。见文末「§同源姊妹教训」两条：眼验破缓存、眼验 console 干净。三者共享同一防御直觉：**看到"不生效"先质疑验证方式，再质疑被测物**。
 
 ---
 
@@ -55,16 +57,35 @@ standard 的 Playwright 测试指南增补"hash-routing 功能"段：
 - 写/测任何 hash-routing / URL-state-at-startup 功能时
 - 线上眼验 hash 驱动功能时（必须冷加载复现）
 - 看到"URL 片段功能不生效 / 编辑器空 / 状态没还原"且 URL 含 hash 时——先查是否同文档导航
+- **部署修复后线上眼验时**——破缓存（§姊妹教训 1）
+- **任何线上 / e2e 眼验收尾时**——查 console 截零（§姊妹教训 2）
+
+## §同源姊妹教训（2026-06-04 v0.5.0 眼验补）
+
+主体（hash-routing 冷加载）的根因是"验证导航方式错 → 误判被测物"。同会话 v0.5.0 又踩两个**同元模式**的坑，一并沉淀：
+
+### 1. 线上眼验改完要破缓存，否则验到旧资源
+
+- **现象**：部署 CSP 修复后线上眼验，`browser_navigate('https://.../editor/')` 仍报**旧** console 错（"font-src was not explicitly set"）→ 一度疑"修复没部署/没生效"。`curl` 线上 `index.html` 实测已是新版（含 `font-src 'self' data:`）。根因 = **浏览器 HTTP-cache 旧 index.html**。
+- **修**：眼验破缓存——`browser_navigate('https://.../?cb=<变化值>')`（query 变化强制重取文档）/ 或先 `curl` 比对线上资源确认部署到位再眼验。
+- **铁律**：重新导航仍报旧错 → **先怀疑浏览器缓存，别先归因部署失败**。与主体同源：缓存导致"验到的不是最新被测物"。
+
+### 2. 眼验固定检查项必含"console 干净"，不只"功能渲染出来"
+
+- **现象**：v0.4.0 引入 KaTeX 时 CSP 缺 `font-src` → 1 个内联字体被拦的 console 红字，因眼验只确认"公式渲染出来了"未查 console，**漏过 v0.4.0 + v0.5.0 两版**，到 v1.4 眼验才 surface（F-V13-4）。
+- **修**：眼验 checklist 固定一步——**console error/warning 截零**；红字即便不阻断功能也要定性（记 finding 或当场修），不许"看着能用就过"。
+- **元教训**：功能正常 ≠ 验证充分。眼验的"看"必须包含 console，不只视觉渲染。
 
 ## related
 
-- **PP-003** `docs/problems/project-patterns.md` trap #5（项目内 tendency 视角）
+- **PP-003** `docs/problems/project-patterns.md` trap #5（hash 冷加载）/ #6（眼验破缓存）/ #7（眼验 console 干净）——项目内 tendency 视角
 - **F-V12-4** `docs/audit/findings-registry.md`（app 侧未监听 hashchange，LOW deferred）
+- **F-V13-4** `docs/audit/findings-registry.md`（§姊妹教训 2 的具体 finding：CSP font-src 缺失，眼验 console 漏检 2 版，已 resolved）
 - **FB-005**（同为 Playwright 测试陷阱家族，但根因不同——那是 worker 竞争）
 
 ## 升级路径
 
-- **当前**：candidate；同项目二次复发（e2e + 线上验证两面）
-- **observing**：第 2 个 hash-routing + Playwright 项目复现 → occurrences 升
-- **applied**：standard Playwright 指南补"hash-routing 冷加载"段 → 标 applied
-- **verified**：applied 后新项目首次测 hash 功能即避坑（不再误判）→ verified
+- **当前**：candidate；同项目同会话 4 次复发（hash e2e / hash 线上 / 破缓存 / console 干净——同元模式"验证方式错→误判"）
+- **observing**：第 2 个 Playwright 项目复现任一姊妹教训 → occurrences 升
+- **applied**：standard Playwright 指南补"**线上眼验认知陷阱**"段（hash 冷加载 + 部署后破缓存 + console 干净三件套）→ 标 applied
+- **verified**：applied 后新项目首次眼验即避坑（不再误判功能/部署，不漏 console）→ verified

@@ -79,10 +79,27 @@ describe('M3 persistence v1.1 — IndexedDB + migration', () => {
     vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
       throw new Error('put fail');
     });
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { loadStoredDocument } = await freshStore();
     const result = await loadStoredDocument();
     expect(result).toBe('# keep'); // fallback to legacy value
     expect(localStorage.getItem(DOC_KEY)).toBe('# keep'); // NOT deleted
+    expect(errSpy).toHaveBeenCalled(); // F-V11-1: not silent
+  });
+
+  it('UT-MIG-006: IDB read error → loadError toast + fallback, not silent (F-V11-1)', async () => {
+    localStorage.setItem(DOC_KEY, '# fb-on-readerr');
+    vi.spyOn(IDBObjectStore.prototype, 'get').mockImplementation(() => {
+      throw new Error('read fail');
+    });
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { loadStoredDocument } = await freshStore();
+    const { toast } = await import('@/shared/toast');
+    const toastSpy = vi.spyOn(toast, 'show').mockImplementation(() => {});
+    const result = await loadStoredDocument();
+    expect(result).toBe('# fb-on-readerr'); // best-available fallback
+    expect(toastSpy).toHaveBeenCalledWith(t('storage.loadError'), 'warn');
+    expect(errSpy).toHaveBeenCalled(); // logged, not swallowed
   });
 
   it('UT-MIG-004: new user (all empty) → returns ""', async () => {

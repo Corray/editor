@@ -35,6 +35,7 @@ export const zhCNDict = {
   'storage.quota': '存储配额已满，无法保存',
   'storage.unavailable': '持久化不可用，请勿关闭页面',
   'storage.degraded': '已降级到基础存储，大文档可能受限',
+  'storage.loadError': '加载已保存内容失败，请刷新重试',
 
   // M4 export toast
   'clipboard.ok': '已复制到剪贴板',

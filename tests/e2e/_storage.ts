@@ -12,14 +12,16 @@ export async function resetStorage(page: Page): Promise<void> {
   await page.evaluate(async () => {
     localStorage.clear();
     await new Promise<void>((resolve) => {
-      const open = indexedDB.open('editor');
+      // open with version+upgrade matching the app schema (F-V11-2): a bare
+      // open() racing ahead of the app would create a storeless v1 DB and
+      // block the app's upgrade → missing 'kv'.
+      const open = indexedDB.open('editor', 1);
+      open.onupgradeneeded = () => {
+        const db = open.result;
+        if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+      };
       open.onsuccess = () => {
         const db = open.result;
-        if (!db.objectStoreNames.contains('kv')) {
-          db.close();
-          resolve();
-          return;
-        }
         const tx = db.transaction('kv', 'readwrite');
         tx.objectStore('kv').clear();
         tx.oncomplete = () => {
@@ -46,14 +48,13 @@ export async function readIdbDoc(page: Page): Promise<string | undefined> {
   return page.evaluate(
     () =>
       new Promise<string | undefined>((resolve) => {
-        const open = indexedDB.open('editor');
+        const open = indexedDB.open('editor', 1);
+        open.onupgradeneeded = () => {
+          const db = open.result;
+          if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+        };
         open.onsuccess = () => {
           const db = open.result;
-          if (!db.objectStoreNames.contains('kv')) {
-            db.close();
-            resolve(undefined);
-            return;
-          }
           const req = db.transaction('kv').objectStore('kv').get('document');
           req.onsuccess = () => {
             db.close();

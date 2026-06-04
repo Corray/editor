@@ -21,6 +21,7 @@ const EXPECTED_KEYS = [
   'storage.quota',
   'storage.unavailable',
   'storage.degraded',
+  'storage.loadError',
   'clipboard.ok',
   'clipboard.fail',
 ] as const;

@@ -90,24 +90,33 @@ export async function loadStoredDocument(): Promise<string> {
     notifyDegradedOnce();
     return lsGetRaw(LEGACY_DOC_KEY) ?? '';
   }
-  try {
-    const existing = await db.get(STORE, DOC_KEY);
-    if (typeof existing === 'string') return existing; // 已迁移 / 已有，幂等跳过
 
-    // IDB 空 → 迁移旧 localStorage（仅当 key 存在）
-    const legacy = lsGetRaw(LEGACY_DOC_KEY);
-    if (legacy !== null) {
-      await db.put(STORE, legacy, DOC_KEY); // 先写新
-      // put resolve = 写成功确认 → 删旧（不可逆前确认）
-      lsRemove(LEGACY_DOC_KEY);
-      lsRemove(LEGACY_NOTICE_KEY);
-      return legacy;
-    }
-    return ''; // 新用户
-  } catch {
-    // IDB 读 / 迁移失败 → 不删旧 key（数据不丢）→ fallback
+  // 读 IDB 文档。读**失败**（IDB 可用但 get throw）是异象，不能静默当空——否则
+  // 显空 → 用户编辑 → write-back 覆盖 IDB 中仍在的旧文档 = 真数据丢失（F-V11-1）。
+  // 故 log + toast 告知"加载失败请刷新"，不裸吞（arch-constraints §8/§9）。
+  let existing: unknown;
+  try {
+    existing = await db.get(STORE, DOC_KEY);
+  } catch (err) {
+    console.error('[persistence] IndexedDB read failed', err);
+    toast.show(t('storage.loadError'), 'warn');
     return lsGetRaw(LEGACY_DOC_KEY) ?? '';
   }
+  if (typeof existing === 'string') return existing; // 已迁移 / 已有，幂等跳过
+
+  // IDB 空 → 迁移旧 localStorage（仅当 key 存在）
+  const legacy = lsGetRaw(LEGACY_DOC_KEY);
+  if (legacy === null) return ''; // 新用户
+  try {
+    await db.put(STORE, legacy, DOC_KEY); // 先写新
+    // put resolve = 写成功确认 → 删旧（不可逆前确认）
+    lsRemove(LEGACY_DOC_KEY);
+    lsRemove(LEGACY_NOTICE_KEY);
+  } catch (err) {
+    // 迁移 put 失败 → 不删旧 key（数据不丢）；返回旧值，下次加载重试迁移
+    console.error('[persistence] migration put failed', err);
+  }
+  return legacy;
 }
 
 /**

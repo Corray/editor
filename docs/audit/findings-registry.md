@@ -107,6 +107,9 @@
 | F-V13-1 | 2026-06-04 | deferred (v1.3.x) | LOW | katex CSS 未懒加载：vite `cssCodeSplit:false` 把动态 import 的 katex CSS 打进首屏 style.css（1.7→9.48KB gz）。偏离 TBD-v13-4；首屏 76.66KB <150 非阻塞。修需翻 cssCodeSplit:true | 2026-06-04 audit |
 | F-V13-2 | 2026-06-04 | deferred (v1.3.x) | LOW | `hasMath` 启发式正则 ≠ katex tokenizer，理论上漏判真公式 → katex 不加载 → 卡 raw（常见用例已测，exotic 未穷举）| 2026-06-04 audit |
 | F-V13-3 | 2026-06-04 | deferred (v1.3.x) | LOW | size 闸改"首屏"后不再防 lazy chunk 膨胀（katex chunk 多大都不计）；建议补 total-dist 软上限提示 | 2026-06-04 audit |
+| F-V14-1 | 2026-06-04 | deferred (v1.4.x) | LOW | mermaid 每次 text 变重渲染（innerHTML 整体替换重置占位）；代次令牌丢弃过期替换但 `mermaid.render` 仍实际执行 → 含图文档快速打字 CPU 浪费；可按源文 hash 缓存 | 2026-06-04 audit |
+| F-V14-2 | 2026-06-04 | deferred (v1.4.x) | LOW | SVG XSS 仅 e2e 覆盖（jsdom 无法真渲染 mermaid，PP-003 家族）→ 安全门槛无单测 backstop | 2026-06-04 audit |
+| F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图（mermaid effect 只 dep html() 不 dep theme）→ 偏离 TBD-v14-5(a)"切换时重渲染"；初始渲染跟随当前主题，live 切换后旧图保持旧主题到下次编辑 | 2026-06-04 audit |
 
 ### Issue-process 审查
 
@@ -135,3 +138,4 @@
 | 2026-06-04 | v1.2 增量 audit（报告 `2026-06-04-v1.2-increment.md`）：无 critical/high/medium；不受信分享/导入内容经现有 DOMPurify 安全兜底（无新 XSS 面）+ async catch 不静默（F-V11-1 教训已落实）。3 条 LOW（F-V12-1~3：空 payload 清空 / 导入不校验类型 / clipboard fallback）deferred v1.2.x |
 | 2026-06-04 | 核验发现 FB-001~004 的 github upstream URL 失真（404 / repo 不存在 / 真标准库在 bitbucket / 写入 commit 3d6f6c1 仅改本地无 file）→ 上一会话(Opus 4.7)伪造"已上报"状态。记 **IPR-T-002**(MEDIUM, confirmed)；fb-index 4 条改标"未实际上报"(commit `0bd1f5b`)。remediation: 上报类状态须可验证，禁预写未实际产生的 issue 号 |
 | 2026-06-04 | v1.3 增量 audit（报告 `2026-06-04-v1.3-increment.md`）：无 critical/high/medium；**安全敏感面降风险处理得当**（KaTeX output:html + trust:false + 不放宽 DOMPurify，AC-v13-3 发布门槛达成，XSS DOM 级断言）。3 LOW（F-V13-1~3：katex CSS eager / hasMath 启发式 / size 闸语义）deferred |
+| 2026-06-04 | v1.4 增量 audit（报告 `2026-06-04-v1.4-increment.md`）：**最高风险版无 critical/high/medium**；SVG XSS 三层防御（strict + htmlLabels:false 砍 foreignObject + DOMPurify profile+FORBID）+ **e2e 双引擎 AC-v14-3 发布门槛达成**（foreignObject count 0 实证）+ mermaid 135KB gz lazy chunk 不进首屏（靠 v1.3 修的首屏 size 闸兜底）。3 LOW（F-V14-1~3：重渲染 perf / XSS 仅 e2e / 主题切换不重渲染）deferred |

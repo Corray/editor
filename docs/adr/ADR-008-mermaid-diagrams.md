@@ -80,5 +80,9 @@ mermaid `initialize({ theme: <M6 dark ? 'dark' : 'default'> })`；M6 主题切�
 ## References
 
 - 共识 v1.4 TBD-v14-1~5
-- （待补）mermaid 官方文档 + securityLevel 行为 + 版本 + DOMPurify svg profile 放行集（install/实现时附）
+- `mermaid` 11.15.0（2026-06-04 核实）：`render(id,def)→{svg}` async；config `securityLevel:'strict'|'loose'|'antiscript'|'sandbox'` + 根级 `htmlLabels:boolean` + `startOnLoad:boolean`
+- **jsdom 限制（实测确认 / PP-003）**：mermaid 真渲染依赖 `getBBox`/drawRect，jsdom 不实现 → renderMermaid 真渲染**无法单测** → XSS 验证（AC-v14-3）落 e2e（真浏览器，E2E-v14-003 双引擎确认无 alert/script/foreignObject/onerror）
+- **实测 bundle**：mermaid 581KB→135KB gz 独立 lazy chunk（首屏不含）；首屏 77.34KB gz（mermaid+katex 懒加载均不计，靠 v1.3 修正的首屏 size 闸）
+- **占位实现**：源文存占位 div 的 textContent（过 sanitize 更稳，不依赖 ALLOW_DATA_ATTR；data-* 在默认 sanitize 下被剥离）
+- 实现 commit `a32f43b`
 - ADR-002（sanitize 红线）/ ADR-007（懒加载+异步范式）

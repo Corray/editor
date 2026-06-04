@@ -65,6 +65,6 @@ mermaid（数百 KB）动态 import lazy chunk；无图文档首屏不含（首�
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| `hasMermaid` / `ensureMermaid` / `renderMermaid`（+sanitize）| ⏳ | v1.4（security review）|
-| render mermaid 占位 | ⏳ | v1.4 |
-| PreviewArea 异步编排 + 代次令牌防竞态 + 失败降级 + 主题 | ⏳ | v1.4 |
+| `hasMermaid` / `ensureMermaid` / `renderMermaid`（+三层 sanitize）| ✓ 已实现（2026-06-04）| `a32f43b` — strict+htmlLabels:false+DOMPurify profile+FORBID foreignObject |
+| render mermaid 占位 | ✓ 已实现 | `a32f43b` — 源文存 textContent（过 sanitize 更稳，非 data-*）|
+| PreviewArea 异步编排 + 代次令牌防竞态 + 失败降级 + 主题 | ✓ 已实现 | `a32f43b` — gen 令牌丢弃过期；单块 try/catch；theme 读 dataset.theme |

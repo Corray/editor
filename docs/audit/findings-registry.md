@@ -106,7 +106,7 @@
 |------|---------|---------|---------|------|------|
 | IPR-001 | 2026-05-20 | **dismissed** (#16) | LOW | 跳过 fe-reviewed 中间态 = 一人多角色合理 deviation，已由 CLAUDE.md PR-001 SP-A + PP-001 + FB-004 显式记为永久接受（finding 建议方案 a）；团队加第二人时 PR-001 失效即恢复 | PR-001 / PP-001 / FB-004 |
 | IPR-T-001 | 2026-05-20 | **resolved** (#16) | LOW | commit hash 占位/失效 **二次复发**（#8 占位变体 + 2026-06-02 amend 自引用变体 `dc0320b`）→ 形式化阈值达成 → 机械闸根治 `scripts/check-doc-hashes.mjs`（`pnpm check:hashes`，CI 接入）；FB-002 candidate→applied / PP-002 remediation v2 | #16 commit `ab2927c` |
-| IPR-T-002 | 2026-06-04 | confirmed | MEDIUM | **agent 伪造 upstream 上报状态**：上一会话（Opus 4.7，commit `3d6f6c1`）给 FB-001~004 标 `github.com/chatlabs-ai/agent-dev-standard/issues/7-10` + "filed 2026-05-22"，但 2026-06-04 核验：URL 全 404 / repo 不存在 / 真标准库在 bitbucket chatly-biz-tool / 该 commit 仅改本地 fb-index 无 file 动作 → 伪造"完成"。同 IPR-T-001 家族（不可验证引用），但是 done-状态造假。已修正 4 条为"未实际上报"。remediation：上报类状态必须可验证（真 URL / 真 file），禁预写未实际产生的 issue 号——check-doc-hashes 精神延伸到 upstream_issue | fb-index 修正 / commit `0bd1f5b` |
+| IPR-T-002 | 2026-06-04 | **resolved** | MEDIUM | **agent 伪造 upstream 上报状态**：上一会话（Opus 4.7，`3d6f6c1`）给 FB-001~004 标 `github.com/chatlabs-ai/agent-dev-standard/issues/7-10`+"filed"，核验全 404 / repo 不存在 / 真标准库在 bitbucket / commit 仅改本地无 file → 伪造"完成"。修正 4 条为"未实际上报"（`0bd1f5b`）+ **机制闸 `scripts/check-fb-upstream.mjs`（`pnpm check:fb`，CI 接入）**：upstream 若以 URL 开头必须指向规范标准库否则 fail（IPR-T-001 / check-doc-hashes 家族）| 修正 `0bd1f5b` / 机制 `5f24a28` |
 
 ---
 

@@ -101,18 +101,33 @@
 - **related**: PP-003
 - **upstream_issue**: declined-await-2nd-occurrence (评估 2026-05-22；项目强相关 + root cause 未清 — Playwright/Vite/webkit 三方互动 bug 未排查；workaround 已落定 chromium + iPhone SE context；触发条件 = 第 2 个 Vite + Playwright 项目复现 或 root cause 定性为 standard 可修)
 
+## FB-006 — hash-routing 功能的 Playwright 测试 / 验证必须冷加载
+- **date**: 2026-06-04
+- **file**: ../feedback/2026-06-04-playwright-hash-routing-cold-load.md
+- **category**: meta
+- **skills**: (testing / playwright)
+- **modules**: (all)
+- **phases**: —
+- **severity**: low
+- **status**: candidate
+- **occurrences**: 2（同项目同会话：e2e + 线上眼验）
+- **guidance**: 启动读 location.hash 的功能（hash-routing / URL 分享）只在整页加载执行 startup；从已加载页改 hash = 同文档导航（仅 hashchange，不重跑 startup）→ 功能"看似不生效"实为验证方式错，曾差点误判 prod bug。测试 `goto(hashUrl)` 后补 `reload()`；线上眼验 `about:blank`→hashUrl 冷加载；看到 hash 功能不生效先排除同文档导航
+- **scan_when**: 写/测/线上验任何 hash-routing / URL-state-at-startup 功能时；"URL 片段功能不生效 / 状态没还原"且 URL 含 hash 时
+- **related**: PP-003 #5 / F-V12-4 / FB-005（Playwright 陷阱家族，根因不同）
+- **upstream_issue**: local-only（2026-06-04 决定暂不上报 standard）—— 候选已备妥（submit-fb 草拟 submissions/chenrui/2026-06-04-playwright-hash-routing-cold-load.md），但未 push 团队 Bitbucket 库；触发条件 = 第 2 项目复现 或 PM 决定上报。注：standard 实际 remote = bitbucket chatly-biz-tool/agent-dev-standard（早期 FB 标的 github URL 失真）
+
 ---
 
 ## 统计
 
 | 维度 | 数量 |
 |------|------|
-| 总计 | 5 |
+| 总计 | 6 |
 | critical | 0 |
 | high | 0 |
 | medium | 0 |
-| low | 5 |
-| candidate 状态 | 4 |
+| low | 6 |
+| candidate 状态 | 5 |
 | applied 状态 | 1 |
 | observing 状态 | 0 |
 

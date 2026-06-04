@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | **draft**（待 Decider 选 D1 压缩库 + 确认 D2~D5）|
+| **Status** | **accepted**（2026-06-04 Corray：D1 选 B `lz-string`；D2~D5 提议确认）|
 | **Date** | 2026-06-04 |
 | **Decider** | FE (Corray) |
 | **Context** | 共识 v1.2（accepted）/ module-list M4 delta / 架构 §4.1 启动序列 |
@@ -34,7 +34,7 @@
 - **Pros:** 0 依赖；gzip 压缩率好
 - **Cons:** **异步**（流式 API）；需手写 gzip-bytes → base64url → URL 编码；`CompressionStream` 兼容性（Safari 16.4+ / 老浏览器无）→ 需 fallback；复杂度高
 
-### 倾向：**B (`lz-string`)**
+### 决策：**B (`lz-string`)**〔Decider accepted 2026-06-04〕
 它就是为这个场景造的（`*EncodedURIComponent` 系列），同步 + URL-safe + 高压缩率 + 几行调用。~3KB 依赖在 150KB 闸内（66→~69KB）。**反例**：若硬性"不加依赖"，C（CompressionStream）可行但异步 + 兼容 fallback 复杂；A 最简但分享能力太弱（小文档才行）。
 
 > research-first：选定后 install 核对 lz-string 官方 API + 实测 gz；ADR References 附链接 + 访问日期。

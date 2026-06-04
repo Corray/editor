@@ -2,8 +2,8 @@
 
 > v1.0 共识增量 delta（路线图 "v1.1" 遗留的渲染插件项）。仅描述本次行为变化，前序条款不变。
 >
-> **状态：** `draft`（TBD-v13-1 已决 **(b) 先 KaTeX，Mermaid 推 v1.4**；v13-2~5 待确认，已按 KaTeX-only 重构）
-> **flow 位置：** v1.3 入口（共识）→ module-list M2 delta → 架构 + ADR-007 → api+data-model+test-plan delta → 实现
+> **状态：** `accepted`（2026-06-04；v13-1=(b) 先 KaTeX / v13-2~5 全 accept (a)）
+> **flow 位置：** 共识 ✓ accepted → **module-list M2 delta** → 架构 + ADR-007 → api+data-model+test-plan delta → 实现
 > **命名：** semver tag 将是 **v0.4.0**（同先例）。
 >
 > **scope 收窄（2026-06-04 降风险）：** 本版**仅 KaTeX 公式**；Mermaid（异步 + SVG sanitize 大头风险）**推迟 v1.4**。张力 A（异步管线）基本消解（KaTeX 同步，仅一次性懒加载异步）；张力 B（安全）缩小为放行 KaTeX MathML/HTML（非任意 SVG）。

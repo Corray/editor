@@ -2,8 +2,8 @@
 
 > v1.0 共识增量 delta（v1.3 明确推迟到 v1.4 的 Mermaid 项）。仅描述本次行为变化。
 >
-> **状态：** `draft`（待 PM 评审 TBD-v14-1~5）
-> **flow 位置：** v1.4 入口（共识）→ module-list M2 delta → 架构 + ADR-008 → api+test-plan delta → 实现（含 security review）
+> **状态：** `accepted`（2026-06-04 Corray 全盘接受 TBD-v14-1~5 的 AI 倾向 (a)）
+> **flow 位置：** 共识 ✓ accepted → **module-list M2 delta** → 架构 + ADR-008 → api+test-plan delta → 实现（含 security review）
 > **命名：** semver tag 将是 **v0.5.0**（同先例）。
 
 | 版本 | 日期 | 变更摘要 |

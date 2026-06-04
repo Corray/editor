@@ -74,16 +74,16 @@
 
 | 维度 | 内容 |
 |------|------|
-| **核心职责** | 订阅 M1 状态变更，调用渲染管线（parse → sanitize → DOM），输出预览 DOM；**〔v1.3〕挂 KaTeX 公式插件（懒加载）** |
+| **核心职责** | 订阅 M1 状态变更，调用渲染管线（parse → sanitize → DOM），输出预览 DOM；〔v1.3〕KaTeX 公式插件（懒加载）；**〔v1.4〕Mermaid 图（懒加载 + per-block 异步渲染）** |
 | **输入** | M1 的 `document.text` |
 | **输出** | 渲染后的 DOM 节点（供 M4 复制 HTML 时读取 innerHTML）|
-| **PRD 功能项** | F2.1 渲染区 / F2.2 CommonMark 全集 / F2.3 滚动同步（MVP 不做）/ **〔v1.3〕KaTeX 数学公式（Mermaid → v1.4）** |
-| **AC 覆盖** | AC-1 / AC-5 / **〔v1.3〕AC-v13-1~5（公式渲染 / 不加载 / 恶意注入 XSS / 懒加载 / $ 不误判）** |
-| **内部组件** | `PreviewArea` / `MarkdownPipeline (parse + sanitize)` / **〔v1.3〕`katex` 懒加载挂载（动态 import + load 后 re-render）** |
-| **关键约束** | **必须 sanitize**（共识 TBD-4，安全红线）；**〔v1.3〕KaTeX 输出走受控放行 allowlist（MathML/HTML 子集，非 SVG），仍二次 sanitize，需 security review（共识 TBD-v13-3 / ADR-007）** |
-| **渲染时序** | 同步基底（markdown + 已载 KaTeX）；**〔v1.3〕首次遇公式且插件未载 → 异步 import → load 完 re-render（仅首次 raw→渲染闪现）** |
-| **bundle** | **〔v1.3〕KaTeX(+CSS) 动态 import code-split，纯文本文档不加载（守 150KB 首屏闸）** |
-| **不做** | 不写源文回 M1 / 不做滚动同步（v1.1+）/ **〔v1.3〕不做 Mermaid（v1.4）** |
+| **PRD 功能项** | F2.1 渲染区 / F2.2 CommonMark 全集 / F2.3 滚动同步（MVP 不做）/ 〔v1.3〕KaTeX / **〔v1.4〕Mermaid 图** |
+| **AC 覆盖** | AC-1 / AC-5 / 〔v1.3〕AC-v13-1~5 / **〔v1.4〕AC-v14-1~6（图渲染 / 不加载 / 恶意 SVG 注入 XSS / 失败降级 / 竞态 / 主题）** |
+| **内部组件** | `PreviewArea` / `MarkdownPipeline` / 〔v1.3〕`katex` 懒加载 / **〔v1.4〕`mermaid` 懒加载 + per-block 异步渲染（占位→填充，代次令牌防竞态）** |
+| **关键约束** | **必须 sanitize**（共识 TBD-4）；〔v1.3〕KaTeX MathML/HTML 受控放行；**〔v1.4〕Mermaid SVG 受控放行（securityLevel:strict + htmlLabels:false 砍 foreignObject + DOMPurify SVG profile），安全红线/发布门槛，需 security review（共识 TBD-v14-1 / ADR-008）** |
+| **渲染时序** | 同步基底（markdown + 已载 KaTeX）；〔v1.3〕KaTeX 一次性懒加载 re-render；**〔v1.4〕Mermaid 块同步出占位 → 异步逐块 render → 替换（代次令牌丢弃过期，防串图）** |
+| **bundle** | 〔v1.3〕KaTeX 懒加载；**〔v1.4〕Mermaid（数百 KB）动态 import code-split，无图文档不加载（守 150KB 首屏闸）** |
+| **不做** | 不写源文回 M1 / 不做滚动同步（v1.1+）/ **〔v1.4〕Mermaid 不开 foreignObject HTML 标签 / click 交互（securityLevel:strict）** |
 
 ### M3 持久化
 

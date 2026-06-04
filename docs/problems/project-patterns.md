@@ -52,20 +52,23 @@
   2. **Solid effect microtask + setTimeout fake timer 双时间轴**：单独 flush 才能让状态机推进
   3. **vi.fn() 类型推断窄于 ReturnType<typeof vi.fn>**：变量类型用 `Mock<any[], unknown>` 但 init 写法导致 narrow 推断 → 改 `.mockReturnValue()` 模式
   4. **Playwright full 并行 suite page.goto 30s 超时 / 延迟膨胀**：根因 = **并行 worker CPU 竞争**（8 核 default workers 饱和），非 dev-server / webkit-mobile-UA（2026-06-03 重定性，commit `b840aeb`；换 vite preview 未解决，限 `workers:CI?1:2` + `navigationTimeout:60s` 才稳）。CI 稳因 workers:1。先前归因 mobile-safari / dev-server / Playwright 版本均被 confounded
-- **危害**：testing 阶段反复中断节奏，但实际不影响业务正确性 — 是 infrastructure noise
+  5. **hash-routing 功能验证必须冷加载（同文档 hash 变更不触发 startup）**：app 在启动时读 `location.hash`（如 v1.2 分享 `#doc=`）的功能，只在**整页加载**时执行 startup。从已加载页 `goto('/editor/#doc=')` / 地址栏改 hash = **同文档导航**（仅 hashchange，无 reload）→ startup 不重跑 → 功能"看起来坏了"，**实为验证方式错**。**二次复发**（2026-06-04 同会话）：① e2e `page.goto(hashUrl)` 从 beforeEach 的 `/editor/` 过去 = 同文档 → 加 `page.reload()` 修；② 线上 MCP `browser_navigate(hashUrl)` 从 base 页过去 = 同文档 → 误判 prod bug，实需 `about:blank` → hashUrl 冷加载才对
+- **危害**：testing/验证 阶段反复中断节奏 + **误报 prod bug**（#5 差点把正常功能判成线上故障）；实际不影响业务正确性 — 是 infrastructure / 验证认知 noise
 - **remediation**：
   - 新模块单测开始前先 quick check：测试目标 API 是否依赖 jsdom 不实现的接口？
   - 平台 API stub 时用 `as unknown as typeof X` 双跳 cast 而非 `as any`
   - Solid 测试 setup helper 标准化：`setup() { createRoot(...); return { dispose }; }`
   - Playwright 跨浏览器：`test.skip(browserName !== 'chromium', '...')` 适用任何 chromium-specific 权限
   - **Playwright 本地并发**：`workers: CI?1:2` + `navigationTimeout:60s` —— page.goto 超时先怀疑 worker 竞争（CPU 饱和），别先归因 server/engine。（preview webServer 试过又回退 `19226c6` —— 非 flake fix，dev 无 per-run build 更快）
+  - **hash-routing 验证铁律（冷加载）**：测/验任何"启动读 location.hash"的功能，必须保证**整页加载**带着 hash —— e2e 用 `goto(hashUrl)` 后补 `page.reload()`（或从空白页进）；线上眼验从 `about:blank` → hashUrl（新标签/冷导航），**绝不**从已开页改 hash。看到"hash 功能不生效"先排除同文档导航，再怀疑功能本身
 - **实例**：
   - #6 spellcheck enumerated 不是 boolean → 用 `"false"` 字符串 + `getAttribute`
   - #9 Blob.text() 不可用 → 拦截 Blob constructor
   - #10 mobile-safari 30s 超时 → 注释（后 2026-06-03 重定性为 worker 竞争，commit `b840aeb`）
   - 2026-06-03 release 补跑：full 并行 suite flaky（page.goto 30s + 延迟 225ms）→ 限 workers 后 3× 连跑确定性 31/1（preview webServer 试过非 fix 已回退 `19226c6`）
   - #2 / #5 fake timers + flushMicrotasks
-- **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选
+  - 2026-06-04 v1.2 分享：e2e 打开 `#doc=` 链接漏 reload → editor 空（同文档导航）→ 加 `page.reload()`；线上眼验同坑差点误判 prod bug → `about:blank` 冷加载才对（hash-routing #5）
+- **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选（trap #4 worker 竞争 + #5 hash-routing 冷加载 跨项目通用，优先上报）
 
 ---
 

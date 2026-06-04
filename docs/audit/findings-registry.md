@@ -98,6 +98,7 @@
 | F-V12-1 | 2026-06-04 | deferred (v1.2.x) | LOW | 篡改的空 payload `#doc=1.` 解码为 ''，本机有文档时 confirm→accept 清空（合法分享链不会空 payload，手工篡改边缘）| 2026-06-04 audit |
 | F-V12-2 | 2026-06-04 | deferred (v1.2.x) | LOW | 导入不校验文件类型，二进制读为乱码文本入编辑器（DOMPurify 渲染兜底无害）| 2026-06-04 audit |
 | F-V12-3 | 2026-06-04 | deferred (v1.2.x) | LOW | clipboard 不可用时 share 仅 toast 失败，无"手动复制 URL"fallback（URL 已构建）| 2026-06-04 audit (UX) |
+| F-V12-4 | 2026-06-04 | deferred (v1.2.x) | LOW | app 未监听 hashchange：在**已开页**地址栏粘贴分享链接（同文档 hash 变更）不触发加载，需手动 reload。真实场景（点链接=冷加载）不受影响；边缘。线上眼验/e2e 二次踩此同文档陷阱（已落 PP-003 #5）| 2026-06-04 线上眼验 |
 
 ### Issue-process 审查
 

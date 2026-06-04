@@ -2,7 +2,7 @@
 
 | 字段 | 值 |
 |------|----|
-| **Status** | **draft**（待 Decider 选 D1 插件 + 确认 D2~D5；D2 需 security review）|
+| **Status** | **accepted**（2026-06-04：D1 选 `@vscode/markdown-it-katex`；D2~D5 提议确认；D2 安全 allowlist 实现时 security review）|
 | **Date** | 2026-06-04 |
 | **Decider** | FE (Corray) |
 | **Context** | 共识 v1.3（accepted，KaTeX-only）/ module-list M2 delta / ADR-001 插件挂载点 / ADR-002 sanitize |
@@ -32,7 +32,7 @@
 - **Pros:** 可配多种分隔风格（dollars/brackets）、katex backend、维护中
 - **Cons:** API 更重；分隔风格灵活反而需多配；对单一 `$`/`$$` 需求 overkill
 
-### 倾向：**A `@vscode/markdown-it-katex`**
+### 决策：**A `@vscode/markdown-it-katex`**〔Decider accepted 2026-06-04〕
 现代 + 维护活跃 + `$` 转义成熟，正配 TBD-v13-5（`$`/`$$` + "$5" 不误判）。katex 本体懒加载控 bundle。**反例**：若未来要多分隔风格（`\(...\)` 等），texmath (C) 更灵活——届时可换。原版 (B) 维护停滞，排除。
 
 > research-first：选定后 install 核对插件 API + katex 版本 + 实测懒加载 chunk gz；ADR References 附链接 + 访问日期。

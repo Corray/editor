@@ -74,7 +74,7 @@ header「导入」→ <input type=file accept=".md,.markdown,.txt"> change
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| `ShareAPI.share()` + lz 编码 + 超限拒绝 | ⏳ | v1.2 |
-| `ImportAPI.readFile()` | ⏳ | v1.2 |
-| `readSharedDocument()` + 启动序列接入 | ⏳ | v1.2 |
-| header 分享/导入按钮 + confirm + i18n | ⏳ | v1.2 |
+| `ShareAPI.share()` + lz 编码 + 超限拒绝 | ✓ 已实现（2026-06-04）| `7e15d00` — createShareAPI（clipboard+toast）；ShareUrl.ts buildShareUrl |
+| `ImportAPI.readFile()` | ✓ 已实现 | `7e15d00` — ImportFile.ts（File.text）|
+| `readSharedDocument()` + 启动序列接入 | ✓ 已实现 | `7e15d00` — 分享>IDB+confirm；取消→保留本机；replaceState 清 hash |
+| header 分享/导入按钮 + confirm + i18n | ✓ 已实现 | `7e15d00` — 8 i18n key；隐藏 file input；13 单测 + ac7 e2e 5 场景 |

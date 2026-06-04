@@ -103,4 +103,7 @@ export function readSharedDocument(): string | null;
 ## References
 
 - 共识 v1.2 TBD-v12-1~5
-- （待补）`lz-string` 官方文档链接 + 访问日期（选定后 install 附）
+- `lz-string` v1.5.0（github.com/pieroxy/lz-string）—— `compressToEncodedURIComponent` / `decompressFromEncodedURIComponent`，往返核实（2026-06-04，含 CJK/特殊字符，输出 URL-safe）
+- **实测 bundle**：lz-string 引入后 66.17 → 68.21 KB gz（+~2KB；ADR 估 ~3KB 略高）；<150KB 闸
+- **ESM interop 注意**：src/unit（Vite）可用 named import；Playwright e2e（Node ESM）需 `import LZString from 'lz-string'` 默认导入（lz-string 仅暴露 default）
+- 实现 commit `7e15d00`

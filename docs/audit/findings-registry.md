@@ -91,6 +91,14 @@
 | F-V11-5 | 2026-06-04 | deferred (v1.1.x) | LOW | `storage.unavailable` i18n 死 key（v1.0 起未用）| 2026-06-04 audit |
 | F-V11-6 | 2026-06-04 | deferred (v1.1.x) | LOW | performWrite 异步写理论可重叠（status 短暂错乱，极边缘）| 2026-06-04 audit |
 
+### v1.2 增量审查（2026-06-04 / 报告 `2026-06-04-v1.2-increment.md`）
+
+| 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
+|------|---------|---------|---------|------|------|
+| F-V12-1 | 2026-06-04 | deferred (v1.2.x) | LOW | 篡改的空 payload `#doc=1.` 解码为 ''，本机有文档时 confirm→accept 清空（合法分享链不会空 payload，手工篡改边缘）| 2026-06-04 audit |
+| F-V12-2 | 2026-06-04 | deferred (v1.2.x) | LOW | 导入不校验文件类型，二进制读为乱码文本入编辑器（DOMPurify 渲染兜底无害）| 2026-06-04 audit |
+| F-V12-3 | 2026-06-04 | deferred (v1.2.x) | LOW | clipboard 不可用时 share 仅 toast 失败，无"手动复制 URL"fallback（URL 已构建）| 2026-06-04 audit (UX) |
+
 ### Issue-process 审查
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
@@ -114,3 +122,4 @@
 | 2026-06-02 | #14 推进 → umbrella 可关闭：GAP-002 删 `getRootElement` 声明（零消费方，消除 drift）→ resolved；API-T-001 toast console stub → 真 DOM UI（无 lib，接口冻结，7 单测）→ resolved。api-spec §3.2/5.5/§4.1 同步。**v0.1.0 audit 三 umbrella #14/#15/#16 全关闭** |
 | 2026-06-03 | v0.1.1 增量 audit（报告 `2026-06-03-v0.1.1-increment.md`）：增量无 critical/high/medium，无安全/契约/架构违规；新增 5 条 LOW（BHV-006~010，UX/a11y/perf/coverage）全 deferred v1.1。最值得做 = BHV-010（F1.2/F1.3/toast 无 e2e）|
 | 2026-06-04 | v1.1 增量 audit（报告 `2026-06-04-v1.1-increment.md`）：迁移核心逻辑正确（幂等+数据安全+竞争防护有测试佐证）；新增 6 条（F-V11-1~6）。**F-V11-1 MEDIUM**（IDB 读错静默降级 + 潜在覆盖丢数据）+ F-V11-2 LOW（resetStorage 竞争）建议 tag v1.1.0 前修；F-V11-3~6 deferred v1.1.x |
+| 2026-06-04 | v1.2 增量 audit（报告 `2026-06-04-v1.2-increment.md`）：无 critical/high/medium；不受信分享/导入内容经现有 DOMPurify 安全兜底（无新 XSS 面）+ async catch 不静默（F-V11-1 教训已落实）。3 条 LOW（F-V12-1~3：空 payload 清空 / 导入不校验类型 / clipboard fallback）deferred v1.2.x |

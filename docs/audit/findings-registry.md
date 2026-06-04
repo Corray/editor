@@ -84,8 +84,8 @@
 
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
-| F-V11-1 | 2026-06-04 | confirmed | MEDIUM | `loadStoredDocument` IDB 读错静默降级 → 显空文档无信号；若用户随后编辑，write-back 覆盖 IDB 仍在的旧文档 → 潜在真数据丢失。建议 tag 前修（catch 加 log + 区分读错 vs 空）| 2026-06-04 audit |
-| F-V11-2 | 2026-06-04 | confirmed | LOW | `_storage.ts` resetStorage `open('editor')` 无 version，竞争下可建无 kv store 的 DB → app upgrade 不触发。建议 open(1)+upgrade | 2026-06-04 audit (test-infra) |
+| F-V11-1 | 2026-06-04 | **resolved** | MEDIUM | `loadStoredDocument` IDB 读错静默降级 → 显空 + 潜在覆盖丢数据。修：拆 get/migration catch，读错 console.error + storage.loadError toast，不裸吞；UT-MIG-006 | tag 前修 / commit `c26d1db` |
+| F-V11-2 | 2026-06-04 | **resolved** | LOW | `_storage.ts` resetStorage `open('editor')` 无 version 竞争可建无 store DB。修：`open(1)+onupgradeneeded` 建 kv，schema-safe | commit `c26d1db` |
 | F-V11-3 | 2026-06-04 | deferred (v1.1.x) | LOW | clear() IDB delete 失败静默吞无 log | 2026-06-04 audit |
 | F-V11-4 | 2026-06-04 | deferred (v1.1.x) | LOW | 每次加载 hydrate 触发冗余 write-back（幂等无害，status 抖动）| 2026-06-04 audit |
 | F-V11-5 | 2026-06-04 | deferred (v1.1.x) | LOW | `storage.unavailable` i18n 死 key（v1.0 起未用）| 2026-06-04 audit |

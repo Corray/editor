@@ -5,7 +5,7 @@
 | **date** | 2026-06-04 |
 | **status** | candidate |
 | **severity** | low |
-| **occurrences** | 6（同项目：① e2e hash 导航 ② 线上眼验 hash 导航 ③ 线上眼验破缓存 ④ 眼验 console 干净 ⑤ SW/Cache 切不了 offline 的三证据替代 ⑥ 状态变迁功能跨部署验——同属"线上眼验认知陷阱→误判/漏验"家族）|
+| **occurrences** | 7（同项目：① e2e hash 导航 ② 线上眼验 hash 导航 ③ 线上眼验破缓存 ④ 眼验 console 干净 ⑤ SW/Cache 切不了 offline 的三证据替代 ⑥ 状态变迁功能跨部署验 ⑦ PWA 破缓存须破 SW 层（`?cb=` 不够）——同属"线上眼验认知陷阱→误判/漏验"家族）|
 | **category** | meta |
 | **skills** | (testing / playwright) |
 | **modules** | (all) |
@@ -57,7 +57,7 @@ standard 的 Playwright 测试指南增补"hash-routing 功能"段：
 - 写/测任何 hash-routing / URL-state-at-startup 功能时
 - 线上眼验 hash 驱动功能时（必须冷加载复现）
 - 看到"URL 片段功能不生效 / 编辑器空 / 状态没还原"且 URL 含 hash 时——先查是否同文档导航
-- **部署修复后线上眼验时**——破缓存（§姊妹教训 1）
+- **部署修复后线上眼验时**——破缓存（§姊妹教训 1）；**PWA 项目额外破 SW 层**（§1b：unregister SW + caches.delete，`?cb=` 不够）
 - **任何线上 / e2e 眼验收尾时**——查 console 截零（§姊妹教训 2）
 - **验 SW / Cache / 离线类功能但工具切不了网时**——三证据链替代 + 标推断边界（§姊妹教训 3）
 - **验依赖状态变迁触发的功能（SW 更新、版本迁移提示等）时**——跨部署验或标 gap（§姊妹教训 4）
@@ -71,6 +71,7 @@ standard 的 Playwright 测试指南增补"hash-routing 功能"段：
 - **现象**：部署 CSP 修复后线上眼验，`browser_navigate('https://.../editor/')` 仍报**旧** console 错（"font-src was not explicitly set"）→ 一度疑"修复没部署/没生效"。`curl` 线上 `index.html` 实测已是新版（含 `font-src 'self' data:`）。根因 = **浏览器 HTTP-cache 旧 index.html**。
 - **修**：眼验破缓存——`browser_navigate('https://.../?cb=<变化值>')`（query 变化强制重取文档）/ 或先 `curl` 比对线上资源确认部署到位再眼验。
 - **铁律**：重新导航仍报旧错 → **先怀疑浏览器缓存，别先归因部署失败**。与主体同源：缓存导致"验到的不是最新被测物"。
+- **1b — PWA 加层（2026-06-05 v0.8.0 踩，重要）**：项目上了 Service Worker（PWA）后，**`?cb=` 不够**——SW precache 是 **cache-first**，query 绕不过 SW 缓存层 → 眼验看到的是**上一版整个 app**。v0.8.0 眼验先看到 v0.7.0（panes clientH 不 respect 新布局 + 无 data-source-line），一度误判"新版没生效"。修：PWA 破缓存必须**额外破 SW 层** —— `(await navigator.serviceWorker.getRegistrations()).forEach(r=>r.unregister())` + `(await caches.keys()).forEach(k=>caches.delete(k))`，再 reload。**判据**：被验 origin 装了 SW（看 `navigator.serviceWorker.controller` 非空 / Application 面板有 SW）→ 眼验破缓存默认含 SW 层，不只 `?cb=`。这是"上了 PWA 就每次版本眼验都会踩"的固定陷阱。
 
 ### 2. 眼验固定检查项必含"console 干净"，不只"功能渲染出来"
 

@@ -4,6 +4,58 @@
 
 ---
 
+## v0.7.0 — 多文档（文件列表 / 路线图 v1.6 里程碑）（2026-06-05）
+
+**Tag:** `v0.7.0` @ commit `ee14b28`
+**Range:** `dee3bdb..ee14b28`（v0.6.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.7.0
+**命名:** 路线图 "v1.6" → semver **v0.7.0**。**迄今最大改动（L3）**：持久化根基单→多 + 新模块 M9。
+
+### Scope — 多文档管理
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| M9 文档管理 | `f2986e2` | documents store(DB v1→2) + activeId + CRUD + 标题自动派生 + `D_<uuid>` |
+| 第三次迁移 | `f2986e2` | 单→多（先写后删幂等）；谱系 ls(v1.0)→kv(v1.1)→documents(v1.6)；含 v1.0 localStorage 直跳兜底路 |
+| M3 改造 | `f2986e2` | 退化为状态机/时机，写目标 = `docManager.saveActiveText`（单 store 单写者）|
+| 涟漪（改 v1.2）| `f2986e2` | import/open-shared → 新建文档（不覆盖；退役 share/import overwrite confirm）|
+| 文件列表 UI | `f2986e2` | DocList 桌面 sidebar + DocDrawer 移动抽屉 + header 文档按钮 |
+| FOUC 修 | `f2986e2` | applyInitialTheme 同步先于 async bootstrap 的 await（深色不闪白）|
+
+### Quality Gates [已验证: 2026-06-05 本机]
+
+- 159 unit tests pass（M9 13：迁移 3 路 / CRUD / 标题派生 / no-op-save）
+- 65 e2e pass / 1 skip（chromium + webkit + pwa project；ac10 多文档 4 场景 + ac2/ac7 v1.6 语义）
+- 首屏 80.01 KB gzipped（M9 +~1.8KB；预算 150 KB）；DB version 1→2
+- TS strict typecheck 0 error；doc-hash + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.6（TBD-v16-1~7 accept）→ module-list **M9 新增 + M3 改造** → 架构 + **ADR-010**（documents store / D_uuid / 先写后删第三次迁移 / M3-M9 分解 / 涟漪 / 抽屉）→ **data-model v1.6（核心：DB v2 + documents schema + 迁移层）** → api/test-plan v1.6 → 实现。research-first：crypto.randomUUID（Node18+/浏览器原生）+ idb DB 升级路径核实。
+
+### Audit（2026-06-05 增量，最大版 L3）
+
+报告 `docs/audit/2026-06-05-v1.6-increment.md`：**最大版无 critical/high/medium**。迁移数据安全经复用 v1.1 先写后删幂等 + 单写者纪律 + 3 路迁移测试控住；**v1.0 直跳 v1.6 盖空 case 被实现期 e2e（E2E-v11-001）捕获并补兜底路**（印证 Check 环节价值）。
+- F-V16-1~5 LOW（切换竞态 info / 无重命名 / 降级单文档 / 多 tab / 列表规模）→ deferred v1.6.x
+
+### Known Limitations（v0.7.0）
+
+- 无手动重命名（标题自动派生，多篇可能同名，F-V16-2）
+- 隐私模式（IDB 不可用）仅单文档降级，多文档不跨 reload（F-V16-3）
+- 多 tab 并发 last-write-wins，无协调（F-V16-4）
+- 大量文档（100+）列表/启动 perf 未压测（F-V16-5）
+- 文件夹/分组 / 标签 / 全文搜索 / 拖拽排序 / 后端同步(v2.0) 按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- 最大版（L3 持久化根基改）无 MEDIUM（迁移数据安全控住 + 实现期 e2e 兜出盖空 case）
+- 附带修 async bootstrap FOUC（v1.5 以来 bootstrap 渐重的副作用）
+- package.json 0.6.0 → 0.7.0
+
+---
+
 ## v0.6.0 — Service Worker 离线（PWA / 路线图 v1.5 里程碑）（2026-06-05）
 
 **Tag:** `v0.6.0` @ commit `dee3bdb`

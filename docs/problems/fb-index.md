@@ -110,10 +110,10 @@
 - **phases**: —
 - **severity**: low
 - **status**: candidate
-- **occurrences**: 4（同项目同会话：hash e2e / hash 线上 / 破缓存 / console 干净——同元模式"验证方式错→误判"）
-- **guidance**: 三件套同源（看到"不生效"先质疑验证方式再质疑被测物）：① hash-routing/URL-state 功能只在整页加载跑 startup，从已加载页改 hash = 同文档导航不重跑 → 测 `goto(hashUrl)` 后补 `reload()` / 线上 `about:blank`→hashUrl 冷加载；② 部署修复后线上眼验破缓存（`?cb=` 或 curl 比对），重新导航仍报旧错先怀疑浏览器缓存别先归因没部署；③ 眼验固定查 console 截零（功能渲染 ≠ console 干净，红字即便不阻断也要定性）
-- **scan_when**: 写/测/线上验任何 hash-routing / URL-state-at-startup 功能时；"URL 片段功能不生效"且 URL 含 hash 时；部署修复后线上眼验时（破缓存）；任何线上/e2e 眼验收尾时（查 console）
-- **related**: PP-003 #5/#6/#7 / F-V12-4 / F-V13-4 / FB-005（Playwright 陷阱家族，根因不同）
+- **occurrences**: 6（同项目：hash e2e / hash 线上 / 破缓存 / console 干净 / SW-Cache 三证据链 / 状态变迁跨部署——同元模式"线上眼验认知陷阱→误判/漏验"）
+- **guidance**: 5 件套同源（看到"不生效/没问题"先质疑验证方式再质疑被测物）：① hash-routing/URL-state 功能只在整页加载跑 startup，从已加载页改 hash = 同文档导航不重跑 → 测 `goto(hashUrl)` 后补 `reload()` / 线上 `about:blank`→hashUrl 冷加载；② 部署修复后线上眼验破缓存（`?cb=` 或 curl 比对），重新导航仍报旧错先怀疑浏览器缓存别先归因没部署；③ 眼验固定查 console 截零（功能渲染 ≠ console 干净）；④ SW/Cache/离线类功能工具切不了 offline 时用三证据链（SW controlling + caches 实测填充 + 同构 e2e）+ 验 cache 分布 + 标"断网 reload 是推断非亲跑"，别假装也别跳过；⑤ 依赖状态变迁触发的功能（SW 更新提示）单次部署验不到 → 跨部署验或显式标 gap
+- **scan_when**: 写/测/线上验任何 hash-routing / URL-state-at-startup 功能时；"URL 片段功能不生效"且 URL 含 hash 时；部署修复后线上眼验时（破缓存）；任何线上/e2e 眼验收尾时（查 console）；验 SW/Cache/离线类功能但工具切不了网时（三证据链）；验依赖状态变迁触发的功能时（跨部署或标 gap）
+- **related**: PP-003 #5/#6/#7/#8/#9 / F-V12-4 / F-V13-4 / F-V15-3 / FB-005（Playwright 陷阱家族，根因不同）
 - **upstream_issue**: local-only（2026-06-04 决定暂不上报 standard）—— 候选已备妥（submit-fb 草拟 submissions/chenrui/2026-06-04-playwright-hash-routing-cold-load.md），但未 push 团队 Bitbucket 库；触发条件 = 第 2 项目复现 或 PM 决定上报。注：standard 实际 remote = bitbucket chatly-biz-tool/agent-dev-standard（早期 FB 标的 github URL 失真）
 
 ---

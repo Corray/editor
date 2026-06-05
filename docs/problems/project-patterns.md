@@ -55,6 +55,8 @@
   5. **hash-routing 功能验证必须冷加载（同文档 hash 变更不触发 startup）**：app 在启动时读 `location.hash`（如 v1.2 分享 `#doc=`）的功能，只在**整页加载**时执行 startup。从已加载页 `goto('/editor/#doc=')` / 地址栏改 hash = **同文档导航**（仅 hashchange，无 reload）→ startup 不重跑 → 功能"看起来坏了"，**实为验证方式错**。**二次复发**（2026-06-04 同会话）：① e2e `page.goto(hashUrl)` 从 beforeEach 的 `/editor/` 过去 = 同文档 → 加 `page.reload()` 修；② 线上 MCP `browser_navigate(hashUrl)` 从 base 页过去 = 同文档 → 误判 prod bug，实需 `about:blank` → hashUrl 冷加载才对
   6. **线上眼验改完要破缓存，否则验到旧资源（与 #5 同源——"验证方式错→误判"）**：部署修复后线上眼验，浏览器 HTTP-cache 旧 `index.html` → 重新 `browser_navigate` 仍看到旧 console 报错 → 一度误判"修复没生效/没部署"。实测 `curl` 线上 HTML 已是新版。修：眼验破缓存——`browser_navigate('https://.../?cb=<变化值>')`（query 变化强制重取文档）/ 或 curl 比对线上资源确认部署到位再眼验。**2026-06-04 v0.5.0 CSP 修复复验时踩**：cache-bust 后 console 才归零
   7. **眼验固定检查项必含"console 干净"，不只"功能渲染出来"（漏检 2 版）**：眼验只看"公式/图渲染出来了"不查 console → v0.4.0 引入的 CSP 字体拦截红字漏了 v0.4.0 + v0.5.0 两版（F-V13-4），到 v1.4 眼验才 surface。功能正常 ≠ console 干净。修：眼验 checklist 固定一步"console error/warning 截零"，红字即便不影响功能也要定性（记 finding 或当场修）
+  8. **SW/Cache 类功能眼验：工具切不了 offline 时用"三证据链"替代，别假装验过也别跳过**：v0.6.0 PWA 眼验时 Playwright MCP 未暴露 `setOffline`（网络 toggle 需 CDP/context 能力）→ 无法在真浏览器亲跑"线上断网 reload"。应对：不谎称"验过离线"，改用**三证据链**——① SW 已 `controlling` + scope 正确 ② `caches.keys()`/`cache.keys()` 实测离线必需资产已填充 ③ 同一份构建（preview=线上 dist）的 e2e 已跑通 `context.setOffline`。**并验 cache 分布是否符合设计**（v0.6.0：precache 47 + mermaid-chunks 4 = 印证 F-V15-1 的 cache-on-use 架构）。诚实标注"断网 reload 本身是推断，非真浏览器亲跑"
+  9. **依赖"状态变迁触发"的功能（SW 更新提示）单次部署眼验验不了，需跨部署或标 gap**：SW「有新版→提示刷新」要 SW 进 waiting 才触发，单次部署的眼验造不出"新版"→ 该链路眼验天然验不到（v0.6.0 AC-v15-4 仅单测 mock，F-V15-3）。修：要么后续任意一次部署后顺带眼验更新提示，要么显式标记为"跨部署才能验"的已知 gap，不在单次眼验里假装覆盖
 - **危害**：testing/验证 阶段反复中断节奏 + **误报 prod bug**（#5 差点把正常功能判成线上故障）；实际不影响业务正确性 — 是 infrastructure / 验证认知 noise
 - **remediation**：
   - 新模块单测开始前先 quick check：测试目标 API 是否依赖 jsdom 不实现的接口？
@@ -65,6 +67,8 @@
   - **hash-routing 验证铁律（冷加载）**：测/验任何"启动读 location.hash"的功能，必须保证**整页加载**带着 hash —— e2e 用 `goto(hashUrl)` 后补 `page.reload()`（或从空白页进）；线上眼验从 `about:blank` → hashUrl（新标签/冷导航），**绝不**从已开页改 hash。看到"hash 功能不生效"先排除同文档导航，再怀疑功能本身
   - **线上眼验破缓存（#6）**：部署后眼验加 cache-bust（`?cb=<变化值>`）或先 curl 比对线上资源确认部署到位，再下"修没生效"结论。"重新导航仍报旧错"先怀疑浏览器 HTTP-cache，别先归因部署失败
   - **眼验 console 干净（#7）**：眼验固定 checklist 加一步"console error/warning 截零"——功能渲染 ✓ 不代表 console 干净；红字即便不阻断功能也要定性（记 finding 或当场修），不许"看着能用就过"
+  - **SW/Cache 眼验三证据链（#8）**：眼验工具切不了 offline 时，用 SW controlling + caches 实测填充 + 同构 e2e 三证据替代，并验 cache 分布符合设计；诚实标"断网 reload 是推断非亲跑"，不谎称验过、不跳过
+  - **状态变迁功能跨部署验（#9）**：SW 更新提示等"需状态变迁才触发"的功能，单次部署眼验验不到 → 后续部署顺带验，或显式标"跨部署 gap"，不假装单次覆盖
 - **实例**：
   - #6 spellcheck enumerated 不是 boolean → 用 `"false"` 字符串 + `getAttribute`
   - #9 Blob.text() 不可用 → 拦截 Blob constructor
@@ -74,7 +78,9 @@
   - 2026-06-04 v1.2 分享：e2e 打开 `#doc=` 链接漏 reload → editor 空（同文档导航）→ 加 `page.reload()`；线上眼验同坑差点误判 prod bug → `about:blank` 冷加载才对（hash-routing #5）
   - 2026-06-04 v0.5.0 CSP 修复复验（#6）：改 `font-src` 部署后 `browser_navigate` 仍报旧 CSP 字体错 → 疑"没生效"，curl 线上 HTML 实已更新 → `?cb=` cache-bust 后 console 归零（浏览器缓存旧文档）
   - 2026-06-04 F-V13-4（#7）：v0.4.0 起 CSP 拦 KaTeX 字体的 console 红字，因眼验只看"公式渲染出来"未查 console，漏 v0.4.0 + v0.5.0 两版 → v1.4 眼验才发现并修
-- **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选（trap #4 worker 竞争 + #5 hash-routing 冷加载 + **#6 眼验破缓存 + #7 眼验 console 干净**跨项目通用，优先上报；#5/#6/#7 同属"线上眼验认知陷阱→误判"家族，合并入 FB-006）
+  - 2026-06-05 v0.6.0 PWA（#8）：MCP 无 setOffline → 用 SW controlling + caches 实测（precache 47 + mermaid-chunks 4）+ 同构 e2e 三证据验离线，诚实标"断网 reload 推断非亲跑"
+  - 2026-06-05 v0.6.0 PWA（#9）：SW 更新提示单次部署验不到（需 SW waiting）→ 标 F-V15-3 gap，留后续部署顺带验
+- **跨项目升级路径**：升级为 standard testing setup template（vitest + playwright + jsdom）的"已知陷阱"段 → FB 候选（trap #4 worker 竞争 + #5 hash-routing 冷加载 + **#6 眼验破缓存 + #7 眼验 console 干净 + #8 SW/Cache 三证据链 + #9 状态变迁跨部署验**跨项目通用，优先上报；#5/#6/#7/#8/#9 同属"线上眼验认知陷阱→误判/漏验"家族，合并入 FB-006）
 
 ---
 

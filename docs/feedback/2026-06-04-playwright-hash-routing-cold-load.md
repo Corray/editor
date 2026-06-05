@@ -5,7 +5,7 @@
 | **date** | 2026-06-04 |
 | **status** | candidate |
 | **severity** | low |
-| **occurrences** | 4（同项目同会话：① e2e hash 导航 ② 线上眼验 hash 导航 ③ 线上眼验破缓存 ④ 眼验 console 干净——同属"验证方式错→误判"家族）|
+| **occurrences** | 6（同项目：① e2e hash 导航 ② 线上眼验 hash 导航 ③ 线上眼验破缓存 ④ 眼验 console 干净 ⑤ SW/Cache 切不了 offline 的三证据替代 ⑥ 状态变迁功能跨部署验——同属"线上眼验认知陷阱→误判/漏验"家族）|
 | **category** | meta |
 | **skills** | (testing / playwright) |
 | **modules** | (all) |
@@ -59,6 +59,8 @@ standard 的 Playwright 测试指南增补"hash-routing 功能"段：
 - 看到"URL 片段功能不生效 / 编辑器空 / 状态没还原"且 URL 含 hash 时——先查是否同文档导航
 - **部署修复后线上眼验时**——破缓存（§姊妹教训 1）
 - **任何线上 / e2e 眼验收尾时**——查 console 截零（§姊妹教训 2）
+- **验 SW / Cache / 离线类功能但工具切不了网时**——三证据链替代 + 标推断边界（§姊妹教训 3）
+- **验依赖状态变迁触发的功能（SW 更新、版本迁移提示等）时**——跨部署验或标 gap（§姊妹教训 4）
 
 ## §同源姊妹教训（2026-06-04 v0.5.0 眼验补）
 
@@ -76,16 +78,30 @@ standard 的 Playwright 测试指南增补"hash-routing 功能"段：
 - **修**：眼验 checklist 固定一步——**console error/warning 截零**；红字即便不阻断功能也要定性（记 finding 或当场修），不许"看着能用就过"。
 - **元教训**：功能正常 ≠ 验证充分。眼验的"看"必须包含 console，不只视觉渲染。
 
+### 3. SW/Cache 类功能：眼验工具切不了 offline 时，用"三证据链"替代，别假装也别跳过
+
+- **现象**：v0.6.0 PWA 眼验，Playwright MCP 未暴露 `setOffline`（网络 toggle 需 CDP/context 能力）→ 无法在真浏览器亲跑"线上断网 reload"。
+- **应对（三证据链）**：不谎称"验过离线"、也不跳过，改用——① SW 已 `controlling` + scope 正确；② `caches.keys()`/`cache.keys()` 实测离线必需资产已填充；③ 同一份构建（`vite preview` = 线上 dist）的 e2e 已跑通 `context.setOffline`。**并验 cache 分布符合设计**（v0.6.0：`workbox-precache-v2` 47 entries + `mermaid-chunks` 4 entries = 印证 F-V15-1 的 precache/runtimeCaching cache-on-use 架构）。
+- **诚实标注**：明说"断网 reload 本身是基于 cache 填充+SW 接管+同构 e2e 的**推断**，非真浏览器亲跑"。
+- **元教训**：眼验工具有能力边界时，老实承认 + 用可得的间接证据补强 + 标清推断边界 —— 比"假装验过"或"干脆跳过"都强。
+
+### 4. 依赖"状态变迁触发"的功能（如 SW 更新提示）单次部署眼验验不了 → 跨部署或标 gap
+
+- **现象**：SW「有新版→提示刷新」要 SW 进 waiting 才触发；单次部署的眼验造不出"新版"→ 该链路眼验天然验不到（v0.6.0 AC-v15-4 仅单测 mock，F-V15-3）。
+- **修**：要么**后续任意一次部署后顺带眼验**更新提示，要么显式标记为"**跨部署才能验**"的已知 gap，**不在单次眼验里假装覆盖**。
+- **元教训**：有些功能的触发条件是"两次状态之间的差异"，单点快照验不到 —— 识别这类功能，用跨快照验证或诚实标 gap。
+
 ## related
 
-- **PP-003** `docs/problems/project-patterns.md` trap #5（hash 冷加载）/ #6（眼验破缓存）/ #7（眼验 console 干净）——项目内 tendency 视角
+- **PP-003** `docs/problems/project-patterns.md` trap #5（hash 冷加载）/ #6（眼验破缓存）/ #7（眼验 console 干净）/ #8（SW/Cache 三证据链）/ #9（状态变迁跨部署验）——项目内 tendency 视角
 - **F-V12-4** `docs/audit/findings-registry.md`（app 侧未监听 hashchange，LOW deferred）
 - **F-V13-4** `docs/audit/findings-registry.md`（§姊妹教训 2 的具体 finding：CSP font-src 缺失，眼验 console 漏检 2 版，已 resolved）
+- **F-V15-3** `docs/audit/findings-registry.md`（§姊妹教训 4 的具体 finding：SW 更新提示仅单测，无跨部署 e2e，LOW deferred）
 - **FB-005**（同为 Playwright 测试陷阱家族，但根因不同——那是 worker 竞争）
 
 ## 升级路径
 
-- **当前**：candidate；同项目同会话 4 次复发（hash e2e / hash 线上 / 破缓存 / console 干净——同元模式"验证方式错→误判"）
+- **当前**：candidate；同项目 6 次复发（hash e2e / hash 线上 / 破缓存 / console 干净 / SW-Cache 三证据链 / 状态变迁跨部署——同元模式"线上眼验认知陷阱→误判/漏验"）
 - **observing**：第 2 个 Playwright 项目复现任一姊妹教训 → occurrences 升
-- **applied**：standard Playwright 指南补"**线上眼验认知陷阱**"段（hash 冷加载 + 部署后破缓存 + console 干净三件套）→ 标 applied
-- **verified**：applied 后新项目首次眼验即避坑（不再误判功能/部署，不漏 console）→ verified
+- **applied**：standard Playwright 指南补"**线上眼验认知陷阱**"段（5 件套：hash 冷加载 + 部署后破缓存 + console 干净 + SW/Cache 三证据链 + 状态变迁跨部署验）→ 标 applied
+- **verified**：applied 后新项目首次眼验即避坑（不误判功能/部署、不漏 console、不假装验过工具够不到的、不漏状态变迁功能）→ verified

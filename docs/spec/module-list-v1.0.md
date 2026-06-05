@@ -43,6 +43,7 @@
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | in-dev (#12 完整 LayoutAPI) | matchMedia API（reactive viewport）+ Solid signals | 容纳 M1/M2 + 装饰 M6 |
 | **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | in-dev (#5 实现) | `prefers-color-scheme` media query、localStorage | → 写 `<html>.dataset.theme`（M5 容器及全文档 CSS Variables 响应）|
 | **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | in-dev (#3 实现) | — | 横切，被 M1-M6 chrome 文案消费 |
+| **M8 PWA/离线**〔v1.5 新增〕| Service Worker precache 离线 + Manifest 可安装 + 更新提示 | 共识 v1.5 | PRD §7 v1.1 候选 | FE | proposed (v1.5) | vite-plugin-pwa 1.3.0 / Workbox 7.4.1（构建期）、Service Worker / Cache API、`virtual:pwa-register` | 横切基础设施；更新提示 → shared/toast.ts；不依赖业务模块 |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）
 
@@ -154,6 +155,20 @@
 | **内部组件** | `i18n.ts`（极简 dict + `t()` 函数 + 当前语言变量）|
 | **MVP 内容** | 中文 dict 涵盖：清空 / 下载 / 复制 / 主题切换 / 默认占位符 / toast 文案 |
 | **不做** | 不做语言切换 UI（v1.1+）/ 不做复数变形 / 不做日期本地化 |
+
+### M8 PWA/离线〔v1.5 新增〕
+
+| 维度 | 内容 |
+|------|------|
+| **核心职责** | Service Worker precache 静态资源（离线可用）+ Web App Manifest（可安装）+ SW 更新提示 |
+| **输入** | 构建产物（Vite hashed 资源 + 懒加载 chunk）；运行时网络状态 |
+| **输出** | 离线可访问的应用；安装入口；有更新时 toast 提示 |
+| **PRD 功能项** | §7 v1.1 候选「Service Worker 离线」|
+| **AC 覆盖** | AC-v15-1~6（离线打开 / 离线编辑持久化 / 离线渲染公式图 / 更新提示 / 可安装 / CSP 干净）|
+| **内部组件** | `vite.config.ts` VitePWA 插件配置；`public/` 图标 + manifest（插件生成）；`main.tsx` SW 注册（`virtual:pwa-register` onNeedRefresh → toast）|
+| **决策** | ADR-009（D1=vite-plugin-pwa / D2=含懒加载 chunk / D3=prompt 更新 / D4=scope `/editor/` + CSP manifest-src）|
+| **不做** | 不做后台同步 / push 通知（v2+ 账号体系）/ 不动持久化模型 / 不动渲染管线 |
+| **边界** | 横切基础设施，不侵入 M1-M7 业务逻辑；仅复用 M7 i18n（更新文案）+ shared/toast（提示载体）|
 
 ---
 

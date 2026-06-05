@@ -56,7 +56,7 @@ test.describe('AC-v15 PWA 离线', () => {
     await context.setOffline(false);
   });
 
-  test('E2E-v15-003: 离线打开含公式/图→chunk 已 precache→离线渲染', async ({
+  test('E2E-v15-003: 公式始终离线可用(precache)；图按用过的离线可用(runtimeCaching) — F-V15-1 修订', async ({
     page,
     context,
   }) => {
@@ -65,16 +65,22 @@ test.describe('AC-v15 PWA 离线', () => {
     await page.reload();
     await waitForSWActive(page);
 
-    await context.setOffline(true);
-    await page.reload();
     const ta = page.getByRole('textbox', tb);
-    // KaTeX
-    await ta.fill('$E = mc^2$\n\n```mermaid\ngraph TD; A-->B\n```');
     const preview = page.getByLabel('Preview');
+    // 先在线渲染一次 mermaid → mmd chunk 经 runtimeCaching(CacheFirst) 缓存
+    await ta.fill('$E = mc^2$\n\n```mermaid\ngraph TD; A-->B\n```');
     await expect(preview.locator('.katex').first()).toBeVisible({
       timeout: 15_000,
     });
-    // Mermaid SVG (chunk precached → offline render)
+    await expect(preview.locator('svg').first()).toBeVisible({ timeout: 15_000 });
+
+    // 断网 reload → katex(precache) + mermaid(已缓存) 都应离线渲染
+    await context.setOffline(true);
+    await page.reload();
+    await ta.fill('$a^2+b^2$\n\n```mermaid\ngraph TD; X-->Y\n```');
+    await expect(preview.locator('.katex').first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(preview.locator('svg').first()).toBeVisible({ timeout: 15_000 });
     await context.setOffline(false);
   });

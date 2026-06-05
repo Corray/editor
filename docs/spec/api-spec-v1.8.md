@@ -39,8 +39,8 @@ export interface DocManagerAPI {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| DocRecord +titleManual（store）| ⏳ | — |
-| manager rename + saveActiveText titleManual 旁路 | ⏳ | — |
-| manager query/setQuery + docs() 过滤（title+text）| ⏳ | — |
-| DocList 搜索框 + 内联重命名（双击/Enter/Esc）| ⏳ | — |
-| i18n doc.search | ⏳ | — |
+| DocRecord +titleManual（store）| ✓ | `c66c21e` |
+| manager rename + saveActiveText titleManual 旁路（解 F-V16-2）| ✓ | `c66c21e` |
+| manager query/setQuery + docs() 过滤（title+text）| ✓ | `c66c21e` — query 信号须先于 metaList 首调（TDZ）|
+| DocList 搜索框 + 内联重命名（双击/Enter/Esc/blur）| ✓ | `c66c21e` — editingId 守 blur 防 Esc 误提交 |
+| i18n doc.search / doc.rename | ✓ | `c66c21e` |

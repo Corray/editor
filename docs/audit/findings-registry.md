@@ -117,7 +117,7 @@
 | F-V15-4 | 2026-06-05 | proposed | LOW | AC-v15-5 可安装性仅验 manifest link 存在；字段完整性/icon 可达/安装入口未自动断言（手验）| 2026-06-05 audit |
 | F-V15-5 | 2026-06-05 | proposed | LOW (info) | workbox-window 进首屏 +0.84KB（prompt 模式必需，固有成本，可接受）| 2026-06-05 audit |
 | F-V16-1 | 2026-06-05 | proposed | LOW (info) | 切换竞态：switchTo flush 后 M3 旧 debounce 计时未 cancel → 切换后或 fire 一次冗余 saveActiveText（no-op guard 兜住，无损）| 2026-06-05 v1.6 audit |
-| F-V16-2 | 2026-06-05 | proposed | LOW | 无手动重命名（TBD-v16-5a）→ 多篇可能同标题（Untitled/同首行）辨识度低 | 2026-06-05 audit |
+| F-V16-2 | 2026-06-05 | **resolved** | LOW | 无手动重命名（TBD-v16-5a）→ 多篇可能同标题（Untitled/同首行）辨识度低。**v1.8 解决 `c66c21e`**：M9 +rename（titleManual 锁）+ DocList 内联重命名 + 搜索过滤（ADR-012）| 2026-06-05 audit |
 | F-V16-3 | 2026-06-05 | proposed | LOW | IDB 不可用（隐私模式）仅单文档 localStorage 降级；多文档 in-memory 不跨 reload（罕见，已 toast）| 2026-06-05 audit |
 | F-V16-4 | 2026-06-05 | proposed | LOW | 多 tab 并发写 documents/activeDocId → last-write-wins，无 versionchange 协调（已知边界）| 2026-06-05 audit |
 | F-V16-5 | 2026-06-05 | proposed | LOW | startup getAll 全量 doc(含 text)入内存；100+ 大文档内存/启动成本增（未压测）| 2026-06-05 audit |
@@ -125,6 +125,10 @@
 | F-V17-2 | 2026-06-05 | proposed | LOW | source-line 对齐到块顶，块内偏移不细调（长段落内滚动预览跳段首）| 2026-06-05 audit |
 | F-V17-3 | 2026-06-05 | proposed | LOW | lineHeight 换算在长行软换行下偏差（视觉行≠逻辑行，scrollTop/lineHeight 高估行号）| 2026-06-05 audit |
 | F-V17-4 | 2026-06-05 | proposed | LOW (info) | rAF 单帧反馈环窗口；极端高频 scroll 理论可能漏防一帧（未实测抖动）| 2026-06-05 audit |
+| F-V18-1 | 2026-06-05 | proposed | LOW | 搜索 docs() 每次 query 变全量扫 records（含 text）includes；100+ 大文档线性扫（同 F-V16-5 家族，未压测）| 2026-06-05 v1.8 audit |
+| F-V18-2 | 2026-06-05 | proposed | LOW (info) | 搜索仅过滤列表，不跳转/高亮匹配位置（共识范围内）| 2026-06-05 audit |
+| F-V18-3 | 2026-06-05 | proposed | LOW | 内联重命名靠双击，无可见编辑图标 → 发现性低（title tooltip 部分缓解）| 2026-06-05 audit |
+| F-V18-4 | 2026-06-05 | proposed | LOW (info) | 搜索过滤后 active doc 可能不在结果中（仍 active + 编辑区显示，列表无高亮项）轻微不一致 | 2026-06-05 audit |
 
 ### Issue-process 审查
 
@@ -157,3 +161,4 @@
 | 2026-06-05 | v1.5 增量 audit（报告 `2026-06-05-v1.5-increment.md`）：PWA 安全面（SW/Workbox 自托管 + CSP 不放宽 script-src）守住、首屏闸守住、离线正确性 e2e 实证（含离线 mermaid/katex 渲染）。**1 MEDIUM F-V15-1（precache 3.7MB）**——accept 的 D2(a) 放大后果，建议 tag v0.6.0 前定夺（F-V11-1 先例）+ 4 LOW（F-V15-2~5）|
 | 2026-06-05 | v1.6 增量 audit（报告 `2026-06-05-v1.6-increment.md`）：**最大版（L3 持久化根基单→多）无 critical/high/medium**。迁移数据安全经复用 v1.1 先写后删幂等 + 单写者纪律 + 3 路迁移测试控住；v1.0 直跳盖空 case 被实现期 e2e 捕获补强；附带修 async bootstrap FOUC。5 LOW（F-V16-1~5：切换竞态 info / 无重命名 / 降级单文档 / 多 tab / 列表规模）deferred |
 | 2026-06-05 | v1.7 增量 audit（报告 `2026-06-05-v1.7-increment.md`）：**无 critical/high/medium**。安全相关（动 sanitize ADD_ATTR data-source-line）经"仅放行惰性属性 + XSS 复验双引擎"控住，ADR-002 红线不放宽，AC-v17-5 达成；附带修潜伏布局（面板不滚/整页滚，live MCP 探针定位）+ copyHtml 剥离内部属性。4 LOW（F-V17-1~4：布局 info / 块顶对齐 / 软换行映射 / 反馈环窗口）deferred |
+| 2026-06-05 | v1.8 增量 audit（报告 `2026-06-05-v1.8-increment.md`）：**无 critical/high/medium**。**F-V16-2 resolved**（重命名 titleManual 锁）；无 DB 升级 + 旧记录兼容 + 无 XSS 面（重命名纯文本）；实现期 2 bug（query TDZ / Esc-unmount-blur）测试捕获。4 LOW（F-V18-1~4：搜索 perf / 不跳转 / 双击发现性 / 搜索-active 不一致）deferred |

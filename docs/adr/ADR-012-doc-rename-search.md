@@ -46,4 +46,6 @@ M9 manager 持 `query` 信号 + `setQuery`。`docs()` 返回**按 query 过滤**
 - ADR-010（M9 / saveActiveText 自动派生标题——本 ADR 加 titleManual 旁路）
 - data-model v1.6（documents store / DocRecord 字段）；IndexedDB store 内 schemaless（加可选字段无需 onupgradeneeded）
 - F-V16-2（同名问题 / 本 ADR resolve）
-- 实现 commit：`<TBD 实现后回填>`
+- 实现 commit：`c66c21e`
+- **实现期 2 个 bug 实测捕获**：① query 信号声明须先于 `createSignal(metaList())` 首调（metaList 读 query → TDZ，否则全 M9 测试挂）；② Esc 取消重命名后 `<Show>` unmount 触发 onBlur → 误提交丢弃值 → onBlur 加 `editingId()===d.id` 守卫
+- 实测：unit 166（M9 +rename-lock/empty/search/legacy）+ e2e 87（ac12 rename/锁/Esc/搜索 双引擎）；首屏 81.04KB

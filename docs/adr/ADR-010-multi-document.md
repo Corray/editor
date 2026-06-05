@@ -73,5 +73,8 @@
 - ADR-005（IDB 单 doc，本 ADR 扩展其 schema）/ data-model v1.1 §1「预留 documents store」
 - ADR-006（share/import，本 ADR 改其涟漪语义）
 - arch-constraints §6（应用层 ID `D_<uuid>` + 前缀常量集中 `EntityIdPrefixes`）
-- `crypto.randomUUID()`（核实：现代浏览器 + GH Pages HTTPS 下可用；jsdom/test 需 polyfill 或 fake）
-- 实现 commit：`<TBD 实现后回填>`
+- `crypto.randomUUID()`（核实：现代浏览器 + GH Pages HTTPS 下可用；Node 18+/jsdom 测试环境原生可用，无需 polyfill）
+- 实现 commit：`f2986e2`
+- **迁移兜底补强**：实现期 e2e（E2E-v11-001）暴露 v1.0 用户直跳 v1.6 的盖空 case → loadInitialDocs 迁移源补 localStorage `editor.document.v1` 兜底路（D3 谱系 ls→kv→documents 全覆盖）
+- **附带修 FOUC**：async bootstrap（await loadInitialDocs 先于 render）使主题应用延迟 → 深色用户闪白 → 新增 `applyInitialTheme()` 同步先于 await（ac6 e2e 暴露）
+- 实测：unit 159（M9 13）+ e2e 65/1skip（ac10 多文档 + ac2/ac7 v1.6 语义双引擎）；首屏 80.01KB

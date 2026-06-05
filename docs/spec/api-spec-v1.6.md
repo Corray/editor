@@ -58,9 +58,10 @@ export interface DocManagerAPI {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| M9 DocManagerAPI（store I/O + CRUD + active + 标题派生）| ⏳ | — |
-| loadInitialDocs（第三次迁移 先写后删）| ⏳ | — |
-| M3 saveActiveText 写目标改造 + clear 改清内容 | ⏳ | — |
-| M4 import/open-shared → create 新建（退役 2 confirm key）| ⏳ | — |
-| DocList(桌面 sidebar) + DocDrawer(移动) UI | ⏳ | — |
-| DB v1→2 升级 + idPrefix（D_）| ⏳ | — |
+| M9 DocManagerAPI（manager.ts：CRUD + active + 标题派生 + no-op-save 防抖）| ✓ | `f2986e2` |
+| loadInitialDocs（store.ts：第三次迁移 先写后删 + v1.0 localStorage 直跳兜底路）| ✓ | `f2986e2` |
+| M3 saveActiveText 写目标改造 + clear 改清内容（单写者）| ✓ | `f2986e2` |
+| M4 import/open-shared → create 新建（退役 share/import overwrite confirm）| ✓ | `f2986e2` |
+| DocList(桌面 sidebar) + DocDrawer(移动抽屉) UI + header 文档按钮 | ✓ | `f2986e2` |
+| DB v1→2 升级 + idPrefix（D_）+ async bootstrap | ✓ | `f2986e2` |
+| 附带修 FOUC：applyInitialTheme 同步先于 await（async bootstrap 深色闪光）| ✓ | `f2986e2` |

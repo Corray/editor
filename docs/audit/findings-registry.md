@@ -116,6 +116,11 @@
 | F-V15-3 | 2026-06-05 | proposed | LOW | AC-v15-4 更新提示仅单测 mock 覆盖，无真实"两次部署"e2e（test-plan §3 声明难模拟）；线上眼验可补 | 2026-06-05 audit |
 | F-V15-4 | 2026-06-05 | proposed | LOW | AC-v15-5 可安装性仅验 manifest link 存在；字段完整性/icon 可达/安装入口未自动断言（手验）| 2026-06-05 audit |
 | F-V15-5 | 2026-06-05 | proposed | LOW (info) | workbox-window 进首屏 +0.84KB（prompt 模式必需，固有成本，可接受）| 2026-06-05 audit |
+| F-V16-1 | 2026-06-05 | proposed | LOW (info) | 切换竞态：switchTo flush 后 M3 旧 debounce 计时未 cancel → 切换后或 fire 一次冗余 saveActiveText（no-op guard 兜住，无损）| 2026-06-05 v1.6 audit |
+| F-V16-2 | 2026-06-05 | proposed | LOW | 无手动重命名（TBD-v16-5a）→ 多篇可能同标题（Untitled/同首行）辨识度低 | 2026-06-05 audit |
+| F-V16-3 | 2026-06-05 | proposed | LOW | IDB 不可用（隐私模式）仅单文档 localStorage 降级；多文档 in-memory 不跨 reload（罕见，已 toast）| 2026-06-05 audit |
+| F-V16-4 | 2026-06-05 | proposed | LOW | 多 tab 并发写 documents/activeDocId → last-write-wins，无 versionchange 协调（已知边界）| 2026-06-05 audit |
+| F-V16-5 | 2026-06-05 | proposed | LOW | startup getAll 全量 doc(含 text)入内存；100+ 大文档内存/启动成本增（未压测）| 2026-06-05 audit |
 
 ### Issue-process 审查
 
@@ -146,3 +151,4 @@
 | 2026-06-04 | v1.3 增量 audit（报告 `2026-06-04-v1.3-increment.md`）：无 critical/high/medium；**安全敏感面降风险处理得当**（KaTeX output:html + trust:false + 不放宽 DOMPurify，AC-v13-3 发布门槛达成，XSS DOM 级断言）。3 LOW（F-V13-1~3：katex CSS eager / hasMath 启发式 / size 闸语义）deferred |
 | 2026-06-04 | v1.4 增量 audit（报告 `2026-06-04-v1.4-increment.md`）：**最高风险版无 critical/high/medium**；SVG XSS 三层防御（strict + htmlLabels:false 砍 foreignObject + DOMPurify profile+FORBID）+ **e2e 双引擎 AC-v14-3 发布门槛达成**（foreignObject count 0 实证）+ mermaid 135KB gz lazy chunk 不进首屏（靠 v1.3 修的首屏 size 闸兜底）。3 LOW（F-V14-1~3：重渲染 perf / XSS 仅 e2e / 主题切换不重渲染）deferred |
 | 2026-06-05 | v1.5 增量 audit（报告 `2026-06-05-v1.5-increment.md`）：PWA 安全面（SW/Workbox 自托管 + CSP 不放宽 script-src）守住、首屏闸守住、离线正确性 e2e 实证（含离线 mermaid/katex 渲染）。**1 MEDIUM F-V15-1（precache 3.7MB）**——accept 的 D2(a) 放大后果，建议 tag v0.6.0 前定夺（F-V11-1 先例）+ 4 LOW（F-V15-2~5）|
+| 2026-06-05 | v1.6 增量 audit（报告 `2026-06-05-v1.6-increment.md`）：**最大版（L3 持久化根基单→多）无 critical/high/medium**。迁移数据安全经复用 v1.1 先写后删幂等 + 单写者纪律 + 3 路迁移测试控住；v1.0 直跳盖空 case 被实现期 e2e 捕获补强；附带修 async bootstrap FOUC。5 LOW（F-V16-1~5：切换竞态 info / 无重命名 / 降级单文档 / 多 tab / 列表规模）deferred |

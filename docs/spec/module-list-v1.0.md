@@ -183,7 +183,8 @@
 | **AC 覆盖** | AC-v16-1~8 |
 | **内部组件** | `m9-doc-manager/`：`store.ts`（documents store + 迁移 loadInitialDocs）、`manager.ts`（DocManagerAPI + signals）、`title.ts`（派生）、`idPrefix.ts`（`D_`）、`DocList.tsx`（桌面）、`DocDrawer.tsx`（移动）|
 | **决策** | ADR-010（D1 documents store / D2 D_uuid / D3 先写后删迁移 / D4 M3-M9 分解 / D5 标题派生 / D6 涟漪 / D7 抽屉）|
-| **不做** | 文件夹/分组 / 标签 / 全文搜索 / 拖拽排序 / 手动重命名（MVP）/ 多 tab race 处理 |
+| **不做** | 文件夹/分组 / 标签 / 拖拽排序 / 多 tab race 处理（〔v1.8〕**手动重命名 + 标题/内容搜索已加**，见下）|
+| **〔v1.8 增强〕** | +`rename(id,title)`（titleManual 锁，解 F-V16-2）+`query`/`setQuery`（docs() 按 title+text 过滤）；DocRecord +titleManual；DocList 搜索框 + 内联双击重命名（ADR-012）|
 | **边界** | 拥有 documents store 唯一写权（单写者）；M3 经 saveActiveText 间接写；不侵入渲染（M2）/ 主题（M6）|
 
 ### M10 滚动同步〔v1.7 新增〕

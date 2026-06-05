@@ -4,6 +4,56 @@
 
 ---
 
+## v0.8.0 — 滚动同步（编辑↔预览 / 路线图 v1.7 里程碑）（2026-06-05）
+
+**Tag:** `v0.8.0` @ commit `7a854b9`
+**Range:** `ee14b28..7a854b9`（v0.7.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.8.0
+**命名:** 路线图 "v1.7" → semver **v0.8.0**。最后一个清晰的 FE-only roadmap 功能。L2 + 安全相关（动 sanitize 配置）。
+
+### Scope — 编辑↔预览滚动同步
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| source-line 映射 | `7c4d7ad` | markdown-it core rule 给块标 `data-source-line`（`token.map[0]`）|
+| ADD_ATTR 放行 | `7c4d7ad` | render 的 DOMPurify 加 `ADD_ATTR:['data-source-line']`（仅惰性属性，红线不放宽）|
+| M10 双向同步 | `7c4d7ad` | createScrollSync：编辑↔预览（source-line 映射 + syncing/rAF 反馈环防护）|
+| copyHtml 剥离 | `7c4d7ad` | 复制 HTML 去掉 data-source-line（内部属性不外泄）|
+| 布局修 | `7c4d7ad` | #root min-height→height:100vh + overflow:hidden（面板内部滚动 / 滚动同步前置）|
+
+### Quality Gates [已验证: 2026-06-05 本机]
+
+- 162 unit tests pass（source-line 标注 + ADD_ATTR XSS 复验）
+- 79 e2e pass（chromium + webkit + pwa；ac11 滚动同步 4 场景：编辑→预览 / 预览→编辑 / XSS / 移动不启用）
+- 首屏 80.51 KB gzipped（M10 极小；预算 150 KB）
+- TS strict typecheck 0 error；doc-hash + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.7（TBD-v17-1~5 accept）→ module-list **M10 新增 + M2 source-line** → 架构 + **ADR-011**（source-line 映射 / ADD_ATTR + XSS 复验 / 反馈环防护 / 双向桌面 only / M10）→ api/test-plan v1.7 → 实现。无 data-model 变更。research-first：markdown-it token.map + core.ruler + DOMPurify ADD_ATTR 语义核实。
+
+### Audit（2026-06-05 增量，安全相关）
+
+报告 `docs/audit/2026-06-05-v1.7-increment.md`：**无 critical/high/medium**。安全敏感点（动 sanitize ADD_ATTR）经"仅放行惰性属性 + XSS 复验双引擎"控住，ADR-002 红线不放宽，**AC-v17-5 发布门槛达成**。
+- F-V17-1~4 LOW（布局 info / 块顶对齐 / 软换行映射 / 反馈环窗口）→ deferred v1.7.x
+
+### Known Limitations（v0.8.0）
+
+- 移动端不启用滚动同步（单栏，设计如此）
+- source-line 对齐到块顶，块内偏移不细调（F-V17-2）
+- 长行软换行下 lineHeight 行号换算有偏差（F-V17-3）
+- 文件夹/搜索/后端同步(v2.0) 按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- AC-v17-5 XSS 复验（ADD_ATTR 不破防）双引擎通过
+- 附带修潜伏布局（面板不滚 / 整页滚 → 面板内部滚动）+ copyHtml 剥离内部属性
+- package.json 0.7.0 → 0.8.0
+
+---
+
 ## v0.7.0 — 多文档（文件列表 / 路线图 v1.6 里程碑）（2026-06-05）
 
 **Tag:** `v0.7.0` @ commit `ee14b28`

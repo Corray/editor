@@ -26,6 +26,8 @@ import { createLayout } from '@/modules/m5-layout/layout';
 import type { LayoutAPI, MobileTab } from '@/modules/m5-layout/api';
 import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
+import { registerSW } from 'virtual:pwa-register';
+import { wireUpdatePrompt } from '@/modules/m8-pwa/register';
 import './styles/main.css';
 
 interface AppShellProps {
@@ -283,4 +285,8 @@ if (root) {
       />
     );
   }, root);
+
+  // M8 PWA (ADR-009)：注册 SW + 更新提示（registerType:'prompt'）。
+  // dev 下 devOptions.enabled:false → registerSW 为 no-op；真 SW 仅 build+preview/线上。
+  wireUpdatePrompt(registerSW);
 }

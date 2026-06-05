@@ -51,6 +51,10 @@ export const zhCNDict = {
   'share.overwrite.confirm': '打开分享内容将替换当前文档，是否继续？',
   'import.overwrite.confirm': '导入将替换当前文档，是否继续？',
   'import.readFail': '文件读取失败',
+
+  // M8 PWA / offline (v1.5)
+  'pwa.updateAvailable': '有新版本可用',
+  'pwa.refresh': '刷新',
 } as const;
 
 export type DictKey = keyof typeof zhCNDict;

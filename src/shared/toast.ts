@@ -12,8 +12,19 @@
  */
 export type ToastLevel = 'info' | 'warn' | 'error';
 
+/** Optional action button (v1.5 / PWA update prompt — API-spec v1.5 §3). */
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastAPI {
-  show(message: string, level?: ToastLevel, durationMs?: number): void;
+  show(
+    message: string,
+    level?: ToastLevel,
+    durationMs?: number,
+    action?: ToastAction,
+  ): void;
 }
 
 const DEFAULT_MS = 3000;
@@ -36,18 +47,40 @@ function ensureContainer(): HTMLElement | null {
 }
 
 export const toast: ToastAPI = {
-  show(message, level = 'info', durationMs = DEFAULT_MS) {
+  show(message, level = 'info', durationMs = DEFAULT_MS, action) {
     const root = ensureContainer();
     if (!root) return; // non-DOM env — no-op
 
     const el = document.createElement('div');
     el.className = `toast toast--${level}`;
-    el.textContent = message;
-    root.appendChild(el);
 
-    window.setTimeout(() => {
+    const text = document.createElement('span');
+    text.className = 'toast__msg';
+    text.textContent = message;
+    el.appendChild(text);
+
+    const dismiss = () => {
       el.classList.add('toast--leaving');
       window.setTimeout(() => el.remove(), LEAVE_MS);
-    }, durationMs);
+    };
+
+    if (action) {
+      // Action toast (e.g. PWA update prompt): persistent — no auto-dismiss;
+      // stays until the user clicks the action.
+      const btn = document.createElement('button');
+      btn.className = 'toast__action';
+      btn.type = 'button';
+      btn.textContent = action.label;
+      btn.addEventListener('click', () => {
+        action.onClick();
+        dismiss();
+      });
+      el.appendChild(btn);
+      root.appendChild(el);
+      return;
+    }
+
+    root.appendChild(el);
+    window.setTimeout(dismiss, durationMs);
   },
 };

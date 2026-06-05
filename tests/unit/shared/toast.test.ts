@@ -72,4 +72,35 @@ describe('shared/toast — real DOM toast (API-T-001)', () => {
     expect(() => toast.show('x', 'info')).not.toThrow();
     expect(() => toast.show('y')).not.toThrow();
   });
+
+  it('UT-TOAST-008: action renders a button; click fires onClick + dismisses (v1.5)', () => {
+    const onClick = vi.fn();
+    toast.show('update', 'info', 0, { label: 'Refresh', onClick });
+    const btn = document.querySelector<HTMLButtonElement>('.toast__action');
+    expect(btn).not.toBeNull();
+    expect(btn?.textContent).toBe('Refresh');
+    expect(document.querySelector('.toast__msg')?.textContent).toBe('update');
+    btn?.click();
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(
+      document.querySelector('.toast')?.classList.contains('toast--leaving'),
+    ).toBe(true);
+  });
+
+  it('UT-TOAST-009: action toast persists (no auto-dismiss) — update prompt stays', () => {
+    vi.useFakeTimers();
+    toast.show('update', 'info', 1000, { label: 'R', onClick: () => {} });
+    vi.advanceTimersByTime(10_000); // far past any duration
+    // still present (persistent until user acts)
+    expect(document.querySelectorAll('.toast').length).toBe(1);
+    expect(
+      document.querySelector('.toast')?.classList.contains('toast--leaving'),
+    ).toBe(false);
+  });
+
+  it('UT-TOAST-010: 3-arg calls unchanged (backward compat — no button)', () => {
+    toast.show('plain', 'warn', 500);
+    expect(document.querySelector('.toast__action')).toBeNull();
+    expect(document.querySelector('.toast')?.textContent).toBe('plain');
+  });
 });

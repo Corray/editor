@@ -62,3 +62,6 @@ build/
 # GitHub identity（Layout A — 不进任何 repo）
 # ============================================================
 .gh-account
+
+# Playwright MCP eye-verification scratch (screenshots/console logs)
+.playwright-mcp/

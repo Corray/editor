@@ -16,15 +16,16 @@ function asDom(html: string): HTMLDivElement {
 
 describe('M2 pipeline.render — UT-PV (basic CommonMark)', () => {
   it('UT-PV-001 / F-E1: heading', () => {
-    expect(render('# Hello')).toContain('<h1>Hello</h1>');
+    // v1.7: 块带 data-source-line → DOM 断言（标签 + 文本，不耦合属性）
+    const h1 = asDom(render('# Hello')).querySelector('h1');
+    expect(h1?.textContent).toBe('Hello');
   });
 
   it('UT-PV-002 / F-E2: list', () => {
-    const r = render('- a\n- b\n');
-    expect(r).toContain('<ul>');
-    expect(r).toContain('<li>a</li>');
-    expect(r).toContain('<li>b</li>');
-    expect(r).toContain('</ul>');
+    const dom = asDom(render('- a\n- b\n'));
+    expect(dom.querySelector('ul')).not.toBeNull();
+    const items = [...dom.querySelectorAll('li')].map((li) => li.textContent);
+    expect(items).toEqual(['a', 'b']);
   });
 
   it('UT-PV-003 / F-E4: fenced code block with language', () => {
@@ -92,29 +93,66 @@ describe('M2 pipeline.render — family-E (XSS matrix)', () => {
 });
 
 // =====================================================
+// v1.7 滚动同步 — source-line 标注 + ADD_ATTR XSS 复验（ADR-011 / AC-v17-5）
+// =====================================================
+
+describe('M2 pipeline.render — v1.7 source-line（ADR-011 D1）', () => {
+  it('UT-M2-source-line: 块元素带 data-source-line（值=源文行号）', () => {
+    const dom = asDom(render('# H1\n\npara line 2\n'));
+    const h1 = dom.querySelector('h1');
+    expect(h1?.getAttribute('data-source-line')).toBe('0'); // 0-based 首行
+    const p = dom.querySelector('p');
+    expect(p?.getAttribute('data-source-line')).toBe('2'); // 第 3 行（空行后）
+  });
+
+  it('UT-M2-source-line-list: 列表项也带行号（嵌套块）', () => {
+    const dom = asDom(render('- a\n- b\n'));
+    const items = [...dom.querySelectorAll('li[data-source-line]')];
+    expect(items.length).toBe(2);
+  });
+});
+
+describe('M2 pipeline.render — v1.7 ADD_ATTR XSS 复验（AC-v17-5 发布门槛）', () => {
+  it('UT-M2-sanitize-add-attr: 放行 data-source-line 后 <script>/onerror/javascript: 仍剥离', () => {
+    // 标准 XSS 向量在 ADD_ATTR 配置下仍须被拦
+    expect(asDom(render('<script>alert(1)</script>')).querySelector('script')).toBeNull();
+    expect(
+      asDom(render('<img src=x onerror="alert(1)">')).querySelector('[onerror]'),
+    ).toBeNull();
+    expect(
+      asDom(render('[a](javascript:alert(1))')).querySelector('a[href^="javascript:"]'),
+    ).toBeNull();
+    // 仅 data-source-line 被放行；尝试注入其他 data-* / 事件属性不应活
+    const dom = asDom(render('# hi\n'));
+    const h1 = dom.querySelector('h1');
+    expect(h1?.hasAttribute('data-source-line')).toBe(true); // 允许
+    expect(dom.querySelector('[onclick]')).toBeNull(); // 事件属性仍无
+  });
+});
+
+// =====================================================
 // family-E 合法元素 — 不要误杀
 // =====================================================
 
 describe('M2 pipeline.render — family-E (legitimate features pass through)', () => {
   it('F-E3: table renders', () => {
     const md = '| a | b |\n|---|---|\n| 1 | 2 |\n';
-    const r = render(md);
-    expect(r).toContain('<table>');
-    expect(r).toContain('<th>a</th>');
-    expect(r).toContain('<td>1</td>');
+    const dom = asDom(render(md)); // v1.7: 块带 data-source-line → 用 DOM 断言（不脆耦合属性）
+    expect(dom.querySelector('table')).not.toBeNull();
+    expect(dom.querySelector('th')?.textContent).toBe('a');
+    expect([...dom.querySelectorAll('td')].some((td) => td.textContent === '1')).toBe(true);
   });
 
   it('F-E8: valid image renders with src + alt', () => {
-    const r = render('![alt-text](https://example.com/img.png)');
-    expect(r).toContain('<img');
-    expect(r).toContain('src="https://example.com/img.png"');
-    expect(r).toContain('alt="alt-text"');
+    const img = asDom(render('![alt-text](https://example.com/img.png)')).querySelector('img');
+    expect(img?.getAttribute('src')).toBe('https://example.com/img.png');
+    expect(img?.getAttribute('alt')).toBe('alt-text');
   });
 
   it('blockquote renders', () => {
-    const r = render('> quoted\n');
-    expect(r).toContain('<blockquote>');
-    expect(r).toContain('quoted');
+    const dom = asDom(render('> quoted\n'));
+    expect(dom.querySelector('blockquote')).not.toBeNull();
+    expect(dom.textContent).toContain('quoted');
   });
 });
 

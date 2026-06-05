@@ -33,7 +33,9 @@ export interface ImportAPI {
 export function createExportAPI(text: Accessor<string>): ExportAPI {
   return {
     downloadMarkdown: () => downloadMarkdown(text()),
-    copyHtml: () => copyHtml(render(text())),
+    // v1.7：剥离 data-source-line（M2 滚动同步内部属性，不该进用户复制的 HTML）
+    copyHtml: () =>
+      copyHtml(render(text()).replace(/ data-source-line="\d+"/g, '')),
   };
 }
 

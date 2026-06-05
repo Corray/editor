@@ -1,5 +1,5 @@
 /* @refresh reload */
-import { Show, createSignal } from 'solid-js';
+import { Show, createSignal, createEffect, onCleanup } from 'solid-js';
 import type { Accessor, Setter } from 'solid-js';
 import { render } from 'solid-js/web';
 import { createDocumentState } from '@/modules/m1-editor/state';
@@ -16,6 +16,7 @@ import {
 } from '@/modules/m9-doc-manager/api';
 import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
 import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
+import { createScrollSync } from '@/modules/m10-scroll-sync/sync';
 import { createTheme, applyInitialTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
 import {
@@ -137,6 +138,22 @@ function AppShell(props: AppShellProps) {
 
   const [drawerOpen, setDrawerOpen] = createSignal(false);
 
+  // M10 滚动同步（v1.7 / ADR-011）：仅桌面双栏挂载；viewport 切换 / 字号变 → 重建。
+  const [editorEl, setEditorEl] = createSignal<HTMLTextAreaElement>();
+  const [previewEl, setPreviewEl] = createSignal<HTMLElement>();
+  createEffect(() => {
+    props.prefs.fontSize(); // dep：字号变 → 行高变 → 重建以更新映射
+    if (props.layout.viewport() !== 'desktop') return;
+    const ed = editorEl();
+    const pv = previewEl();
+    if (!ed || !pv) return;
+    const cs = getComputedStyle(ed);
+    let lh = parseFloat(cs.lineHeight);
+    if (!Number.isFinite(lh)) lh = parseFloat(cs.fontSize) * 1.6 || 24;
+    const sync = createScrollSync(ed, pv, lh);
+    onCleanup(() => sync.dispose());
+  });
+
   return (
     <main class="app-shell">
       <header class="app-header">
@@ -241,9 +258,10 @@ function AppShell(props: AppShellProps) {
               <EditorArea
                 state={props.state}
                 showLineNumbers={props.prefs.showLineNumbers}
+                editorRef={setEditorEl}
               />
             </div>
-            <PreviewArea state={props.state} />
+            <PreviewArea state={props.state} scrollRef={setPreviewEl} />
           </div>
         </div>
       </Show>

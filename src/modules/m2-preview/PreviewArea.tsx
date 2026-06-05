@@ -12,6 +12,8 @@ import { t } from '@/modules/m7-i18n/i18n';
 
 export interface PreviewAreaProps {
   state: DocumentState;
+  /** 上抛预览滚动容器（.preview-pane）（M10 滚动同步用 / v1.7）。 */
+  scrollRef?: (el: HTMLElement) => void;
 }
 
 /**
@@ -78,7 +80,11 @@ export function PreviewArea(props: PreviewAreaProps) {
   });
 
   return (
-    <div class="preview-pane" aria-label="Preview">
+    <div
+      class="preview-pane"
+      aria-label="Preview"
+      ref={(el) => props.scrollRef?.(el)}
+    >
       <Show
         when={props.state.text() !== ''}
         fallback={

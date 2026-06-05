@@ -8,6 +8,8 @@ export interface EditorAreaProps {
    * 显示时同步关闭软换行（white-space: pre），让行号精确对应逻辑行。
    */
   showLineNumbers?: Accessor<boolean>;
+  /** 上抛 textarea 元素（M10 滚动同步用 / v1.7）。省略 = 不上抛。 */
+  editorRef?: (el: HTMLTextAreaElement) => void;
 }
 
 /**
@@ -55,6 +57,7 @@ export function EditorArea(props: EditorAreaProps) {
         class="editor-area"
         classList={{ 'editor-area--nowrap': showGutter() }}
         aria-label="Markdown editor"
+        ref={(el) => props.editorRef?.(el)}
         value={props.state.text()}
         onInput={(e) => props.state.setText(e.currentTarget.value)}
         onScroll={syncScroll}

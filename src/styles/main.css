@@ -1,7 +1,10 @@
 #root {
-  min-height: 100vh;
+  /* v1.7：固定视口高度（非 min-height）→ 编辑/预览面板各自内部滚动（而非整页滚动），
+     滚动同步（M10）才有可滚区间；split editor 的标准 UX。 */
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-shell {

@@ -8,9 +8,26 @@ const MD_OPTS = {
   typographer: false,
 } as const;
 
+/**
+ * source-line 标注（v1.7 / ADR-011 D1）：给块级开始 token 标 `data-source-line`
+ * = 源文行号（`token.map[0]`，0-based）。M10 滚动同步据此映射编辑↔预览。
+ * 行号属性须配合 render 的 `ADD_ATTR:['data-source-line']`（否则被 DOMPurify 剥离）。
+ */
+function installSourceLine(md: MarkdownIt): void {
+  md.core.ruler.push('source_line', (state) => {
+    for (const token of state.tokens) {
+      if (token.map && token.nesting === 1) {
+        token.attrSet('data-source-line', String(token.map[0]));
+      }
+    }
+    return true;
+  });
+}
+
 /** 基底渲染器（无 KaTeX）—— KaTeX 未懒加载时用。 */
 const baseMd = new MarkdownIt(MD_OPTS);
 installMermaidFence(baseMd);
+installSourceLine(baseMd);
 
 /**
  * 给 markdown-it 装 ` ```mermaid ` fence 规则：同步输出**占位** div（不在 render 里
@@ -80,6 +97,7 @@ export function ensureKatex(): Promise<void> {
         trust: false,
       });
       installMermaidFence(katexMd); // katex 渲染器也要认 mermaid fence
+      installSourceLine(katexMd); // 同样标 data-source-line（v1.7）
     })();
   }
   return loadPromise;
@@ -157,5 +175,9 @@ export async function renderMermaid(src: string): Promise<string> {
 export function render(markdown: string): string {
   if (markdown === '') return '';
   const engine = katexMd ?? baseMd;
-  return DOMPurify.sanitize(engine.render(markdown));
+  // ADD_ATTR data-source-line（v1.7 / ADR-011 D2）：仅放行该惰性数字属性供滚动同步
+  // 映射；标签/事件/url 等严格 sanitize 不放宽（ADR-002 红线）。XSS 复验 AC-v17-5。
+  return DOMPurify.sanitize(engine.render(markdown), {
+    ADD_ATTR: ['data-source-line'],
+  });
 }

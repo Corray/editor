@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, devices } from '@playwright/test';
 import { resetStorage } from './_storage';
 
 const tb = { name: 'Markdown editor' };
@@ -77,5 +77,42 @@ test.describe('AC-v16 多文档', () => {
     // active = Beta（最后操作的），刷新后仍是它
     await expect(page.getByRole('textbox', tb)).toHaveValue('# Beta active');
     await expect(page.locator('.doc-list__item')).toHaveCount(2);
+  });
+
+  test('E2E-v16-007: 移动端抽屉 — ☰文档 开抽屉 + 新建/切换（选中关抽屉）', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ ...devices['iPhone SE'] });
+    const page = await context.newPage();
+    await page.goto('/');
+    await resetStorage(page);
+    await page.reload();
+
+    const ta = page.getByRole('textbox', tb);
+    await ta.fill('# Mobile First');
+    await page.waitForTimeout(700);
+
+    // 桌面 sidebar 在移动端不显示；改用 header ☰文档 按钮开抽屉
+    await expect(page.locator('.doc-sidebar')).toHaveCount(0);
+    await page.getByRole('button', { name: '文档' }).click();
+    await expect(page.locator('.doc-drawer')).toBeVisible();
+
+    // 抽屉内新建 → 创建并关抽屉（onAfterSelect）
+    await page.locator('.doc-drawer .doc-list__new').click();
+    await expect(page.locator('.doc-drawer')).toHaveCount(0); // 抽屉已关
+    await expect(ta).toHaveValue(''); // 新文档空
+    await ta.fill('# Mobile Second');
+    await page.waitForTimeout(700);
+
+    // 再开抽屉 → 2 篇；切回第一篇 → 抽屉关 + 编辑区加载
+    await page.getByRole('button', { name: '文档' }).click();
+    await expect(page.locator('.doc-drawer .doc-list__item')).toHaveCount(2);
+    await page
+      .locator('.doc-drawer .doc-list__item', { hasText: 'Mobile First' })
+      .click();
+    await expect(page.locator('.doc-drawer')).toHaveCount(0); // 选中关抽屉
+    await expect(ta).toHaveValue('# Mobile First');
+
+    await context.close();
   });
 });

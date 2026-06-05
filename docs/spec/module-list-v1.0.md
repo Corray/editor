@@ -45,6 +45,7 @@
 | **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | in-dev (#3 实现) | — | 横切，被 M1-M6 chrome 文案消费 |
 | **M8 PWA/离线**〔v1.5 新增〕| Service Worker precache 离线 + Manifest 可安装 + 更新提示 | 共识 v1.5 | PRD §7 v1.1 候选 | FE | proposed (v1.5) | vite-plugin-pwa 1.3.0 / Workbox 7.4.1（构建期）、Service Worker / Cache API、`virtual:pwa-register` | 横切基础设施；更新提示 → shared/toast.ts；不依赖业务模块 |
 | **M9 文档管理**〔v1.6 新增〕| 多文档模型（列表 + active）+ CRUD + 单→多迁移 + 标题派生 + documents store I/O | 共识 v1.6 | PRD §7 v1.1 候选 | FE | proposed (v1.6) | IndexedDB documents store（DB v2）、`crypto.randomUUID` | → M1（切换 set DocumentState）、← M3（M3 经 saveActiveText 写）、被 M5（sidebar/抽屉）+ M4（import/share 涟漪）消费 |
+| **M10 滚动同步**〔v1.7 新增〕| 桌面编辑↔预览滚动联动（source-line 映射 + 双向 + 反馈环防护）| 共识 v1.7 | defer 项（非 PRD §7）| FE | proposed (v1.7) | DOM scroll API、requestAnimationFrame | ← M2（读 data-source-line）、← M1/M5（editor/preview DOM ref），桌面 only |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）
 
@@ -184,6 +185,20 @@
 | **决策** | ADR-010（D1 documents store / D2 D_uuid / D3 先写后删迁移 / D4 M3-M9 分解 / D5 标题派生 / D6 涟漪 / D7 抽屉）|
 | **不做** | 文件夹/分组 / 标签 / 全文搜索 / 拖拽排序 / 手动重命名（MVP）/ 多 tab race 处理 |
 | **边界** | 拥有 documents store 唯一写权（单写者）；M3 经 saveActiveText 间接写；不侵入渲染（M2）/ 主题（M6）|
+
+### M10 滚动同步〔v1.7 新增〕
+
+| 维度 | 内容 |
+|------|------|
+| **核心职责** | 桌面双栏编辑↔预览滚动联动：source-line 映射 + 双向 + 反馈环防护 |
+| **输入** | editor textarea + preview 容器 DOM ref；M2 渲染的 `data-source-line` 属性；scroll 事件 |
+| **输出** | 被驱动方 scrollTop（程序滚动对齐）|
+| **PRD 功能项** | 非 PRD §7（consensus defer 3 次的项）|
+| **AC 覆盖** | AC-v17-1~5 |
+| **内部组件** | `m10-scroll-sync/sync.ts`（`createScrollSync(editorEl, previewEl, lineHeight)` → 装监听 + 映射 + 反馈环防护 + dispose）|
+| **决策** | ADR-011（D1 source-line / D2 ADD_ATTR data-source-line + XSS 复验 / D3 syncing 反馈环 / D4 双向+桌面 only / D5 M10）|
+| **不做** | 移动端 / 当前行高亮 / 光标定位 / 拖拽分栏 / 同步开关（常开） |
+| **边界** | 不改持久化/数据模型；依赖 M2 的 data-source-line（render 加）；桌面 viewport 才挂载（viewport 切换 mount/unmount）|
 
 ---
 

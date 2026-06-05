@@ -4,6 +4,55 @@
 
 ---
 
+## v0.9.0 — 多文档增强（重命名 + 搜索 / 路线图 v1.8 里程碑）（2026-06-05）
+
+**Tag:** `v0.9.0` @ commit `367cb5d`
+**Range:** `7a854b9..367cb5d`（v0.8.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.9.0
+**命名:** 路线图 "v1.8" → semver **v0.9.0**。L2（扩 M9）。**FE 功能井近干的拐点版**（解 v1.6 遗留 F-V16-2）。
+
+### Scope — 文档重命名 + 搜索
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| 手动重命名 + titleManual 锁 | `c66c21e` | rename(id,title)：非空锁 titleManual（saveActiveText 不再覆盖）/ 空回退自动派生（解 F-V16-2）|
+| 标题/内容搜索 | `c66c21e` | query/setQuery，docs() 按 title 或 text 过滤（records 含 text，无额外 IO）|
+| 内联重命名 UI | `c66c21e` | DocList 双击标题 → 输入框 → Enter 提交 / Esc 取消（editingId 守 blur）|
+| 数据模型 | `c66c21e` | DocRecord +titleManual?（无 DB 升级 / schemaless / 旧记录兼容）|
+
+### Quality Gates [已验证: 2026-06-05 本机]
+
+- 166 unit tests pass（M9 +rename-lock / empty / search / legacy-autotitle）
+- 87 e2e pass（chromium + webkit + pwa；ac12 重命名/锁/Esc/搜索 4 场景 ×2）
+- 首屏 81.04 KB gzipped（预算 150 KB）；DB version 仍 2（无升级）
+- TS strict typecheck 0 error；doc-hash + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.8（TBD-v18-1~4 accept）→ module-list **M9 delta** → 架构 + **ADR-012**（titleManual 锁 / 内联重命名 / title+text 搜索）→ data-model v1.8（+titleManual，无 DB 升级）→ api/test-plan v1.8 → 实现。
+
+### Audit（2026-06-05 增量）
+
+报告 `docs/audit/2026-06-05-v1.8-increment.md`：**无 critical/high/medium**。**F-V16-2（v1.6 遗留 LOW）resolved**；无 DB 升级 + 旧记录兼容 + 无 XSS 面（重命名纯文本显示）。实现期 2 bug（query 信号 TDZ / Esc-unmount-blur 误提交）经 unit+e2e 捕获修复。
+- F-V18-1~4 LOW（搜索 perf / 不跳转 / 双击发现性 / 搜索-active 不一致）→ deferred v1.8.x
+
+### Known Limitations（v0.9.0）
+
+- 内联重命名靠双击，无可见编辑图标（发现性低，F-V18-3）
+- 搜索仅过滤列表，不跳转/高亮匹配位置（F-V18-2）
+- IME（中文输入法）重命名合成态未专门测（诚实盲点）
+- 文件夹/分组/标签/拖拽 / 后端同步(v2.0) 按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- F-V16-2 resolved（多文档同名问题闭环）
+- 无 DB 升级、旧记录兼容、无 XSS 面
+- package.json 0.8.0 → 0.9.0
+
+---
+
 ## v0.8.0 — 滚动同步（编辑↔预览 / 路线图 v1.7 里程碑）（2026-06-05）
 
 **Tag:** `v0.8.0` @ commit `7a854b9`

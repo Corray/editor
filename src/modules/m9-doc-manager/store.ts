@@ -17,6 +17,9 @@ export interface DocRecord {
   text: string;
   createdAt: number;
   updatedAt: number;
+  /** v1.8：手动重命名锁。true=用户改过名，saveActiveText 不再自动派生标题。
+   *  缺省/false=自动派生（旧记录无此字段 → 兼容自动 / ADR-012 D1）。 */
+  titleManual?: boolean;
 }
 
 const DB_NAME = 'editor';

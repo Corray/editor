@@ -22,13 +22,17 @@ function mockDocManager(
 ): DocManagerAPI {
   const [docs] = createSignal([]);
   const [activeId] = createSignal('D_x');
+  const [query] = createSignal('');
   return {
     docs,
     activeId,
+    query,
+    setQuery: vi.fn(),
     saveActiveText,
     create: vi.fn(async () => 'D_new'),
     switchTo: vi.fn(async () => {}),
     remove: vi.fn(async () => {}),
+    rename: vi.fn(async () => {}),
   };
 }
 

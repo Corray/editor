@@ -39,6 +39,8 @@ const EXPECTED_KEYS = [
   'doc.delete',
   'doc.close',
   'doc.delete.confirm',
+  'doc.search',
+  'doc.rename',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

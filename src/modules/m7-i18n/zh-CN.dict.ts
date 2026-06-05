@@ -57,6 +57,8 @@ export const zhCNDict = {
   'doc.delete': '删除',
   'doc.close': '关闭',
   'doc.delete.confirm': '删除此文档？此操作不可撤销。',
+  'doc.search': '搜索文档…',
+  'doc.rename': '双击重命名',
 
   // M8 PWA / offline (v1.5)
   'pwa.updateAvailable': '有新版本可用',

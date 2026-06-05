@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 import { t } from '@/modules/m7-i18n/i18n';
 import type { DocManagerAPI } from './api';
 
@@ -7,10 +7,12 @@ interface InnerProps {
   onAfterSelect?: () => void; // 移动端选中后关抽屉
 }
 
-/** 共享列表主体：新建 + 文档项（标题 + 删除）。active 高亮，点选切换。 */
+/** 共享列表主体：搜索 + 新建 + 文档项（标题 / 内联重命名 + 删除）。active 高亮。 */
 function DocListBody(props: InnerProps) {
   const m = props.docs;
+  const [editingId, setEditingId] = createSignal<string | null>(null); // v1.8 内联重命名
   const select = (id: string) => {
+    if (editingId()) return; // 重命名中不切换
     void m.switchTo(id);
     props.onAfterSelect?.();
   };
@@ -18,8 +20,20 @@ function DocListBody(props: InnerProps) {
     e.stopPropagation(); // 不触发行切换
     if (window.confirm(t('doc.delete.confirm'))) void m.remove(id);
   };
+  const commitRename = (id: string, value: string) => {
+    void m.rename(id, value);
+    setEditingId(null);
+  };
   return (
     <div class="doc-list">
+      <input
+        type="search"
+        class="doc-list__search"
+        placeholder={t('doc.search')}
+        aria-label={t('doc.search')}
+        value={m.query()}
+        onInput={(e) => m.setQuery(e.currentTarget.value)}
+      />
       <button
         type="button"
         class="doc-list__new"
@@ -40,7 +54,36 @@ function DocListBody(props: InnerProps) {
               aria-selected={d.id === m.activeId()}
               onClick={() => select(d.id)}
             >
-              <span class="doc-list__title">{d.title}</span>
+              <Show
+                when={editingId() === d.id}
+                fallback={
+                  <span
+                    class="doc-list__title"
+                    title={t('doc.rename')}
+                    onDblClick={(e) => {
+                      e.stopPropagation();
+                      setEditingId(d.id);
+                    }}
+                  >
+                    {d.title}
+                  </span>
+                }
+              >
+                <input
+                  class="doc-list__rename"
+                  value={d.title}
+                  autofocus
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename(d.id, e.currentTarget.value);
+                    else if (e.key === 'Escape') setEditingId(null); // 取消，不提交
+                  }}
+                  onBlur={(e) => {
+                    // 仅当仍在编辑本项才提交：Esc 已置 null → unmount 触发的 blur 跳过（不误提交）
+                    if (editingId() === d.id) commitRename(d.id, e.currentTarget.value);
+                  }}
+                />
+              </Show>
               <button
                 type="button"
                 class="doc-list__del"

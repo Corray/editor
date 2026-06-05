@@ -189,4 +189,66 @@ describe('M9 CRUD (createDocManager)', () => {
       dispose();
     });
   });
+
+  // v1.8 重命名 + 标题锁 + 搜索（ADR-012）
+  it('UT-M9-rename-lock: 重命名后编辑内容不覆盖手动标题（解 F-V16-2 / AC-v18-2）', async () => {
+    await createRoot(async (dispose) => {
+      const { api } = await setup();
+      const id = await api.create('# Auto Title');
+      await api.rename(id, 'My Custom Name');
+      expect(api.docs().find((d) => d.id === id)!.title).toBe('My Custom Name');
+      // 继续编辑内容 → 标题保持手动名（不被 deriveTitle 覆盖）
+      await api.saveActiveText('# Totally Different Heading\n\nbody');
+      expect(api.docs().find((d) => d.id === id)!.title).toBe('My Custom Name');
+      dispose();
+    });
+  });
+
+  it('UT-M9-rename-empty: 重命名为空 → 回退自动派生（AC-v18-3）', async () => {
+    await createRoot(async (dispose) => {
+      const { api } = await setup();
+      const id = await api.create('# Derived');
+      await api.rename(id, 'Manual');
+      await api.rename(id, '   '); // 空白 → 回退
+      // 标题重新从 text 派生
+      expect(api.docs().find((d) => d.id === id)!.title).toBe('Derived');
+      // 且锁解除：再编辑内容会重新派生
+      await api.saveActiveText('# New Auto');
+      expect(api.docs().find((d) => d.id === id)!.title).toBe('New Auto');
+      dispose();
+    });
+  });
+
+  it('UT-M9-search: query 匹配标题或内容；清空恢复（AC-v18-5）', async () => {
+    await createRoot(async (dispose) => {
+      const { api } = await setup();
+      await api.create('# Apples\n\nfruit notes');
+      await api.create('# Bananas\n\nyellow lorem');
+      await api.create('# Cherries\n\ncontains pineapple keyword');
+      const total = api.docs().length; // 含初始空 doc
+      // 标题命中
+      api.setQuery('banana');
+      expect(api.docs().map((d) => d.title)).toEqual(['Bananas']);
+      // 内容命中（标题不含 pineapple，正文含）
+      api.setQuery('pineapple');
+      expect(api.docs().map((d) => d.title)).toEqual(['Cherries']);
+      // 无果
+      api.setQuery('zzz-nomatch');
+      expect(api.docs().length).toBe(0);
+      // 清空恢复
+      api.setQuery('');
+      expect(api.docs().length).toBe(total);
+      dispose();
+    });
+  });
+
+  it('UT-M9-legacy-autotitle: 无 titleManual 的文档仍自动派生（AC-v18-6）', async () => {
+    await createRoot(async (dispose) => {
+      const { api } = await setup();
+      const id = await api.create('# initial'); // titleManual 未设
+      await api.saveActiveText('# updated heading');
+      expect(api.docs().find((d) => d.id === id)!.title).toBe('updated heading');
+      dispose();
+    });
+  });
 });

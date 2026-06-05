@@ -34,11 +34,21 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   const records = new Map<string, DocRecord>();
   for (const d of deps.initial.docs) records.set(d.id, d);
 
-  const [docs, setDocs] = createSignal<DocMeta[]>(metaList());
+  const [query, setQuerySignal] = createSignal<string>(''); // v1.8 搜索词（须先于 metaList 首调）
   const [activeId, setActiveSignal] = createSignal<string>(deps.initial.activeId);
+  const [docs, setDocs] = createSignal<DocMeta[]>(metaList());
 
   function metaList(): DocMeta[] {
-    return [...records.values()].sort(byRecent).map(toMeta);
+    const q = query().trim().toLowerCase();
+    const all = [...records.values()].sort(byRecent);
+    const filtered = q
+      ? all.filter(
+          (d) =>
+            d.title.toLowerCase().includes(q) ||
+            d.text.toLowerCase().includes(q), // v1.8：标题或内容命中（records 含 text）
+        )
+      : all;
+    return filtered.map(toMeta);
   }
   function refresh(): void {
     setDocs(metaList());
@@ -52,12 +62,26 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     const updated: DocRecord = {
       ...rec,
       text,
-      title: deriveTitle(text),
+      // v1.8：手动重命名锁 → 不覆盖手动标题（解 F-V16-2 / ADR-012 D1）
+      title: rec.titleManual ? rec.title : deriveTitle(text),
       updatedAt: now(),
     };
     records.set(id, updated);
     refresh();
     await putDoc(updated, true);
+  }
+
+  async function rename(id: string, title: string): Promise<void> {
+    const rec = records.get(id);
+    if (!rec) return;
+    const trimmed = title.trim();
+    const updated: DocRecord = trimmed
+      ? { ...rec, title: trimmed, titleManual: true, updatedAt: now() }
+      : // 空 → 回退自动派生（titleManual=false）
+        { ...rec, title: deriveTitle(rec.text), titleManual: false, updatedAt: now() };
+    records.set(id, updated);
+    refresh();
+    await putDoc(updated, id === activeId());
   }
 
   async function activate(id: string): Promise<void> {
@@ -121,5 +145,20 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     }
   }
 
-  return { docs, activeId, saveActiveText, create, switchTo, remove };
+  function setQuery(q: string): void {
+    setQuerySignal(q);
+    refresh();
+  }
+
+  return {
+    docs,
+    activeId,
+    query,
+    setQuery,
+    saveActiveText,
+    create,
+    switchTo,
+    remove,
+    rename,
+  };
 }

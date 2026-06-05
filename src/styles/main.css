@@ -97,6 +97,27 @@
   flex-direction: column;
 }
 
+.doc-list__search {
+  margin: 0.5rem 0.5rem 0;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.8125rem;
+}
+
+.doc-list__rename {
+  flex: 1;
+  min-width: 0;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.2rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.875rem;
+}
+
 .doc-list__new {
   margin: 0.5rem;
   padding: 0.4rem 0.6rem;

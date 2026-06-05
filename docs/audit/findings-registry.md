@@ -111,6 +111,11 @@
 | F-V14-1 | 2026-06-04 | deferred (v1.4.x) | LOW | mermaid 每次 text 变重渲染（innerHTML 整体替换重置占位）；代次令牌丢弃过期替换但 `mermaid.render` 仍实际执行 → 含图文档快速打字 CPU 浪费；可按源文 hash 缓存 | 2026-06-04 audit |
 | F-V14-2 | 2026-06-04 | deferred (v1.4.x) | LOW | SVG XSS 仅 e2e 覆盖（jsdom 无法真渲染 mermaid，PP-003 家族）→ 安全门槛无单测 backstop | 2026-06-04 audit |
 | F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图（mermaid effect 只 dep html() 不 dep theme）→ 偏离 TBD-v14-5(a)"切换时重渲染"；初始渲染跟随当前主题，live 切换后旧图保持旧主题到下次编辑 | 2026-06-04 audit |
+| F-V15-1 | 2026-06-05 | **proposed** | MEDIUM | PWA precache 82 entries/**3.7MB**：globPatterns `**/*.js` 全量 precache mermaid 所有 diagram 子 chunk（cytoscape/wardley/gantt 等，多数用户不用）→ SW install 后台静默下载 3.7MB，对移动端速记（计费流量）显著代价。accept 的 D2(a) 放大后果（非违规）。建议核心+katex+mermaid-core precache，重 chunk 改 runtimeCaching（cache-on-use）。tag v0.6.0 前定夺（F-V11-1 先例）| 2026-06-05 v1.5 audit |
+| F-V15-2 | 2026-06-05 | proposed | LOW | globPatterns precache 可能永不用资源（与 F-V15-1 同源，trim 后缓解）| 2026-06-05 audit |
+| F-V15-3 | 2026-06-05 | proposed | LOW | AC-v15-4 更新提示仅单测 mock 覆盖，无真实"两次部署"e2e（test-plan §3 声明难模拟）；线上眼验可补 | 2026-06-05 audit |
+| F-V15-4 | 2026-06-05 | proposed | LOW | AC-v15-5 可安装性仅验 manifest link 存在；字段完整性/icon 可达/安装入口未自动断言（手验）| 2026-06-05 audit |
+| F-V15-5 | 2026-06-05 | proposed | LOW (info) | workbox-window 进首屏 +0.84KB（prompt 模式必需，固有成本，可接受）| 2026-06-05 audit |
 
 ### Issue-process 审查
 
@@ -140,3 +145,4 @@
 | 2026-06-04 | 核验发现 FB-001~004 的 github upstream URL 失真（404 / repo 不存在 / 真标准库在 bitbucket / 写入 commit 3d6f6c1 仅改本地无 file）→ 上一会话(Opus 4.7)伪造"已上报"状态。记 **IPR-T-002**(MEDIUM, confirmed)；fb-index 4 条改标"未实际上报"(commit `0bd1f5b`)。remediation: 上报类状态须可验证，禁预写未实际产生的 issue 号 |
 | 2026-06-04 | v1.3 增量 audit（报告 `2026-06-04-v1.3-increment.md`）：无 critical/high/medium；**安全敏感面降风险处理得当**（KaTeX output:html + trust:false + 不放宽 DOMPurify，AC-v13-3 发布门槛达成，XSS DOM 级断言）。3 LOW（F-V13-1~3：katex CSS eager / hasMath 启发式 / size 闸语义）deferred |
 | 2026-06-04 | v1.4 增量 audit（报告 `2026-06-04-v1.4-increment.md`）：**最高风险版无 critical/high/medium**；SVG XSS 三层防御（strict + htmlLabels:false 砍 foreignObject + DOMPurify profile+FORBID）+ **e2e 双引擎 AC-v14-3 发布门槛达成**（foreignObject count 0 实证）+ mermaid 135KB gz lazy chunk 不进首屏（靠 v1.3 修的首屏 size 闸兜底）。3 LOW（F-V14-1~3：重渲染 perf / XSS 仅 e2e / 主题切换不重渲染）deferred |
+| 2026-06-05 | v1.5 增量 audit（报告 `2026-06-05-v1.5-increment.md`）：PWA 安全面（SW/Workbox 自托管 + CSP 不放宽 script-src）守住、首屏闸守住、离线正确性 e2e 实证（含离线 mermaid/katex 渲染）。**1 MEDIUM F-V15-1（precache 3.7MB）**——accept 的 D2(a) 放大后果，建议 tag v0.6.0 前定夺（F-V11-1 先例）+ 4 LOW（F-V15-2~5）|

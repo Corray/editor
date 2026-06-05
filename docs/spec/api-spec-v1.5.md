@@ -75,8 +75,9 @@ const updateSW = registerSW({
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| vite.config VitePWA 配置（manifest + globPatterns 含 chunk）| ⏳ 待实现 | — |
-| main.tsx registerSW + onNeedRefresh → toast | ⏳ | — |
-| toast action 扩展（向后兼容）| ⏳ | — |
-| index.html CSP manifest-src + 图标资源 | ⏳ | — |
-| env.d.ts virtual:pwa-register 类型 | ⏳ | — |
+| vite.config VitePWA 配置（manifest + globPatterns 含 chunk + devOptions off）| ✓ 已实现（2026-06-05）| `296294e` |
+| main.tsx registerSW（virtual:pwa-register）+ m8-pwa/register wireUpdatePrompt → toast | ✓ | `296294e` — register 逻辑解耦虚拟模块（DI，可单测）|
+| toast action 扩展（持久 + 向后兼容 3-arg）| ✓ | `296294e` — `showToast(msg,level,ms,action?)` |
+| index.html CSP manifest-src + worker-src + 图标资源 | ✓ | `296294e` — 自绘 PNG 192/512/maskable |
+| env.d.ts vite-plugin-pwa/client 类型 | ✓ | `296294e` |
+| workbox-window 运行时依赖（prompt 模式必需）| ✓ | `296294e` — 首屏 +0.84KB |

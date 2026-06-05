@@ -69,4 +69,7 @@
 - [vite-plugin-pwa subdirectory / base path](https://github.com/vite-pwa/vite-plugin-pwa/issues/263)（GH Pages 子路径继承 vite base）
 - Workbox 7.4.1（随插件，runtime 内联 SW 自托管 → CSP script-src 'self' 安全）
 - ADR-004（GH Pages `/editor/`）/ index.html CSP（F-V13-4 修复后含 font-src）
-- 实现 commit：`<TBD 实现后回填>`
+- 实现 commit：`296294e`（vite-plugin-pwa 1.3.0 + workbox-window 7.4.1）
+- **实测产物**：`dist/sw.js`（5.8KB）+ `workbox-*.js`（自托管 runtime）+ manifest + 3 PNG 图标；precache **82 entries / 3.7MB**（含 mermaid 全部 diagram 子 chunk：cytoscape 142KB gz / wardley 145KB gz 等——D2 含 chunk 的代价，见增量 audit F-V15-1）
+- **首屏影响**：workbox-window +0.84KB → 78.18KB gz（<150 闸）
+- **验证**：unit 155 + e2e pwa project 4 场景（build+preview 真 SW，含离线 mermaid/katex 渲染 + console 干净），full e2e 63 pass/1 skip 无回归

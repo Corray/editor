@@ -4,6 +4,59 @@
 
 ---
 
+## v0.6.0 — Service Worker 离线（PWA / 路线图 v1.5 里程碑）（2026-06-05）
+
+**Tag:** `v0.6.0` @ commit `dee3bdb`
+**Range:** `8dcdd6f..dee3bdb`（v0.5.0 以来）
+**部署:** https://corray.github.io/editor/
+**GitHub Release:** https://github.com/Corray/editor/releases/tag/v0.6.0
+**命名:** 路线图 "v1.5" → semver **v0.6.0**（同先例）。新基础设施模块 M8。
+
+### Scope — PWA 离线 + 可安装
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| Service Worker + precache | `296294e` | vite-plugin-pwa 1.3.0 generateSW；Workbox runtime 内联自托管（CSP `script-src 'self'` 不放宽）|
+| Web App Manifest + 图标 | `296294e` | standalone + scope `/editor/`；自绘 PNG 192/512/maskable（scripts/generate-pwa-icons.mjs）|
+| 更新提示 | `296294e` | registerType:prompt + virtual:pwa-register onNeedRefresh → toast action「刷新」（不静默打断）|
+| toast action 扩展 | `296294e` | `show(msg,level,ms,action?)` 持久 action toast；向后兼容 3-arg |
+| CSP | `296294e` | 加 `manifest-src 'self'` + `worker-src 'self'` |
+| **precache 瘦身（F-V15-1）** | `551c28d` | mermaid 重 chunk 路由 assets/mmd/ + runtimeCaching(cache-on-use)；**precache 3.7MB→1.18MB（−68%）**，app+katex 仍 precache |
+
+### Quality Gates [已验证: 2026-06-05 本机]
+
+- 155 unit tests pass（+toast action ×3 / PWA register ×3）
+- 63 e2e pass / 1 skip（chromium + webkit + **pwa project：build+preview 真 SW**，含离线 reload 可编辑 / 离线持久化 / 离线公式渲染 + 图 cache-on-use / console 干净）
+- 首屏 78.19 KB gzipped（workbox-window +0.84KB；预算 150 KB）
+- precache 1.18 MB（app 核心 + katex + 字体/图标；mermaid 重 chunk runtimeCaching）
+- TS strict typecheck 0 error；doc-hash + fb-upstream 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v1.5（TBD-v15-1~4 accept）→ module-list **M8 PWA/离线** 新增 → 架构 + **ADR-009**（D1=vite-plugin-pwa / D2'=分级 precache+runtimeCaching / D3=prompt 更新 / D4=scope+CSP）→ api-spec v1.5 → test-plan v1.5 → 实现。无 data-model delta（离线复用 IndexedDB v1.1）。research-first：vite-plugin-pwa 1.3.0 + Workbox 7.4.1 + GH Pages 子路径 核实。
+
+### Audit（2026-06-05 增量）
+
+报告 `docs/audit/2026-06-05-v1.5-increment.md`：安全面（SW/Workbox 自托管 + CSP 不放宽）守住、首屏闸守住、离线正确性 e2e 实证。
+- **F-V15-1（MEDIUM，precache 3.7MB）→ tag 前修 resolved**（`551c28d`，沿用 F-V11-1 先例）；F-V15-2 resolved
+- F-V15-3~5（LOW：更新流程仅单测 / 可安装仅验 link / workbox-window 首屏）→ deferred v1.5.x
+
+### Known Limitations（v0.6.0）
+
+- 从未在线用过的 mermaid 图类型**离线不可用**（runtimeCaching cache-on-use 权衡，F-V15-1 修订）
+- 真实"部署新版→SW 更新提示"链路仅单测覆盖（F-V15-3）
+- 离线 e2e 仅 chromium（webkit SW 行为未覆盖）
+- 多文档 / 后端同步 / 滚动同步 按 roadmap 推迟
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓
+- F-V15-1 MEDIUM tag 前修（precache −68%）
+- 离线 + 可安装 + 更新提示 e2e/单测实证
+- package.json 0.5.0 → 0.6.0
+
+---
+
 ## v0.5.0 — Mermaid 图渲染（路线图 v1.4 里程碑）（2026-06-04）
 
 **Tag:** `v0.5.0` @ commit `8dcdd6f`

@@ -32,11 +32,15 @@
 
 ---
 
-## D2 — 缓存范围
+## D2 — 缓存范围（**F-V15-1 修订 2026-06-05**）
 
-`workbox.globPatterns: ['**/*.{js,css,html,woff2,svg,webmanifest}']` —— precache 首屏 + 懒加载 chunk（mermaid 135KB / katex）+ katex woff2 字体。离线也能渲染公式/图（共识 AC-v15-3）。
-- mermaid chunk 135KB gz / ~580KB raw > Workbox 默认 `maximumFileSizeToCacheInBytes`（2MB）以内，无需调；若未来超限再加 `maximumFileSizeToCacheInBytes`。
-- 代价：首次缓存体积 ~几百 KB（一次性，非首屏 runtime，不碰 150KB 闸）。
+**初版（D2-a）：** `globPatterns: ['**/*.{js,...}']` 全量 precache 含所有 mermaid diagram 子 chunk → 实测 precache **82 entries / 3.7MB**。增量 audit F-V15-1（MEDIUM）：对"移动端速记"（计费流量）静默下载 3.7MB 代价过大。
+
+**修订（D2-a'，`551c28d`）：** 保留 D2 本意「离线能用公式/图」但**分级**：
+- **precache**：app 核心 + **katex** + css/字体/图标/manifest → 离线**公式始终可用**
+- **runtimeCaching（CacheFirst, cache-on-use）**：mermaid 生态重 chunk（mermaid.core/cytoscape/wardley/各 *Diagram/dagre 等）→ `chunkFileNames` 按名路由到 `assets/mmd/`，`globIgnores: ['**/assets/mmd/**']` 排除 precache，首次（在线）渲染图时缓存 → 之后离线可用
+- **结果**：precache **3.7MB→1.18MB（−68%）**；离线**图按"用过的类型"可用**（轻微弱化 AC-v15-3：从未用过的图类型离线不可用，需先在线用一次——对"轻量编辑器"合理权衡）
+- 路由按 chunk **名**（chunkFileNames 里 moduleIds 对部分 chunk 为空/不可靠）；过度路由由离线 app 加载 e2e（E2E-v15-001）兜底
 
 ## D3 — 更新策略
 

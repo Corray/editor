@@ -31,9 +31,13 @@ VitePWA({
     ],
   },
   workbox: {
-    globPatterns: ['**/*.{js,css,html,woff2,svg,webmanifest}'],  // D2：含懒加载 chunk + katex 字体
+    // D2'（F-V15-1 修订 551c28d）：precache app+katex+静态；mermaid 重 chunk 排除→runtimeCaching
+    globPatterns: ['**/*.{js,css,html,woff2,svg,webmanifest}'],
+    globIgnores: ['**/assets/mmd/**'],
+    runtimeCaching: [{ urlPattern: /\/assets\/mmd\/.*\.js$/, handler: 'CacheFirst', /* cache-on-use */ }],
   },
 })
+// + build.rollupOptions.output.chunkFileNames 按名路由 mermaid 生态 chunk → assets/mmd/
 ```
 
 ## 2. SW 注册 + 更新编排（main.tsx / ADR-009 D3）
@@ -81,3 +85,4 @@ const updateSW = registerSW({
 | index.html CSP manifest-src + worker-src + 图标资源 | ✓ | `296294e` — 自绘 PNG 192/512/maskable |
 | env.d.ts vite-plugin-pwa/client 类型 | ✓ | `296294e` |
 | workbox-window 运行时依赖（prompt 模式必需）| ✓ | `296294e` — 首屏 +0.84KB |
+| F-V15-1 修：mermaid 重 chunk 路由 mmd + globIgnores + runtimeCaching | ✓ | `551c28d` — precache 3.7MB→1.18MB |

@@ -111,8 +111,8 @@
 | F-V14-1 | 2026-06-04 | deferred (v1.4.x) | LOW | mermaid 每次 text 变重渲染（innerHTML 整体替换重置占位）；代次令牌丢弃过期替换但 `mermaid.render` 仍实际执行 → 含图文档快速打字 CPU 浪费；可按源文 hash 缓存 | 2026-06-04 audit |
 | F-V14-2 | 2026-06-04 | deferred (v1.4.x) | LOW | SVG XSS 仅 e2e 覆盖（jsdom 无法真渲染 mermaid，PP-003 家族）→ 安全门槛无单测 backstop | 2026-06-04 audit |
 | F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图（mermaid effect 只 dep html() 不 dep theme）→ 偏离 TBD-v14-5(a)"切换时重渲染"；初始渲染跟随当前主题，live 切换后旧图保持旧主题到下次编辑 | 2026-06-04 audit |
-| F-V15-1 | 2026-06-05 | **proposed** | MEDIUM | PWA precache 82 entries/**3.7MB**：globPatterns `**/*.js` 全量 precache mermaid 所有 diagram 子 chunk（cytoscape/wardley/gantt 等，多数用户不用）→ SW install 后台静默下载 3.7MB，对移动端速记（计费流量）显著代价。accept 的 D2(a) 放大后果（非违规）。建议核心+katex+mermaid-core precache，重 chunk 改 runtimeCaching（cache-on-use）。tag v0.6.0 前定夺（F-V11-1 先例）| 2026-06-05 v1.5 audit |
-| F-V15-2 | 2026-06-05 | proposed | LOW | globPatterns precache 可能永不用资源（与 F-V15-1 同源，trim 后缓解）| 2026-06-05 audit |
+| F-V15-1 | 2026-06-05 | **resolved** | MEDIUM | PWA precache 82 entries/**3.7MB**：globPatterns `**/*.js` 全量 precache mermaid 所有 diagram 子 chunk。**修复 `551c28d`**：chunkFileNames 按名路由 mermaid 生态 chunk→`assets/mmd/`，globIgnores + runtimeCaching(CacheFirst, cache-on-use)；app+katex 仍 precache（离线公式始终可用），mermaid 图按用过的离线可用。**precache 3.7MB→1.18MB（−68%）**；离线 e2e 实证（含 app 离线加载无误路由 + 图 cache-on-use）| 2026-06-05 v1.5 audit |
+| F-V15-2 | 2026-06-05 | **resolved** | LOW | globPatterns precache 可能永不用资源 → 同 `551c28d` globIgnores assets/mmd/ 修复 | 2026-06-05 audit |
 | F-V15-3 | 2026-06-05 | proposed | LOW | AC-v15-4 更新提示仅单测 mock 覆盖，无真实"两次部署"e2e（test-plan §3 声明难模拟）；线上眼验可补 | 2026-06-05 audit |
 | F-V15-4 | 2026-06-05 | proposed | LOW | AC-v15-5 可安装性仅验 manifest link 存在；字段完整性/icon 可达/安装入口未自动断言（手验）| 2026-06-05 audit |
 | F-V15-5 | 2026-06-05 | proposed | LOW (info) | workbox-window 进首屏 +0.84KB（prompt 模式必需，固有成本，可接受）| 2026-06-05 audit |

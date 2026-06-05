@@ -42,15 +42,21 @@ export const zhCNDict = {
   'clipboard.ok': '已复制到剪贴板',
   'clipboard.fail': '复制失败，请手动选择预览区内容复制',
 
-  // M4 share / import (v1.2)
+  // M4 share / import (v1.2; v1.6 import/open-shared 改新建语义 → 退役 2 个 overwrite confirm)
   'share.button': '分享',
   'import.button': '导入',
   'share.ok': '分享链接已复制（含明文内容，勿分享敏感信息）',
   'share.tooLarge': '文档过大，无法生成分享链接，请改用下载 .md',
   'share.linkInvalid': '分享链接无效或不受支持',
-  'share.overwrite.confirm': '打开分享内容将替换当前文档，是否继续？',
-  'import.overwrite.confirm': '导入将替换当前文档，是否继续？',
   'import.readFail': '文件读取失败',
+
+  // M9 文档管理 (v1.6)
+  'doc.new': '新建',
+  'doc.button': '文档',
+  'doc.list': '文档列表',
+  'doc.delete': '删除',
+  'doc.close': '关闭',
+  'doc.delete.confirm': '删除此文档？此操作不可撤销。',
 
   // M8 PWA / offline (v1.5)
   'pwa.updateAvailable': '有新版本可用',

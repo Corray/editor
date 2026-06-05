@@ -34,6 +34,18 @@ function readInitial(): ThemeMode {
 }
 
 /**
+ * Apply the initial theme to <html> synchronously — call at bootstrap **before**
+ * any async work (v1.6: bootstrap awaits IDB before render; without this the
+ * dark-mode initial theme flashes light until render / FOUC). Idempotent with
+ * createTheme's effect (same value re-applied). Pure side effect, no signal.
+ */
+export function applyInitialTheme(): void {
+  if (typeof document !== 'undefined') {
+    document.documentElement.dataset.theme = readInitial();
+  }
+}
+
+/**
  * Build a ThemeAPI. Must be called inside a Solid reactive root.
  *
  * Side effect: a createEffect mirrors `theme()` to:

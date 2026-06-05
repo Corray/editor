@@ -67,10 +67,129 @@
 }
 
 /* panes — desktop row, mobile column */
+/* v1.6 multi-doc: workspace = sidebar + panes (desktop) */
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .panes {
   display: flex;
   flex: 1;
   min-height: 0;
+}
+
+/* --- M9 doc list (desktop sidebar + shared body) --- */
+.doc-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.doc-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-list__new {
+  margin: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.25rem;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.doc-list__new:hover {
+  opacity: 0.9;
+}
+
+.doc-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.doc-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.doc-list__item:hover {
+  background: var(--border);
+}
+.doc-list__item--active {
+  background: var(--border);
+  border-left: 3px solid var(--accent);
+  font-weight: 600;
+}
+
+.doc-list__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.doc-list__del {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  flex-shrink: 0;
+}
+.doc-list__del:hover {
+  color: #dc2626;
+}
+
+/* --- M9 mobile drawer --- */
+.doc-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.4);
+  z-index: 900;
+  display: flex;
+}
+.doc-drawer {
+  width: 80%;
+  max-width: 300px;
+  background: var(--bg);
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: 2px 0 12px rgb(0 0 0 / 0.2);
+  position: relative;
+  animation: drawer-in 0.2s ease;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.doc-drawer__close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .editor-pane,

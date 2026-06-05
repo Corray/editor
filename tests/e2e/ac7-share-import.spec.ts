@@ -57,41 +57,38 @@ test.describe('AC-v12 分享 / 导入', () => {
     expect(await page.evaluate(() => location.hash)).toBe('');
   });
 
-  test('E2E-v12-003: 打开分享链接（本机非空）→ confirm；accept 覆盖', async ({
+  test('E2E-v16-share-new: 打开分享链接（本机非空）→ 新建文档，不覆盖本机（v1.6 / ADR-010 D6）', async ({
     page,
   }) => {
     // seed a local doc first
     await page.getByRole('textbox', textbox).fill('# local existing');
     await page.waitForTimeout(800); // past debounce → IDB
 
-    page.on('dialog', (d) => d.accept()); // confirm overwrite
-    await page.goto(`/editor/${shareHash('# shared wins')}`);
+    await page.goto(`/editor/${shareHash('# shared as new')}`);
     await page.reload(); // force full load so app startup reads the hash
-    await expect(page.getByRole('textbox', textbox)).toHaveValue('# shared wins');
+    // 分享内容进当前（新建并切为 active）；本机文档仍在列表（不被覆盖）
+    await expect(page.getByRole('textbox', textbox)).toHaveValue(
+      '# shared as new',
+    );
+    await expect(page.locator('.doc-list__item')).toHaveCount(2);
   });
 
-  test('E2E-v12-003b: 打开分享链接（本机非空）→ dismiss 保留本机', async ({
+  test('E2E-v16-import-new: 导入 .md → 新建文档（不覆盖当前）', async ({
     page,
   }) => {
-    await page.getByRole('textbox', textbox).fill('# local keep');
+    await page.getByRole('textbox', textbox).fill('# local before import');
     await page.waitForTimeout(800);
 
-    page.on('dialog', (d) => d.dismiss()); // cancel → keep local
-    await page.goto(`/editor/${shareHash('# shared discarded')}`);
-    await page.reload(); // force full load so app startup reads the hash
-    await expect(page.getByRole('textbox', textbox)).toHaveValue('# local keep');
-  });
-
-  test('E2E-v12-005: 导入 .md 文件 → 内容进编辑器', async ({ page }) => {
     const fileInput = page.locator('input[type=file]');
     await fileInput.setInputFiles({
       name: 'note.md',
       mimeType: 'text/markdown',
       buffer: Buffer.from('# imported\n\nfrom file'),
     });
-    // 本机空 → 无 confirm，直接加载
+    // 导入内容进当前（新建并切为 active）；原文档保留 → 共 2 篇
     await expect(page.getByRole('textbox', textbox)).toHaveValue(
       '# imported\n\nfrom file',
     );
+    await expect(page.locator('.doc-list__item')).toHaveCount(2);
   });
 });

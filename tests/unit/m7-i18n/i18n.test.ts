@@ -30,11 +30,15 @@ const EXPECTED_KEYS = [
   'share.ok',
   'share.tooLarge',
   'share.linkInvalid',
-  'share.overwrite.confirm',
-  'import.overwrite.confirm',
   'import.readFail',
   'pwa.updateAvailable',
   'pwa.refresh',
+  'doc.new',
+  'doc.button',
+  'doc.list',
+  'doc.delete',
+  'doc.close',
+  'doc.delete.confirm',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

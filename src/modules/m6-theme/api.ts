@@ -8,4 +8,4 @@ export interface ThemeAPI {
   setTheme(mode: ThemeMode): void;
 }
 
-export { createTheme } from './theme';
+export { createTheme, applyInitialTheme } from './theme';

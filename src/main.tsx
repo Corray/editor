@@ -1,5 +1,5 @@
 /* @refresh reload */
-import { Show } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 import type { Accessor, Setter } from 'solid-js';
 import { render } from 'solid-js/web';
 import { createDocumentState } from '@/modules/m1-editor/state';
@@ -8,12 +8,15 @@ import { createEditorAPI, createEditorPrefs } from '@/modules/m1-editor/api';
 import type { EditorAPI, EditorPrefsAPI } from '@/modules/m1-editor/api';
 import { EditorArea } from '@/modules/m1-editor/EditorArea';
 import { PreviewArea } from '@/modules/m2-preview/PreviewArea';
-import {
-  createPersistence,
-  loadStoredDocument,
-} from '@/modules/m3-persistence/store';
+import { createPersistence } from '@/modules/m3-persistence/store';
 import type { PersistenceAPI } from '@/modules/m3-persistence/api';
-import { createTheme } from '@/modules/m6-theme/theme';
+import {
+  createDocManager,
+  loadInitialDocs,
+} from '@/modules/m9-doc-manager/api';
+import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
+import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
+import { createTheme, applyInitialTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
 import {
   createExportAPI,
@@ -39,6 +42,7 @@ interface AppShellProps {
   layout: LayoutAPI;
   prefs: EditorPrefsAPI;
   share: ShareAPI;
+  docManager: DocManagerAPI;
 }
 
 interface MobilePanesProps {
@@ -127,17 +131,27 @@ function AppShell(props: AppShellProps) {
       toast.show(t('import.readFail'), 'warn');
       return;
     }
-    // 覆盖保护（TBD-v12-4）：当前非空先 confirm
-    if (props.state.text() !== '' && !window.confirm(t('import.overwrite.confirm')))
-      return;
-    props.editor.setTextFromStorage(text);
+    // v1.6（ADR-010 D6）：导入 = 新建文档（不覆盖当前）
+    void props.docManager.create(text);
   };
+
+  const [drawerOpen, setDrawerOpen] = createSignal(false);
 
   return (
     <main class="app-shell">
       <header class="app-header">
         <h1>{t('app.title')}</h1>
         <div class="header-actions">
+          <Show when={props.layout.viewport() === 'mobile'}>
+            <button
+              type="button"
+              class="header-button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label={t('doc.button')}
+            >
+              ☰ {t('doc.button')}
+            </button>
+          </Show>
           <button type="button" class="header-button" onClick={onClear}>
             {t('clear.button')}
           </button>
@@ -205,73 +219,78 @@ function AppShell(props: AppShellProps) {
       <Show
         when={props.layout.viewport() === 'desktop'}
         fallback={
-          <MobilePanes
-            state={props.state}
-            mobileTab={props.layout.mobileTab}
-            setMobileTab={props.layout.setMobileTab}
-            showLineNumbers={props.prefs.showLineNumbers}
-          />
-        }
-      >
-        <div class="panes">
-          <div class="editor-pane">
-            <EditorArea
+          <>
+            <MobilePanes
               state={props.state}
+              mobileTab={props.layout.mobileTab}
+              setMobileTab={props.layout.setMobileTab}
               showLineNumbers={props.prefs.showLineNumbers}
             />
+            <DocDrawer
+              docs={props.docManager}
+              open={drawerOpen()}
+              onClose={() => setDrawerOpen(false)}
+            />
+          </>
+        }
+      >
+        <div class="workspace">
+          <DocList docs={props.docManager} />
+          <div class="panes">
+            <div class="editor-pane">
+              <EditorArea
+                state={props.state}
+                showLineNumbers={props.prefs.showLineNumbers}
+              />
+            </div>
+            <PreviewArea state={props.state} />
           </div>
-          <PreviewArea state={props.state} />
         </div>
       </Show>
     </main>
   );
 }
 
-const root = document.getElementById('root');
-if (root) {
-  // 启动序列（v1.1 异步 / api-spec v1.1 §2 / ADR-005 D4）：
-  //   1. createDocumentState('') — 先空（IDB 异步，首帧拿不到文档）
-  //   2. createEditorAPI / createPersistence(state.text) — 订阅 text debounce 写 IDB
-  //   3. 其余 chrome（theme / exporter / layout / prefs）同步装配
-  //   4. loadStoredDocument() 异步 hydrate（含一次性迁移）→ resolve 后 setTextFromStorage
-  //      （共识 TBD-v11-1 (a)：空 editor 闪现后填入；IDB 单 key 读通常 <50ms）
-  //
-  // createPersistence / createTheme 内部跑 createEffect，须在 createRoot 内；
-  // render() 已包 createRoot，装配放回调里。
+// 启动序列（v1.6 多文档 / api-spec v1.6 §1 / ADR-010 D4）：
+//   1. loadInitialDocs() 先于 render —— 迁移 + 拿 active doc 文本作初始（M9 拥有
+//      documents store + 迁移；纯 IDB，无 Solid 信号 → 可在 createRoot 外 await）
+//   2. render(createRoot)：state(activeText) → editor → docManager → persistence
+//   3. open-shared #doc= → docManager.create（新建文档，不覆盖 / ADR-010 D6）
+async function bootstrap(): Promise<void> {
+  const root = document.getElementById('root');
+  if (!root) return;
+
+  applyInitialTheme(); // 同步应用主题，先于 await（防深色 FOUC / async bootstrap）
+  const shared = readSharedDocument(); // 在 hash 被清前读
+  const initial = await loadInitialDocs(Date.now());
+  const activeDoc = initial.docs.find((d) => d.id === initial.activeId);
+  const activeText = activeDoc?.text ?? '';
+
   render(() => {
-    const state = createDocumentState('');
+    const state = createDocumentState(activeText);
     const editor = createEditorAPI(state);
-    const persist = createPersistence(state.text);
+    const docManager = createDocManager({
+      initial,
+      now: () => Date.now(),
+      setEditorText: (txt) => editor.setTextFromStorage(txt),
+      getEditorText: state.text,
+    });
+    const persist = createPersistence(state.text, docManager);
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
     const share = createShareAPI(state.text);
     const layout = createLayout();
     const prefs = createEditorPrefs();
 
-    // 加载优先级（api-spec v1.2 §2 / data-model v1.2 §3）：URL 分享 > IDB。
-    const shared = readSharedDocument();
+    // open-shared：作为新文档导入（不覆盖当前 / ADR-010 D6）
     if (shared !== null) {
-      // 显式打开分享链接：本机 IDB 非空且内容不同 → confirm（TBD-v12-3）再覆盖。
-      void loadStoredDocument().then((existing) => {
-        if (!existing || existing === shared) {
-          editor.setTextFromStorage(shared);
-        } else if (window.confirm(t('share.overwrite.confirm'))) {
-          editor.setTextFromStorage(shared);
-        } else {
-          // 取消覆盖 → 保留本机文档（否则编辑器停在空，丢失本机文档的显示）
-          editor.setTextFromStorage(existing);
-        }
-        // 清 #doc=（防 reload 重触发 + 不长留地址栏）
+      void docManager.create(shared).then(() => {
         if (typeof history !== 'undefined') {
           history.replaceState(null, '', location.pathname + location.search);
         }
       });
-    } else {
-      // 正常 IDB 异步还原 + 竞争防护（v1.1）：hydrate 窗口内已输入则不覆盖。
-      void loadStoredDocument().then((stored) => {
-        if (stored && state.text() === '') editor.setTextFromStorage(stored);
-      });
     }
+
     return (
       <AppShell
         state={state}
@@ -282,11 +301,13 @@ if (root) {
         layout={layout}
         prefs={prefs}
         share={share}
+        docManager={docManager}
       />
     );
   }, root);
 
   // M8 PWA (ADR-009)：注册 SW + 更新提示（registerType:'prompt'）。
-  // dev 下 devOptions.enabled:false → registerSW 为 no-op；真 SW 仅 build+preview/线上。
   wireUpdatePrompt(registerSW);
 }
+
+void bootstrap();

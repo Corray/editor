@@ -55,4 +55,8 @@ markdown-it `core.ruler` 加规则：遍历 token，对**开始块 token**（`to
 - ADR-002（sanitize 红线 / 二次 DOMPurify）；ADD_ATTR 仅加惰性 data 属性，红线（标签/事件/url 严格）不动
 - v1.4 mermaid 实测：DOMPurify 默认剥离 data-* → 本版用 ADD_ATTR 显式放行（非 textContent 绕路，因行号需在属性上供 JS 读）
 - DOMPurify `ADD_ATTR` 文档（核实放行语义：仅加白名单属性，不放宽其他）
-- 实现 commit：`<TBD 实现后回填>`
+- 实现 commit：`7c4d7ad`
+- **附带修布局（实现期发现）**：滚动同步要求面板有可滚区间，但实测 `#root { min-height:100vh }` 使整页随内容增高、面板从不溢出（编辑/预览 clientH==scrollH，整页滚动）→ 改 `height:100vh + overflow:hidden`，面板内部滚动（split editor 标准 UX）。前置依赖，否则 sync 无可滚区间（live MCP 探针定位）
+- **copyHtml 剥离 data-source-line**：内部映射属性不进用户复制的 HTML（export 干净）
+- 实测：unit 162（source-line 标注 + ADD_ATTR XSS 复验）+ e2e 79（ac11 双向滚动 + XSS + 移动不启用 双引擎）；首屏 80.51KB
+- AC-v17-5 XSS 复验通过：ADD_ATTR data-source-line 后 `<script>`/`onerror`/`javascript:` 仍剥离（DOM 断言 + e2e 双引擎）

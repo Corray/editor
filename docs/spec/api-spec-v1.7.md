@@ -52,7 +52,9 @@ createEffect:
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| M2 source_line core rule + render ADD_ATTR data-source-line | ⏳ | — |
-| M10 createScrollSync（映射 + 双向 + 反馈环防护 + dispose）| ⏳ | — |
-| AppShell 桌面双栏 createEffect 挂载 + onCleanup + editor/preview ref | ⏳ | — |
-| XSS 复验（ADD_ATTR 不破防 / AC-v17-5）| ⏳ | — |
+| M2 source_line core rule + render ADD_ATTR data-source-line | ✓ | `7c4d7ad` |
+| M10 createScrollSync（映射 + 双向 + 反馈环防护 rAF + dispose）| ✓ | `7c4d7ad` |
+| AppShell 桌面双栏 createEffect 挂载 + onCleanup + editor/preview ref（fontSize 变重建）| ✓ | `7c4d7ad` |
+| copyHtml 剥离 data-source-line（不进用户复制 HTML）| ✓ | `7c4d7ad` |
+| **布局修**：#root height:100vh + overflow hidden（面板内部滚动）| ✓ | `7c4d7ad` — 前置依赖，否则整页滚无可滚区间 |
+| XSS 复验（ADD_ATTR 不破防 / AC-v17-5）| ✓ | `7c4d7ad` — unit + e2e 双引擎 |

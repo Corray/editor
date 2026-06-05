@@ -121,6 +121,10 @@
 | F-V16-3 | 2026-06-05 | proposed | LOW | IDB 不可用（隐私模式）仅单文档 localStorage 降级；多文档 in-memory 不跨 reload（罕见，已 toast）| 2026-06-05 audit |
 | F-V16-4 | 2026-06-05 | proposed | LOW | 多 tab 并发写 documents/activeDocId → last-write-wins，无 versionchange 协调（已知边界）| 2026-06-05 audit |
 | F-V16-5 | 2026-06-05 | proposed | LOW | startup getAll 全量 doc(含 text)入内存；100+ 大文档内存/启动成本增（未压测）| 2026-06-05 audit |
+| F-V17-1 | 2026-06-05 | proposed | LOW (info) | `#root min-height→height:100vh` 修潜伏布局（面板从不滚/整页滚，v1.7 前就在）；full e2e 79 无回归，但全局布局改动，移动/小屏边界留意 | 2026-06-05 v1.7 audit |
+| F-V17-2 | 2026-06-05 | proposed | LOW | source-line 对齐到块顶，块内偏移不细调（长段落内滚动预览跳段首）| 2026-06-05 audit |
+| F-V17-3 | 2026-06-05 | proposed | LOW | lineHeight 换算在长行软换行下偏差（视觉行≠逻辑行，scrollTop/lineHeight 高估行号）| 2026-06-05 audit |
+| F-V17-4 | 2026-06-05 | proposed | LOW (info) | rAF 单帧反馈环窗口；极端高频 scroll 理论可能漏防一帧（未实测抖动）| 2026-06-05 audit |
 
 ### Issue-process 审查
 
@@ -152,3 +156,4 @@
 | 2026-06-04 | v1.4 增量 audit（报告 `2026-06-04-v1.4-increment.md`）：**最高风险版无 critical/high/medium**；SVG XSS 三层防御（strict + htmlLabels:false 砍 foreignObject + DOMPurify profile+FORBID）+ **e2e 双引擎 AC-v14-3 发布门槛达成**（foreignObject count 0 实证）+ mermaid 135KB gz lazy chunk 不进首屏（靠 v1.3 修的首屏 size 闸兜底）。3 LOW（F-V14-1~3：重渲染 perf / XSS 仅 e2e / 主题切换不重渲染）deferred |
 | 2026-06-05 | v1.5 增量 audit（报告 `2026-06-05-v1.5-increment.md`）：PWA 安全面（SW/Workbox 自托管 + CSP 不放宽 script-src）守住、首屏闸守住、离线正确性 e2e 实证（含离线 mermaid/katex 渲染）。**1 MEDIUM F-V15-1（precache 3.7MB）**——accept 的 D2(a) 放大后果，建议 tag v0.6.0 前定夺（F-V11-1 先例）+ 4 LOW（F-V15-2~5）|
 | 2026-06-05 | v1.6 增量 audit（报告 `2026-06-05-v1.6-increment.md`）：**最大版（L3 持久化根基单→多）无 critical/high/medium**。迁移数据安全经复用 v1.1 先写后删幂等 + 单写者纪律 + 3 路迁移测试控住；v1.0 直跳盖空 case 被实现期 e2e 捕获补强；附带修 async bootstrap FOUC。5 LOW（F-V16-1~5：切换竞态 info / 无重命名 / 降级单文档 / 多 tab / 列表规模）deferred |
+| 2026-06-05 | v1.7 增量 audit（报告 `2026-06-05-v1.7-increment.md`）：**无 critical/high/medium**。安全相关（动 sanitize ADD_ATTR data-source-line）经"仅放行惰性属性 + XSS 复验双引擎"控住，ADR-002 红线不放宽，AC-v17-5 达成；附带修潜伏布局（面板不滚/整页滚，live MCP 探针定位）+ copyHtml 剥离内部属性。4 LOW（F-V17-1~4：布局 info / 块顶对齐 / 软换行映射 / 反馈环窗口）deferred |

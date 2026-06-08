@@ -78,7 +78,7 @@
 | BHV-007 | 2026-06-03 | deferred (v1.1) | LOW | 行号 toggle off→on 时若 textarea 已滚动，gutter 从 scrollTop 0 起，下次 scroll 才同步 → 短暂错位 | 2026-06-03 增量 audit |
 | BHV-008 | 2026-06-03 | deferred (v1.1) | LOW | gutter 每逻辑行 1 DOM 节点，近 1MB 大文档放大渲染/内存成本（静态推断，未压测）| 2026-06-03 增量 audit |
 | BHV-009 | 2026-06-03 | deferred (v1.1) | LOW | toast 容器统一 aria-live=polite；error/warn 语义宜 assertive（a11y，未真机验）| 2026-06-03 增量 audit |
-| BHV-010 | 2026-06-03 | deferred (v1.1) | LOW | F1.2 行号 / F1.3 字号 / toast 仅 unit+手测，无 e2e 验收覆盖（PRD §F1 功能，回归风险）| 2026-06-03 增量 audit |
+| BHV-010 | 2026-06-03 | **resolved** | LOW | F1.2 行号 / F1.3 字号 / toast 无 e2e 验收覆盖。**v0.9.1 补 ac13 e2e**（行号 toggle / 字号档位 / 复制 toast，双引擎）`a0efd2c` | 2026-06-03 增量 audit |
 
 ### v1.1 增量审查（2026-06-04 / 报告 `2026-06-04-v1.1-increment.md`）
 
@@ -86,9 +86,9 @@
 |------|---------|---------|---------|------|------|
 | F-V11-1 | 2026-06-04 | **resolved** | MEDIUM | `loadStoredDocument` IDB 读错静默降级 → 显空 + 潜在覆盖丢数据。修：拆 get/migration catch，读错 console.error + storage.loadError toast，不裸吞；UT-MIG-006 | tag 前修 / commit `c26d1db` |
 | F-V11-2 | 2026-06-04 | **resolved** | LOW | `_storage.ts` resetStorage `open('editor')` 无 version 竞争可建无 store DB。修：`open(1)+onupgradeneeded` 建 kv，schema-safe | commit `c26d1db` |
-| F-V11-3 | 2026-06-04 | deferred (v1.1.x) | LOW | clear() IDB delete 失败静默吞无 log | 2026-06-04 audit |
+| F-V11-3 | 2026-06-04 | **resolved** | LOW | （旗舰/F-V11-1 家族漏网）静默路径经 v1.6 重构迁到 M9 用户操作 fire-and-forget store 写。**v0.9.1 加 guardStore**（log+toast，saveActiveText 仍由 M3 接管）+ family scan 确认仅此处 `a0efd2c` | 2026-06-04 audit |
 | F-V11-4 | 2026-06-04 | deferred (v1.1.x) | LOW | 每次加载 hydrate 触发冗余 write-back（幂等无害，status 抖动）| 2026-06-04 audit |
-| F-V11-5 | 2026-06-04 | deferred (v1.1.x) | LOW | `storage.unavailable` i18n 死 key（v1.0 起未用）| 2026-06-04 audit |
+| F-V11-5 | 2026-06-04 | **resolved** | LOW | `storage.unavailable` 死 key。**v0.9.1 复用**为 guardStore 通用 store 错误提示（不再死）`a0efd2c` | 2026-06-04 audit |
 | F-V11-6 | 2026-06-04 | deferred (v1.1.x) | LOW | performWrite 异步写理论可重叠（status 短暂错乱，极边缘）| 2026-06-04 audit |
 
 ### v1.2 增量审查（2026-06-04 / 报告 `2026-06-04-v1.2-increment.md`）
@@ -96,7 +96,7 @@
 | 编号 | 首次发现 | 当前状态 | severity | 说明 | 关联 |
 |------|---------|---------|---------|------|------|
 | F-V12-1 | 2026-06-04 | deferred (v1.2.x) | LOW | 篡改的空 payload `#doc=1.` 解码为 ''，本机有文档时 confirm→accept 清空（合法分享链不会空 payload，手工篡改边缘）| 2026-06-04 audit |
-| F-V12-2 | 2026-06-04 | deferred (v1.2.x) | LOW | 导入不校验文件类型，二进制读为乱码文本入编辑器（DOMPurify 渲染兜底无害）| 2026-06-04 audit |
+| F-V12-2 | 2026-06-04 | **resolved** | LOW | 导入不校验类型→二进制乱码。**v0.9.1 加 looksBinary**（NUL / >10% U+FFFD）→ 拒绝 + toast import.notText `a0efd2c` | 2026-06-04 audit |
 | F-V12-3 | 2026-06-04 | deferred (v1.2.x) | LOW | clipboard 不可用时 share 仅 toast 失败，无"手动复制 URL"fallback（URL 已构建）| 2026-06-04 audit (UX) |
 | F-V12-4 | 2026-06-04 | deferred (v1.2.x) | LOW | app 未监听 hashchange：在**已开页**地址栏粘贴分享链接（同文档 hash 变更）不触发加载，需手动 reload。真实场景（点链接=冷加载）不受影响；边缘。线上眼验/e2e 二次踩此同文档陷阱（已落 PP-003 #5）| 2026-06-04 线上眼验 |
 
@@ -162,3 +162,4 @@
 | 2026-06-05 | v1.6 增量 audit（报告 `2026-06-05-v1.6-increment.md`）：**最大版（L3 持久化根基单→多）无 critical/high/medium**。迁移数据安全经复用 v1.1 先写后删幂等 + 单写者纪律 + 3 路迁移测试控住；v1.0 直跳盖空 case 被实现期 e2e 捕获补强；附带修 async bootstrap FOUC。5 LOW（F-V16-1~5：切换竞态 info / 无重命名 / 降级单文档 / 多 tab / 列表规模）deferred |
 | 2026-06-05 | v1.7 增量 audit（报告 `2026-06-05-v1.7-increment.md`）：**无 critical/high/medium**。安全相关（动 sanitize ADD_ATTR data-source-line）经"仅放行惰性属性 + XSS 复验双引擎"控住，ADR-002 红线不放宽，AC-v17-5 达成；附带修潜伏布局（面板不滚/整页滚，live MCP 探针定位）+ copyHtml 剥离内部属性。4 LOW（F-V17-1~4：布局 info / 块顶对齐 / 软换行映射 / 反馈环窗口）deferred |
 | 2026-06-05 | v1.8 增量 audit（报告 `2026-06-05-v1.8-increment.md`）：**无 critical/high/medium**。**F-V16-2 resolved**（重命名 titleManual 锁）；无 DB 升级 + 旧记录兼容 + 无 XSS 面（重命名纯文本）；实现期 2 bug（query TDZ / Esc-unmount-blur）测试捕获。4 LOW（F-V18-1~4：搜索 perf / 不跳转 / 双击发现性 / 搜索-active 不一致）deferred |
+| 2026-06-08 | **v0.9.1 清债 consolidation**（报告 `2026-06-08-v0.9.1-consolidation.md`）：非功能 PATCH，挑高价值子集清 4 条 → **F-V11-3（旗舰/家族漏网 guardStore）+ F-V12-2（looksBinary）+ F-V11-5（死 key 复用）+ BHV-010（ac13 e2e）resolved**；明确 defer 多 tab/race/perf/SVG单测/UX（理由见报告）。unit 171 + e2e ac13 6；剩 30 条多为 info/边缘/perf-待压测 |

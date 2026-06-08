@@ -51,4 +51,4 @@ tag v1.0.0 前**必须**：① RLS 策略人工审 ② 跨用户隔离验证（A
 - 共识 v2.0 TBD-v20-5 / arch-constraints §4（identity 隔离）/ security-review rule
 - Supabase RLS 官方文档（research-first 实现/审策略时查，核实 auth.uid() 语义 + policy 默认拒绝）
 - ADR-002（XSS 红线，session 安全前提）/ ADR-013（anon key 公开模型）
-- 实现 commit：`<TBD>`
+- 实现 commit：`935d3ae`（mock 实现 + 真后端代码；真云连接/真隔离待用户 provision 后验，AC-v20-6 安全门槛 pending）

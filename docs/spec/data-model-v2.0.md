@@ -39,17 +39,15 @@ create policy "own update" on documents for update using (auth.uid() = user_id) 
 create policy "own delete" on documents for delete using (auth.uid() = user_id);
 ```
 
-## 2. 本地 DocRecord 同步元（增量 / 无 DB 升级）
+## 2. 本地 DocRecord（**实现后修订：无本地 schema 变更**）
 
-DocRecord（data-model v1.6/v1.8）+ 可选字段（IndexedDB schemaless，无 onupgradeneeded）：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `deleted` | boolean? | 软删（登录态删除 = 软删 + 同步；匿名仍可硬删）；M9 列表过滤 deleted |
-| `syncedAt` | number? | 上次成功 push/pull 的时间（判定"本地未同步"用于首登 union）|
-| `remoteUpdatedAt` | number? | 上次见到的云端 updatedAt（辅助 LWW / 调试）|
-
-旧记录无这些字段 = undefined = 未同步/未删（兼容，无迁移）。
+> **设计简化（实现 `935d3ae`）：** soft-delete tombstone **仅存云端**，本地不加 `deleted`/
+> `syncedAt`/`remoteUpdatedAt` 字段。本地删除 = 硬删 + 经 onLocalDelete 通知云端写 tombstone
+> （`deleted=true`）。多设备复活由 **pull-before-push 合并** + 云端 tombstone LWW 防止
+> （ADR-015 D4）。首登并集靠"本地全量 push + 云端全量 pull 按 id LWW"，无需 syncedAt。
+>
+> **结果：DocRecord 保持 v1.8 形态不变**（id/title/text/createdAt/updatedAt/titleManual），
+> 无本地 DB 变更、无迁移。比初版方案更简（少 3 个本地字段 + 本地不留 tombstone）。
 
 ## 3. LWW 映射（ADR-015 D3）
 

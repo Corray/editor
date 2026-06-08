@@ -46,4 +46,4 @@ supabase-js **must** 封装在 **M11 同步网关**（AuthGateway + SyncGateway 
 - **`@supabase/supabase-js` 2.107.0**（npm 核实 2026-06-08）— research-first：Auth（magic link）+ RLS + from().select/upsert API 实现时查官方文档定稿
 - architecture-constraints §7（Gateway/strategy）/ §4（数据隔离基于 identity）
 - ADR-004（GH Pages 静态部署，FE 不变）
-- 实现 commit：`<TBD>`
+- 实现 commit：`935d3ae`（mock 实现 + 真后端代码；真云连接/真隔离待用户 provision 后验，AC-v20-6 安全门槛 pending）

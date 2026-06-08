@@ -43,4 +43,4 @@
 
 - 共识 v2.0 TBD-v20-2/3/4 / ADR-010（id 复用为云 PK）/ ADR-016（RLS）
 - LWW / 软删 tombstone（分布式同步常见模式；CRDT 留 v2.1）
-- 实现 commit：`<TBD>`
+- 实现 commit：`935d3ae`（mock 实现 + 真后端代码；真云连接/真隔离待用户 provision 后验，AC-v20-6 安全门槛 pending）

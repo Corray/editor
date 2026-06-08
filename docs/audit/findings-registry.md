@@ -129,6 +129,13 @@
 | F-V18-2 | 2026-06-05 | proposed | LOW (info) | 搜索仅过滤列表，不跳转/高亮匹配位置（共识范围内）| 2026-06-05 audit |
 | F-V18-3 | 2026-06-05 | proposed | LOW | 内联重命名靠双击，无可见编辑图标 → 发现性低（title tooltip 部分缓解）| 2026-06-05 audit |
 | F-V18-4 | 2026-06-05 | proposed | LOW (info) | 搜索过滤后 active doc 可能不在结果中（仍 active + 编辑区显示，列表无高亮项）轻微不一致 | 2026-06-05 audit |
+| F-V20-1 | 2026-06-08 | **proposed** | MEDIUM | supabase.ts 真后端**未运行时验证**（无真项目，按文档 API 写，mock 只验契约）→ 真 auth/同步行为未实证。pending 用户 provision 后线上验 | 2026-06-08 v2.0 audit |
+| F-V20-2 | 2026-06-08 | **proposed** | MEDIUM | **AC-v20-6 RLS 真隔离发布门槛未达**：mock 模拟 ≠ 真 RLS；须真项目跑 RLS SQL + 两用户线上验 + 人工审策略。**阻 v1.0.0**（故打 rc）| 2026-06-08 audit |
+| F-V20-3 | 2026-06-08 | proposed | LOW | magic link 回调（URL token）× `#doc=` 分享 hash 共存仅设计声明，未真浏览器验 | 2026-06-08 audit |
+| F-V20-4 | 2026-06-08 | proposed | LOW | LWW 跨设备时钟偏差误序（ADR-015 已声明 MVP 限制）| 2026-06-08 audit |
+| F-V20-5 | 2026-06-08 | proposed | LOW (info) | 文档明文存云（无 E2EE）；仅 toast 提示，运维方可见 | 2026-06-08 audit |
+| F-V20-6 | 2026-06-08 | proposed | LOW | 登录 UI 用 window.prompt 取 email（简陋，真云前可接受）| 2026-06-08 audit |
+| F-V20-7 | 2026-06-08 | proposed | LOW (info) | push × focus-pull 理论竞争（LWW + pull-before-push 兜底，未压测）| 2026-06-08 audit |
 
 ### Issue-process 审查
 
@@ -163,3 +170,4 @@
 | 2026-06-05 | v1.7 增量 audit（报告 `2026-06-05-v1.7-increment.md`）：**无 critical/high/medium**。安全相关（动 sanitize ADD_ATTR data-source-line）经"仅放行惰性属性 + XSS 复验双引擎"控住，ADR-002 红线不放宽，AC-v17-5 达成；附带修潜伏布局（面板不滚/整页滚，live MCP 探针定位）+ copyHtml 剥离内部属性。4 LOW（F-V17-1~4：布局 info / 块顶对齐 / 软换行映射 / 反馈环窗口）deferred |
 | 2026-06-05 | v1.8 增量 audit（报告 `2026-06-05-v1.8-increment.md`）：**无 critical/high/medium**。**F-V16-2 resolved**（重命名 titleManual 锁）；无 DB 升级 + 旧记录兼容 + 无 XSS 面（重命名纯文本）；实现期 2 bug（query TDZ / Esc-unmount-blur）测试捕获。4 LOW（F-V18-1~4：搜索 perf / 不跳转 / 双击发现性 / 搜索-active 不一致）deferred |
 | 2026-06-08 | **v0.9.1 清债 consolidation**（报告 `2026-06-08-v0.9.1-consolidation.md`）：非功能 PATCH，挑高价值子集清 4 条 → **F-V11-3（旗舰/家族漏网 guardStore）+ F-V12-2（looksBinary）+ F-V11-5（死 key 复用）+ BHV-010（ac13 e2e）resolved**；明确 defer 多 tab/race/perf/SVG单测/UX（理由见报告）。unit 171 + e2e ac13 6；剩 30 条多为 info/边缘/perf-待压测 |
+| 2026-06-08 | v2.0 增量 audit（报告 `2026-06-08-v2.0-increment.md`）：**架构跳变（破纯 FE）+ 安全核心**，**mock 验证基线**。逻辑层无 critical/high（匿名零回归 e2e 实证 + supabase lazy + Gateway 边界 + LWW/并集/tombstone 数据安全）。**2 MEDIUM（F-V20-1 真impl 未验 / F-V20-2 RLS 真隔离未达）= AC-v20-6 发布门槛 PENDING → 不打 v1.0.0，打 v1.0.0-rc.1**；5 LOW（F-V20-3~7）。真云全路径 0 次真验（最大盲点，诚实标）|

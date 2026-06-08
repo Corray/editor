@@ -63,9 +63,10 @@ export interface SyncGateway {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| client.ts（supabase client + env 降级）| ⏳ | — |
-| AuthGateway（magic link / session / onAuthChange）| ⏳ | — |
-| SyncGateway（push/pullAll/pushDelete）| ⏳ | — |
-| M9 集成（push 触发 / pull+首登并集 / 软删 / LWW）| ⏳ | — |
-| UI 登录态 + 隐私提示 + i18n | ⏳ | — |
-| mock client（测试 + 模拟 RLS）| ⏳ | — |
+| client.ts（env 门控 syncEnv + 懒加载 loadBackend + session 探测）| ✓ | `935d3ae` |
+| AuthGateway + SyncGateway（supabase.ts 真后端，懒加载，**未运行时验证**）| ✓ | `935d3ae` — 真云待 provision |
+| M9 集成（sync hooks + mergeRemote LWW/首登并集/软删；本地无 schema 变更）| ✓ | `935d3ae` |
+| feature.ts（reactive 登录态）+ orchestrator.ts（wireSync）| ✓ | `935d3ae` |
+| UI 登录控件（magic link prompt MVP）+ 隐私提示 + i18n auth.* | ✓ | `935d3ae` — 仅 enabled(有 env) 显示 |
+| mock.ts（内存 fake + 模拟 RLS 分区）| ✓ | `935d3ae` — unit 7 测覆盖 |
+| supabase-js 懒加载（env-less tree-shaken / with-env 204KB lazy chunk 非首屏）| ✓ | `935d3ae` — dummy-env build 验证 |

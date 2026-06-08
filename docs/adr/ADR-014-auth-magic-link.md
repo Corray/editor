@@ -41,4 +41,4 @@ magic link 回到 `/editor/`（带 token hash）→ Supabase client `detectSessi
 - 共识 v2.0 TBD-v20-1 / ADR-013（Supabase）/ ADR-016（RLS 才是授权边界）
 - Supabase Auth `signInWithOtp` + `detectSessionInUrl`（research-first 实现时查官方）
 - ADR-002（XSS 红线——session token 在 localStorage，XSS 防线不破是前提）
-- 实现 commit：`<TBD>`
+- 实现 commit：`935d3ae`（mock 实现 + 真后端代码；真云连接/真隔离待用户 provision 后验，AC-v20-6 安全门槛 pending）

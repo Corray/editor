@@ -4,6 +4,42 @@
 
 ---
 
+## v0.9.1 — 清债 consolidation（非功能 PATCH）（2026-06-08）
+
+**Tag:** `v0.9.1` @ commit `6a7f630`
+**Range:** `367cb5d..6a7f630`（v0.9.0 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** **技术债 consolidation**（非功能版）。FE 功能井近干 → 拐点决策选"清债降熵"，不加功能、不做全清。
+
+### Scope — 清 4 条高价值 findings（`a0efd2c`）
+
+| 编号 | 性质 | 处置 |
+|------|------|------|
+| F-V11-3 | 旗舰 / F-V11-1 家族漏网 | 静默吞错经 v1.6 重构迁到 M9 用户操作 fire-and-forget store 写 → `guardStore`(log+toast) + family scan 复核 |
+| F-V12-2 | 正确性 | 导入 `looksBinary` 检测（NUL / >10% U+FFFD）→ 二进制拒绝 + toast |
+| F-V11-5 | dead code | 死 key `storage.unavailable` 复用为 guardStore 通用错误提示 |
+| BHV-010 | 覆盖缺口 | 补 ac13 e2e（行号 toggle / 字号档位 / 复制 toast 双引擎）|
+
+**明确 defer**（理由见 audit 报告）：多 tab(F-V16-4) / race-info / perf 类 4 条 / SVG 单测(F-V14-2) / UX 打磨 + 边缘 ~15 条。
+
+### Quality Gates [已验证: 2026-06-08 本机]
+
+- 171 unit tests pass（+looksBinary 4 / +remove-store-fail guardStore surface 1）
+- e2e ac13 6 通过（双引擎）；full e2e 92 pass + 1 **已知 PP-003 #4 并行竞争 flake**（E2E-v16-002，隔离 5/5 过，非回归）
+- 首屏 81.20 KB gzipped；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit
+
+报告 `docs/audit/2026-06-08-v0.9.1-consolidation.md`：无功能/DB/XSS 变更。F-V11-3 印证 fix-pattern-scan 家族扫描价值（代码重构后静默点会"迁移"，需重新定位，不照搬旧 finding 描述）。
+
+### Closure
+
+- 4 findings resolved（剩 30 条多为 info/边缘/perf-待压测）
+- 非功能版：无新 feature、无 DB 变更、无新 XSS 面
+- package.json 0.9.0 → 0.9.1
+
+---
+
 ## v0.9.0 — 多文档增强（重命名 + 搜索 / 路线图 v1.8 里程碑）（2026-06-05）
 
 **Tag:** `v0.9.0` @ commit `367cb5d`

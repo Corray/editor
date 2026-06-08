@@ -68,4 +68,4 @@ export const importer: ImportAPI = {
 export { downloadMarkdown, getFileName } from './ExportMd';
 export { copyHtml } from './CopyHtml';
 export { buildShareUrl, readSharedDocument, SHARE_URL_MAX } from './ShareUrl';
-export { readMarkdownFile } from './ImportFile';
+export { readMarkdownFile, looksBinary } from './ImportFile';

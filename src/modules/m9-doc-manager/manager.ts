@@ -1,4 +1,6 @@
 import { createSignal } from 'solid-js';
+import { toast } from '@/shared/toast';
+import { t } from '@/modules/m7-i18n/i18n';
 import { deriveTitle } from './title';
 import { newDocId } from './idPrefix';
 import {
@@ -10,6 +12,21 @@ import {
   type InitialDocs,
 } from './store';
 import type { DocManagerAPI, DocMeta } from './api';
+
+/**
+ * 用户操作（create/switchTo/remove/rename）的 store 写是 fire-and-forget（DocList
+ * `void m.xxx()`）→ IDB 失败若不接 = 静默吞错（F-V11-3 家族：v1.1 在 M3.clear，
+ * v1.6 重构后迁到此处）。包一层 surface：失败 console.error + toast，不静默。
+ * 注：saveActiveText **不**走这里——它由 M3 performWrite 的 try/catch 接管（ERROR 态）。
+ */
+async function guardStore(op: Promise<void>): Promise<void> {
+  try {
+    await op;
+  } catch (err) {
+    console.error('[m9] store op failed', err);
+    toast.show(t('storage.unavailable'), 'error'); // 复用原死 key（F-V11-5）
+  }
+}
 
 export interface DocManagerDeps {
   initial: InitialDocs;
@@ -81,18 +98,18 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
         { ...rec, title: deriveTitle(rec.text), titleManual: false, updatedAt: now() };
     records.set(id, updated);
     refresh();
-    await putDoc(updated, id === activeId());
+    await guardStore(putDoc(updated, id === activeId())); // F-V11-3：失败不静默
   }
 
   async function activate(id: string): Promise<void> {
     setActiveSignal(id);
-    await setActiveId(id);
+    await guardStore(setActiveId(id)); // F-V11-3
     setEditorText(records.get(id)?.text ?? '');
   }
 
   async function create(initialText = ''): Promise<string> {
     // 先 flush 当前（防丢未存盘的编辑）
-    await saveActiveText(getEditorText());
+    await guardStore(saveActiveText(getEditorText()));
     const ts = now();
     const doc: DocRecord = {
       id: newDocId(),
@@ -103,7 +120,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     };
     records.set(doc.id, doc);
     refresh();
-    await putDoc(doc, true);
+    await guardStore(putDoc(doc, true)); // F-V11-3
     await activate(doc.id);
     return doc.id;
   }
@@ -111,7 +128,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   async function switchTo(id: string): Promise<void> {
     if (id === activeId()) return;
     if (!records.has(id)) return;
-    await saveActiveText(getEditorText()); // flush 当前
+    await guardStore(saveActiveText(getEditorText())); // flush 当前（F-V11-3：fire-and-forget 路径 surface）
     await activate(id);
   }
 
@@ -119,7 +136,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     if (!records.has(id)) return;
     const wasActive = id === activeId();
     records.delete(id);
-    await deleteDocRecord(id);
+    await guardStore(deleteDocRecord(id)); // F-V11-3：删除失败不静默
 
     if (records.size === 0) {
       // 删到空 → 自动建空 doc（永远 ≥1 / ADR-010 D4）
@@ -132,7 +149,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
         updatedAt: ts,
       };
       records.set(doc.id, doc);
-      await putDoc(doc, true);
+      await guardStore(putDoc(doc, true)); // F-V11-3
       refresh();
       await activate(doc.id);
       return;

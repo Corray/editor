@@ -251,4 +251,28 @@ describe('M9 CRUD (createDocManager)', () => {
       dispose();
     });
   });
+
+  // F-V11-3：用户操作 store 失败不静默吞 → toast + 不 reject（guardStore）
+  it('UT-M9-remove-store-fail: 删除 IDB 失败 → toast 提示，不 reject（不静默）', async () => {
+    await createRoot(async (dispose) => {
+      const { IDBObjectStore } = await import('fake-indexeddb');
+      const { api } = await setup();
+      const id = await api.create('# to delete');
+      const { toast } = await import('@/shared/toast');
+      const { t } = await import('@/modules/m7-i18n/i18n');
+      const toastSpy = vi.spyOn(toast, 'show').mockImplementation(() => {});
+      const delSpy = vi
+        .spyOn(IDBObjectStore.prototype, 'delete')
+        .mockImplementation(() => {
+          throw new Error('idb delete fail');
+        });
+      const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      // remove 不应 reject（guardStore 接住）
+      await expect(api.remove(id)).resolves.toBeUndefined();
+      expect(toastSpy).toHaveBeenCalledWith(t('storage.unavailable'), 'error');
+      expect(errSpy).toHaveBeenCalled(); // 有 log，不静默
+      delSpy.mockRestore();
+      dispose();
+    });
+  });
 });

@@ -23,6 +23,7 @@ import {
   createExportAPI,
   createShareAPI,
   importer,
+  looksBinary,
   readSharedDocument,
 } from '@/modules/m4-export/api';
 import type { ExportAPI, ShareAPI } from '@/modules/m4-export/api';
@@ -130,6 +131,11 @@ function AppShell(props: AppShellProps) {
       text = await importer.readFile(file);
     } catch {
       toast.show(t('import.readFail'), 'warn');
+      return;
+    }
+    // F-V12-2：二进制文件读为乱码 → 拒绝导入（不进编辑器）
+    if (looksBinary(text)) {
+      toast.show(t('import.notText'), 'warn');
       return;
     }
     // v1.6（ADR-010 D6）：导入 = 新建文档（不覆盖当前）

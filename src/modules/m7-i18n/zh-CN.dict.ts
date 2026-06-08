@@ -49,6 +49,7 @@ export const zhCNDict = {
   'share.tooLarge': '文档过大，无法生成分享链接，请改用下载 .md',
   'share.linkInvalid': '分享链接无效或不受支持',
   'import.readFail': '文件读取失败',
+  'import.notText': '文件不是文本（疑似二进制），无法导入',
 
   // M9 文档管理 (v1.6)
   'doc.new': '新建',

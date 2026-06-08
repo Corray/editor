@@ -31,6 +31,7 @@ const EXPECTED_KEYS = [
   'share.tooLarge',
   'share.linkInvalid',
   'import.readFail',
+  'import.notText',
   'pwa.updateAvailable',
   'pwa.refresh',
   'doc.new',

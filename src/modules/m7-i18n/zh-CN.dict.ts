@@ -61,6 +61,14 @@ export const zhCNDict = {
   'doc.search': '搜索文档…',
   'doc.rename': '双击重命名',
 
+  // M11 账号 / 云同步 (v2.0)
+  'auth.login': '登录',
+  'auth.logout': '登出',
+  'auth.emailPrompt': '输入邮箱，将发送登录链接：',
+  'auth.checkEmail': '登录链接已发送，请查收邮箱',
+  'auth.failed': '发送失败，请重试',
+  'auth.privacy': '登录后文档将明文同步到云端（勿存敏感信息）',
+
   // M8 PWA / offline (v1.5)
   'pwa.updateAvailable': '有新版本可用',
   'pwa.refresh': '刷新',

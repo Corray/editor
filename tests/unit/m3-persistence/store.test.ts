@@ -33,6 +33,8 @@ function mockDocManager(
     switchTo: vi.fn(async () => {}),
     remove: vi.fn(async () => {}),
     rename: vi.fn(async () => {}),
+    setSyncHooks: vi.fn(),
+    mergeRemote: vi.fn(async () => []),
   };
 }
 

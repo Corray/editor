@@ -12,6 +12,7 @@ import {
   type InitialDocs,
 } from './store';
 import type { DocManagerAPI, DocMeta } from './api';
+import type { RemoteDoc } from '@/modules/m11-sync/api';
 
 /**
  * 用户操作（create/switchTo/remove/rename）的 store 写是 fire-and-forget（DocList
@@ -26,6 +27,15 @@ async function guardStore(op: Promise<void>): Promise<void> {
     console.error('[m9] store op failed', err);
     toast.show(t('storage.unavailable'), 'error'); // 复用原死 key（F-V11-5）
   }
+}
+
+/**
+ * v2.0 同步钩子（M11 在登录态注入；匿名 = undefined，M9 行为不变）。M9 本地持久后
+ * 调钩子，由 M11 push 到云（fire-and-forget）。M9 不碰 supabase（解耦 / ADR-013 D2）。
+ */
+export interface SyncHooks {
+  onLocalChange(doc: DocRecord): void;
+  onLocalDelete(id: string, updatedAt: number): void;
 }
 
 export interface DocManagerDeps {
@@ -50,6 +60,10 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   // 全量 record 缓存（含 text），避免切换时重读 store
   const records = new Map<string, DocRecord>();
   for (const d of deps.initial.docs) records.set(d.id, d);
+
+  // v2.0：同步钩子（M11 登录态注入 / 匿名 = null → 行为不变）
+  let syncHooks: SyncHooks | null = null;
+  const pushed = (doc: DocRecord) => syncHooks?.onLocalChange(doc);
 
   const [query, setQuerySignal] = createSignal<string>(''); // v1.8 搜索词（须先于 metaList 首调）
   const [activeId, setActiveSignal] = createSignal<string>(deps.initial.activeId);
@@ -86,6 +100,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     records.set(id, updated);
     refresh();
     await putDoc(updated, true);
+    pushed(updated); // v2.0：登录态 → push 到云
   }
 
   async function rename(id: string, title: string): Promise<void> {
@@ -99,6 +114,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     records.set(id, updated);
     refresh();
     await guardStore(putDoc(updated, id === activeId())); // F-V11-3：失败不静默
+    pushed(updated); // v2.0
   }
 
   async function activate(id: string): Promise<void> {
@@ -121,6 +137,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     records.set(doc.id, doc);
     refresh();
     await guardStore(putDoc(doc, true)); // F-V11-3
+    pushed(doc); // v2.0
     await activate(doc.id);
     return doc.id;
   }
@@ -137,6 +154,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     const wasActive = id === activeId();
     records.delete(id);
     await guardStore(deleteDocRecord(id)); // F-V11-3：删除失败不静默
+    syncHooks?.onLocalDelete(id, now()); // v2.0：登录态 → 云端软删 tombstone（防多设备复活）
 
     if (records.size === 0) {
       // 删到空 → 自动建空 doc（永远 ≥1 / ADR-010 D4）
@@ -167,6 +185,74 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     refresh();
   }
 
+  // v2.0：M11 登录态注入同步钩子；登出传 null（恢复匿名行为）
+  function setSyncHooks(hooks: SyncHooks | null): void {
+    syncHooks = hooks;
+  }
+
+  /** 远端 → 本地记录（titleManual 启发式：title≠自动派生 → 视为手动，保住跨设备重命名）。 */
+  function fromRemote(r: RemoteDoc): DocRecord {
+    return {
+      id: r.id,
+      title: r.title,
+      text: r.text,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      titleManual: r.title !== deriveTitle(r.text),
+    };
+  }
+
+  /**
+   * 合并云端 doc（pull / 首登并集，ADR-015 D3/D5）。per-doc LWW + 软删 tombstone。
+   * 返回 toPush（本地权威、需推云的 doc：云端无 或 本地更新）。
+   * active doc 的编辑区**不**在此覆盖（避免 clobber 进行中编辑）；仅 active 被远端删时切换。
+   */
+  async function mergeRemote(remote: RemoteDoc[]): Promise<DocRecord[]> {
+    const remoteById = new Map(remote.map((r) => [r.id, r] as const));
+    const adopted: DocRecord[] = []; // 远端胜 → 需落本地 IndexedDB
+    for (const r of remote) {
+      const local = records.get(r.id);
+      if (r.deleted) {
+        if (local && r.updatedAt >= local.updatedAt) records.delete(r.id); // tombstone 胜 → 删本地
+        continue; // 本地无 → 不加（防复活）
+      }
+      if (!local || r.updatedAt > local.updatedAt) {
+        const rec = fromRemote(r); // 云胜/仅云 → 采纳
+        records.set(r.id, rec);
+        adopted.push(rec);
+      }
+    }
+    // toPush：本地权威（云端无该 id，或本地更新于云）
+    const toPush: DocRecord[] = [];
+    for (const local of records.values()) {
+      const r = remoteById.get(local.id);
+      if (!r || (!r.deleted && local.updatedAt > r.updatedAt)) toPush.push(local);
+    }
+    // active 失效（被远端删）→ 修正（永远 ≥1 / 编辑区跟随）
+    if (!records.has(activeId())) {
+      if (records.size === 0) {
+        const ts = now();
+        const doc: DocRecord = {
+          id: newDocId(),
+          title: deriveTitle(''),
+          text: '',
+          createdAt: ts,
+          updatedAt: ts,
+        };
+        records.set(doc.id, doc);
+        toPush.push(doc);
+        await guardStore(putDoc(doc, true));
+        await activate(doc.id);
+      } else {
+        await activate([...records.values()].sort(byRecent)[0]!.id);
+      }
+    }
+    // 持久化采纳的远端 doc 到本地 IndexedDB
+    for (const rec of adopted) await guardStore(putDoc(rec, rec.id === activeId()));
+    refresh();
+    return toPush;
+  }
+
   return {
     docs,
     activeId,
@@ -177,5 +263,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     switchTo,
     remove,
     rename,
+    setSyncHooks,
+    mergeRemote,
   };
 }

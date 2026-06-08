@@ -19,6 +19,7 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.107.0",
     "@vscode/markdown-it-katex": "^1.1.2",
     "dompurify": "^3.0.0",
     "idb": "^8.0.3",

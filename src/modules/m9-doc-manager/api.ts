@@ -27,6 +27,12 @@ export interface DocManagerAPI {
   remove(id: string): Promise<void>;
   /** v1.8：手动重命名（非空→锁 titleManual；空→回退自动派生）。 */
   rename(id: string, title: string): Promise<void>;
+  /** v2.0：M11 登录态注入同步钩子（登出传 null → 恢复匿名行为）。 */
+  setSyncHooks(hooks: import('./manager').SyncHooks | null): void;
+  /** v2.0：合并云端 doc（pull/首登并集，per-doc LWW + 软删）；返回需推云的本地权威 doc。 */
+  mergeRemote(remote: import('@/modules/m11-sync/api').RemoteDoc[]): Promise<
+    import('./store').DocRecord[]
+  >;
 }
 
 export { createDocManager } from './manager';

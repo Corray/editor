@@ -17,6 +17,8 @@ import {
 import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
 import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
 import { createScrollSync } from '@/modules/m10-scroll-sync/sync';
+import { createSyncFeature } from '@/modules/m11-sync/feature';
+import type { SyncFeature } from '@/modules/m11-sync/feature';
 import { createTheme, applyInitialTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
 import {
@@ -45,6 +47,7 @@ interface AppShellProps {
   prefs: EditorPrefsAPI;
   share: ShareAPI;
   docManager: DocManagerAPI;
+  sync: SyncFeature;
 }
 
 interface MobilePanesProps {
@@ -117,6 +120,17 @@ function AppShell(props: AppShellProps) {
   const onShare = () => {
     void props.share.share(); // 内部 toast（ok / tooLarge / copyFail）
   };
+
+  // v2.0 登录（magic link）。MVP：prompt 取 email（极简，真云待 provision）。
+  const onLogin = () => {
+    const email = window.prompt(t('auth.emailPrompt'));
+    if (!email) return;
+    toast.show(t('auth.privacy'), 'info'); // 隐私提示：内容将明文存云端（ADR-016 D4）
+    void props.sync.signIn(email.trim()).then((r) => {
+      toast.show(r.ok ? t('auth.checkEmail') : t('auth.failed'), r.ok ? 'info' : 'warn');
+    });
+  };
+  const onLogout = () => void props.sync.signOut();
 
   let fileInput: HTMLInputElement | undefined;
   const onImportPick = () => fileInput?.click();
@@ -229,6 +243,27 @@ function AppShell(props: AppShellProps) {
           >
             #
           </button>
+          <Show when={props.sync.enabled}>
+            <Show
+              when={props.sync.user()}
+              fallback={
+                <button type="button" class="header-button" onClick={onLogin}>
+                  {t('auth.login')}
+                </button>
+              }
+            >
+              {(u) => (
+                <button
+                  type="button"
+                  class="header-button"
+                  onClick={onLogout}
+                  title={u().email}
+                >
+                  {t('auth.logout')}
+                </button>
+              )}
+            </Show>
+          </Show>
           <button
             type="button"
             class="theme-toggle"
@@ -300,6 +335,7 @@ async function bootstrap(): Promise<void> {
       getEditorText: state.text,
     });
     const persist = createPersistence(state.text, docManager);
+    const sync = createSyncFeature(docManager); // v2.0：env 缺失 → enabled=false（纯本地不变）
     const theme = createTheme();
     const exporter = createExportAPI(state.text);
     const share = createShareAPI(state.text);
@@ -326,6 +362,7 @@ async function bootstrap(): Promise<void> {
         prefs={prefs}
         share={share}
         docManager={docManager}
+        sync={sync}
       />
     );
   }, root);

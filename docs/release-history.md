@@ -4,6 +4,62 @@
 
 ---
 
+## v1.0.0-rc.1 — 账号 + 云同步（v2.0 / mock 实现 / Release Candidate）（2026-06-08）
+
+**Tag:** `v1.0.0-rc.1` @ commit `e160724`
+**Range:** `6a7f630..e160724`（v0.9.1 以来）
+**部署:** https://corray.github.io/editor/（env-less → 同步禁用，匿名行为不变）
+**类型:** **架构跳变（破纯 FE）+ 安全核心**。**RC（非正式 v1.0.0）**——真云连接 + RLS 真隔离（AC-v20-6 安全发布门槛）待用户 provision 后验。
+
+### Scope — 账号（magic link）+ 文档云同步（local-first + LWW）
+
+| 变更 | Commit | 说明 |
+|------|--------|------|
+| M11 同步网关 | `935d3ae` | 唯一封装 supabase-js（Gateway / arch §7）；懒加载（env-less tree-shaken / with-env 204KB lazy chunk 非首屏）|
+| auth | `935d3ae` | Supabase magic link（无密码）；session 持久；登录 UI 仅 env 配置时显示 |
+| 同步 | `935d3ae` | local-first 叠加云 + 自动 push/pull + per-doc LWW + 首登并集（不丢数据）+ 软删 tombstone |
+| 安全 | ADR-016 | RLS `user_id=auth.uid()` 行级隔离；FE 不做授权；anon key 公开；明文+隐私提示 |
+| M9 集成 | `935d3ae` | sync hooks + mergeRemote；**匿名(无 env)行为不变**（setSyncHooks 永不调）|
+
+### Quality Gates [已验证: 2026-06-08 本机 / mock]
+
+- 178 unit（+M11 7：mergeRemote LWW/首登并集/软删 tombstone + push + RLS-deny + no-env）
+- 93 e2e / 1 skip（**匿名零回归实证**，env-less）
+- 首屏 81.20 KB gz（env-less）/ 82.38 KB（with-env，supabase lazy 不计）；supabase env-less 完全 tree-shaken
+- typecheck 0；doc-hash + fb 闸 pass
+
+### Spec-to-Code-Flow
+
+共识 v2.0 新章节（破纯 FE / TBD-v20-1~7 accept）→ module-list M11 + 架构重评估 → **4 ADR**（013 Supabase / 014 magic link / 015 sync LWW / 016 安全 RLS）→ data-model/api/test-plan v2.0 → 实现（mock 后端）。激活休眠 rule：arch-constraints §7 Gateway / §4 identity 隔离、security-review 全程。
+
+### Audit（2026-06-08 增量 / 安全核心）
+
+报告 `docs/audit/2026-06-08-v2.0-increment.md`：mock 验证基线，逻辑层无 critical/high。**2 MEDIUM（F-V20-1 真impl 未运行时验 / F-V20-2 RLS 真隔离未达）= AC-v20-6 安全发布门槛 PENDING → 故 RC 不打 v1.0.0**。F-V20-3~7 LOW。
+
+### 升 v1.0.0 的 PENDING 清单（用户 provision 后）
+
+1. 开 Supabase 项目 + 跑 data-model v2.0 §1 建表+RLS SQL
+2. 配 `VITE_SUPABASE_*`（CI Secrets）→ build
+3. 真 magic link 登录 + 跨设备同步验（AC-v20-2/3/4/5）
+4. **构造两用户验 RLS 隔离（AC-v20-6）+ 人工审 RLS 策略**
+5. magic link 回调 × `#doc=` 共存线上验
+→ 全过 + security review 签字 → 升 v1.0.0
+
+### Known Limitations（v1.0.0-rc.1）
+
+- **真云全路径 0 次真验**（mock 验逻辑；infra 待 provision，最大盲点）
+- supabase.ts 真 impl 未运行时验证（F-V20-1）
+- 明文存云无 E2EE（F-V20-5）/ LWW 时钟偏差（F-V20-4）/ 登录 UI prompt 简陋（F-V20-6）
+- 不做实时/CRDT/协作（v2.1+）
+
+### Closure
+
+- spec-to-code-flow 全节点 accepted + 实现追溯回填 ✓（休眠架构/安全 rule 首次激活落地）
+- **RC**：逻辑 + mock 验证完成；真云安全门槛诚实标 PENDING-provision，**不假装闭环**
+- package.json 0.9.1 → 1.0.0-rc.1
+
+---
+
 ## v0.9.1 — 清债 consolidation（非功能 PATCH）（2026-06-08）
 
 **Tag:** `v0.9.1` @ commit `6a7f630`

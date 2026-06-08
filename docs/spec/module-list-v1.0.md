@@ -46,6 +46,7 @@
 | **M8 PWA/离线**〔v1.5 新增〕| Service Worker precache 离线 + Manifest 可安装 + 更新提示 | 共识 v1.5 | PRD §7 v1.1 候选 | FE | proposed (v1.5) | vite-plugin-pwa 1.3.0 / Workbox 7.4.1（构建期）、Service Worker / Cache API、`virtual:pwa-register` | 横切基础设施；更新提示 → shared/toast.ts；不依赖业务模块 |
 | **M9 文档管理**〔v1.6 新增〕| 多文档模型（列表 + active）+ CRUD + 单→多迁移 + 标题派生 + documents store I/O | 共识 v1.6 | PRD §7 v1.1 候选 | FE | proposed (v1.6) | IndexedDB documents store（DB v2）、`crypto.randomUUID` | → M1（切换 set DocumentState）、← M3（M3 经 saveActiveText 写）、被 M5（sidebar/抽屉）+ M4（import/share 涟漪）消费 |
 | **M10 滚动同步**〔v1.7 新增〕| 桌面编辑↔预览滚动联动（source-line 映射 + 双向 + 反馈环防护）| 共识 v1.7 | defer 项（非 PRD §7）| FE | proposed (v1.7) | DOM scroll API、requestAnimationFrame | ← M2（读 data-source-line）、← M1/M5（editor/preview DOM ref），桌面 only |
+| **M11 同步网关 + 账号**〔v2.0 新增 / **破纯 FE**〕| 封装 supabase-js：账号(magic link auth) + 文档云同步(local-first + LWW) | 共识 v2.0 | PRD §7 v2.0 | FE→BaaS | proposed (v2.0) | `@supabase/supabase-js` 2.107.0 + Supabase(Auth/Postgres/RLS) | Gateway 封装(arch §7)；→ M9(push/pull/首登 merge)；UI 登录态；**security-review 全程** |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）
 
@@ -186,6 +187,20 @@
 | **不做** | 文件夹/分组 / 标签 / 拖拽排序 / 多 tab race 处理（〔v1.8〕**手动重命名 + 标题/内容搜索已加**，见下）|
 | **〔v1.8 增强〕** | +`rename(id,title)`（titleManual 锁，解 F-V16-2）+`query`/`setQuery`（docs() 按 title+text 过滤）；DocRecord +titleManual；DocList 搜索框 + 内联双击重命名（ADR-012）|
 | **边界** | 拥有 documents store 唯一写权（单写者）；M3 经 saveActiveText 间接写；不侵入渲染（M2）/ 主题（M6）|
+
+### M11 同步网关 + 账号〔v2.0 新增 / 破纯 FE〕
+
+| 维度 | 内容 |
+|------|------|
+| **核心职责** | 封装 supabase-js（Gateway，arch §7）：AuthGateway（magic link 登录/登出/态）+ SyncGateway（文档云 CRUD + push/pull + 首登并集 + LWW + 软删）|
+| **输入** | 用户登录操作；M9 本地 doc 变更（push 触发）；启动/focus（pull 触发）|
+| **输出** | 登录态 + 当前用户；云端 doc ↔ 本地 doc 合并（经 M9）|
+| **PRD 功能项** | §7 v2.0 后端同步 |
+| **AC 覆盖** | AC-v20-1~7（含 AC-v20-6 RLS 隔离发布门槛）|
+| **内部组件** | `m11-sync/`：`client.ts`（supabase client + env）、`auth.ts`（AuthGateway）、`sync.ts`（SyncGateway: push/pull/merge/LWW/软删）、`mock.ts`（测试 mock client）；UI 登录入口 |
+| **决策** | ADR-013(Supabase) / ADR-014(magic link) / ADR-015(local-first LWW 首登并集软删) / ADR-016(RLS 安全核心) |
+| **不做** | 实时同步 / CRDT 字段合并 / 协作 / 分享他人 / E2EE（推 v2.1+）|
+| **边界** | **唯一**碰 supabase-js 的模块（Gateway）；FE 不做安全决策（授权在 RLS）；匿名用户不依赖本模块（纯本地不变）|
 
 ### M10 滚动同步〔v1.7 新增〕
 

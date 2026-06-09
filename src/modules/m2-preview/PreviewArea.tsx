@@ -1,4 +1,10 @@
-import { createMemo, createSignal, createEffect, Show } from 'solid-js';
+import {
+  createMemo,
+  createSignal,
+  createEffect,
+  onCleanup,
+  Show,
+} from 'solid-js';
 import type { DocumentState } from '@/modules/m1-editor/state';
 import {
   render,
@@ -7,6 +13,7 @@ import {
   katexReady,
   ensureMermaid,
   renderMermaid,
+  hasMermaid,
 } from './pipeline';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -15,6 +22,18 @@ export interface PreviewAreaProps {
   /** 上抛预览滚动容器（.preview-pane）（M10 滚动同步用 / v1.7）。 */
   scrollRef?: (el: HTMLElement) => void;
 }
+
+/**
+ * 大文档预览渲染防抖（perf / BHV-008 实测反哺 2026-06-09）。
+ *
+ * `render()`（markdown-it + DOMPurify）耗时随文本体量增长（实测 dev 100KB ~300ms /
+ * 一帧 16ms 在 ~10KB 处被突破）。每键同步全量重渲染会**阻塞 textarea 输入**。
+ * 策略：小文档立即渲染（无感）；大文档 / 含 mermaid 走 trailing-debounce ——
+ * 连续输入期间不渲染，停顿 DEBOUNCE_MS 后渲染一次，输入保持流畅。
+ * 含 mermaid 也防抖：顺带消除「每键占位 → SVG」闪烁 + 重复异步渲染 CPU 浪费（F-V14-1）。
+ */
+const PREVIEW_DEBOUNCE_MS = 120;
+const PREVIEW_DEBOUNCE_THRESHOLD = 10_000;
 
 /**
  * Live preview pane.
@@ -27,9 +46,26 @@ export function PreviewArea(props: PreviewAreaProps) {
   // innerHTML 唯一合法源 = pipeline.render()（已 DOMPurify sanitize；ADR-002）。
   // v1.3 KaTeX 懒加载：含公式且未载 → 一次性 import → bump katexVer 触发重算。
   const [katexVer, setKatexVer] = createSignal(0);
+
+  // 防抖渲染源：renderText 跟随 state.text()，但大文档 / 含 mermaid 时延迟到输入停顿。
+  // textarea 仍即时响应（输入处理廉价）；仅昂贵的 render() 被推迟。
+  const [renderText, setRenderText] = createSignal(props.state.text());
+  let debTimer: ReturnType<typeof setTimeout> | undefined;
+  createEffect(() => {
+    const text = props.state.text();
+    if (text.length < PREVIEW_DEBOUNCE_THRESHOLD && !hasMermaid(text)) {
+      clearTimeout(debTimer); // 小文档 → 立即（取消任何挂起的防抖）
+      setRenderText(text);
+      return;
+    }
+    clearTimeout(debTimer);
+    debTimer = setTimeout(() => setRenderText(text), PREVIEW_DEBOUNCE_MS);
+  });
+  onCleanup(() => clearTimeout(debTimer));
+
   const html = createMemo(() => {
     katexVer();
-    const text = props.state.text();
+    const text = renderText();
     if (hasMath(text) && !katexReady()) {
       void ensureKatex().then(() => setKatexVer((v) => v + 1));
     }

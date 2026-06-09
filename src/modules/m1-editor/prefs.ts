@@ -18,6 +18,10 @@ export interface EditorPrefsAPI {
   decreaseFontSize(): void;
   /** 切换行号显示。 */
   toggleLineNumbers(): void;
+  /** 还能否增大（未到最大档）——UI 据此 disable 按钮（BHV-006）。 */
+  readonly canIncreaseFontSize: Accessor<boolean>;
+  /** 还能否减小（未到最小档）。 */
+  readonly canDecreaseFontSize: Accessor<boolean>;
 }
 
 /** 字号档位（px）——极简三档；中档 15 = 旧 .editor-area 的 0.9375rem。 */
@@ -114,11 +118,17 @@ export function createEditorPrefs(): EditorPrefsAPI {
     if (target !== undefined) setFontSize(target);
   };
 
+  const presets = FONT_SIZE_PRESETS as readonly number[];
+  const max = presets[presets.length - 1]!;
+  const min = presets[0]!;
+
   return {
     fontSize,
     showLineNumbers,
     increaseFontSize: () => stepFontSize(1),
     decreaseFontSize: () => stepFontSize(-1),
     toggleLineNumbers: () => setShowLineNumbers((v) => !v),
+    canIncreaseFontSize: () => fontSize() < max, // BHV-006
+    canDecreaseFontSize: () => fontSize() > min,
   };
 }

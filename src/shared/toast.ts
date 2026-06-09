@@ -53,6 +53,11 @@ export const toast: ToastAPI = {
 
     const el = document.createElement('div');
     el.className = `toast toast--${level}`;
+    // BHV-009：error/warn 用 assertive（打断播报，role=alert）；info 走容器的 polite。
+    if (level === 'error' || level === 'warn') {
+      el.setAttribute('role', 'alert');
+      el.setAttribute('aria-live', 'assertive');
+    }
 
     const text = document.createElement('span');
     text.className = 'toast__msg';

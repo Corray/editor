@@ -84,6 +84,20 @@ function DocListBody(props: InnerProps) {
                   }}
                 />
               </Show>
+              <Show when={editingId() !== d.id}>
+                {/* F-V18-3：可见 ✎ 入口（双击发现性低）—— 点击进编辑 */}
+                <button
+                  type="button"
+                  class="doc-list__rename-btn"
+                  aria-label={t('doc.rename')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingId(d.id);
+                  }}
+                >
+                  ✎
+                </button>
+              </Show>
               <button
                 type="button"
                 class="doc-list__del"

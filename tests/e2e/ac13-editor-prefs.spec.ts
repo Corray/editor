@@ -34,12 +34,13 @@ test.describe('AC-BHV010 编辑器偏好（行号 / 字号）+ toast', () => {
     expect(await fs()).toBe('15px'); // 默认档
     await page.getByRole('button', { name: '增大字号' }).click();
     expect(await fs()).toBe('17px');
+    // BHV-006：到上限 → 增大按钮 disabled
+    await expect(page.getByRole('button', { name: '增大字号' })).toBeDisabled();
     await page.getByRole('button', { name: '减小字号' }).click();
     await page.getByRole('button', { name: '减小字号' }).click();
     expect(await fs()).toBe('13px'); // 下限档
-    // 边界：13 再减不越界（仍 13）
-    await page.getByRole('button', { name: '减小字号' }).click();
-    expect(await fs()).toBe('13px');
+    // BHV-006：到下限 → 减小按钮 disabled（不再点 disabled 按钮）
+    await expect(page.getByRole('button', { name: '减小字号' })).toBeDisabled();
   });
 
   test('E2E-BHV010-3: 复制 HTML → toast 提示（clipboard stub）', async ({

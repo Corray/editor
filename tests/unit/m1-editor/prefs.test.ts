@@ -64,6 +64,22 @@ describe('M1 prefs — UT-PREF (font size + line numbers + persistence)', () => 
     dispose();
   });
 
+  it('UT-PREF-009 / BHV-006: canIncrease/canDecrease 反映边界档', async () => {
+    const { api, dispose } = setup();
+    await flushMicrotasks();
+    // 默认 15：两端都能动
+    expect(api.canIncreaseFontSize()).toBe(true);
+    expect(api.canDecreaseFontSize()).toBe(true);
+    api.increaseFontSize(); // → 17（顶）
+    expect(api.canIncreaseFontSize()).toBe(false);
+    expect(api.canDecreaseFontSize()).toBe(true);
+    api.decreaseFontSize();
+    api.decreaseFontSize(); // → 13（底）
+    expect(api.canDecreaseFontSize()).toBe(false);
+    expect(api.canIncreaseFontSize()).toBe(true);
+    dispose();
+  });
+
   it('UT-PREF-004: presets are exactly [13, 15, 17]', () => {
     expect([...FONT_SIZE_PRESETS]).toEqual([13, 15, 17]);
   });

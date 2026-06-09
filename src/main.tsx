@@ -219,6 +219,7 @@ function AppShell(props: AppShellProps) {
             type="button"
             class="header-button"
             onClick={() => props.prefs.decreaseFontSize()}
+            disabled={!props.prefs.canDecreaseFontSize()}
             aria-label={t('editor.fontDecrease')}
           >
             A−
@@ -227,6 +228,7 @@ function AppShell(props: AppShellProps) {
             type="button"
             class="header-button"
             onClick={() => props.prefs.increaseFontSize()}
+            disabled={!props.prefs.canIncreaseFontSize()}
             aria-label={t('editor.fontIncrease')}
           >
             A+

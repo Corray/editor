@@ -103,4 +103,16 @@ describe('shared/toast — real DOM toast (API-T-001)', () => {
     expect(document.querySelector('.toast__action')).toBeNull();
     expect(document.querySelector('.toast')?.textContent).toBe('plain');
   });
+
+  it('UT-TOAST-011 / BHV-009: error/warn → role=alert + aria-live=assertive；info 不加（走容器 polite）', () => {
+    toast.show('boom', 'error');
+    toast.show('careful', 'warn');
+    toast.show('fyi', 'info');
+    const byText = (t: string) =>
+      [...document.querySelectorAll('.toast')].find((e) => e.textContent === t);
+    expect(byText('boom')?.getAttribute('aria-live')).toBe('assertive');
+    expect(byText('boom')?.getAttribute('role')).toBe('alert');
+    expect(byText('careful')?.getAttribute('aria-live')).toBe('assertive');
+    expect(byText('fyi')?.getAttribute('aria-live')).toBeNull(); // info → 容器 polite
+  });
 });

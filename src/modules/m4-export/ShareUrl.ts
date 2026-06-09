@@ -37,5 +37,7 @@ export function readSharedDocument(): string | null {
   if (!m) return null;
   const [, version, payload] = m;
   if (version !== VERSION) return null; // 不支持的格式版本
-  return decompressFromEncodedURIComponent(payload ?? ''); // 解码失败 → null
+  const decoded = decompressFromEncodedURIComponent(payload ?? ''); // 解码失败 → null
+  // F-V12-1：空 payload（如篡改的 `#doc=1.`）解码为 '' → 视为无效，不建空文档
+  return decoded ? decoded : null;
 }

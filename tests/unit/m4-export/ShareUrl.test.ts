@@ -62,6 +62,11 @@ describe('M4 ShareUrl — UT-SHARE / UT-LOAD (encode / decode / limit)', () => {
     expect(readSharedDocument()).toBeNull();
   });
 
+  it('UT-LOAD-EMPTY / F-V12-1: 空 payload `#doc=1.` → null（不建空文档）', () => {
+    setHash('#doc=1.');
+    expect(readSharedDocument()).toBeNull();
+  });
+
   it('UT-LOAD-INVALID-2: garbage payload → null (decompress fails)', () => {
     setHash('#doc=1.!!!not-valid-lz!!!');
     // lz decompress of invalid → null

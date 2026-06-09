@@ -57,6 +57,13 @@
   border-color: var(--accent);
 }
 
+/* BHV-006：字号到边界档 → 禁用态（无反馈→有反馈）。覆盖 hover。 */
+.header-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+
 .theme-toggle:focus-visible,
 .header-button:focus-visible {
   outline: 2px solid var(--accent);
@@ -164,7 +171,8 @@
   flex: 1;
 }
 
-.doc-list__del {
+.doc-list__del,
+.doc-list__rename-btn {
   border: none;
   background: none;
   color: var(--muted);
@@ -173,6 +181,13 @@
   line-height: 1;
   padding: 0 0.25rem;
   flex-shrink: 0;
+}
+.doc-list__rename-btn {
+  /* F-V18-3：可见重命名入口（不只双击）。常显 → mobile（无 hover）也可用。 */
+  font-size: 0.9rem;
+}
+.doc-list__rename-btn:hover {
+  color: var(--accent);
 }
 .doc-list__del:hover {
   color: #dc2626;

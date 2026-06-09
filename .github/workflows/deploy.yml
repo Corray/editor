@@ -50,6 +50,11 @@ jobs:
 
       - name: Build
         run: pnpm build
+        # v2.0 云同步：Secrets 未设 → 空串 → syncEnv() null → env-less build（supabase
+        # tree-shaken，同步禁用，匿名正常）。设了 Secrets → with-env build（supabase lazy chunk）。
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Bundle size budget (gzip < 150KB / MANUAL-PERF-003)
         run: pnpm size

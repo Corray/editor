@@ -65,3 +65,11 @@ build/
 
 # Playwright MCP eye-verification scratch (screenshots/console logs)
 .playwright-mcp/
+
+# ============================================================
+# 环境变量（v2.0 云同步 / Supabase）—— 真密钥不入库；.env.example 模板入库
+# ============================================================
+.env
+.env.local
+.env.*.local
+!.env.example

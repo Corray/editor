@@ -76,7 +76,8 @@
 | BHV-005 | 2026-06-02 | **resolved** (#15) | MEDIUM | **GAP-003 回归**：header 加 A-/A+/# 3 按钮后 7 按钮在 320px 不换行 → document 横向溢出（破 AC-4-001）；BHV-004 跑 e2e 时捕获（GAP-003 当时只跑 unit+desktop visual 漏 e2e）。修：`.header-actions { flex-wrap: wrap }` | #15 commit `eac71bb` |
 | BHV-006 | 2026-06-03 | **resolved** | LOW | 字号边界无反馈。**rc.2 `5975561`**：canIncrease/canDecreaseFontSize 访问器 + A−/A+ disabled 态 | 2026-06-03 增量 audit |
 | BHV-007 | 2026-06-03 | deferred (v1.1) | LOW | 行号 toggle off→on 时若 textarea 已滚动，gutter 从 scrollTop 0 起，下次 scroll 才同步 → 短暂错位 | 2026-06-03 增量 audit |
-| BHV-008 | 2026-06-03 | deferred (v1.1) | LOW | gutter 每逻辑行 1 DOM 节点，近 1MB 大文档放大渲染/内存成本（静态推断，未压测）| 2026-06-03 增量 audit |
+| BHV-008 | 2026-06-03 | **dismissed**（2026-06-09 压测）| LOW | gutter 每逻辑行 1 DOM 节点放大大文档成本（静态推断）。**压测推翻**：5000 行/374KB 文档 gutter ON 378ms vs OFF 374ms（等价，5000 节点成本可忽略）→ gutter 非瓶颈。详见 `docs/perf/stress-2026-06-09-large-dataset.md` §1 | 2026-06-03 增量 audit / 2026-06-09 压测 |
+| BHV-008' | 2026-06-09 | **resolved**（压测浮现）| MEDIUM | （BHV-008 压测浮现真问题）大文档 preview `html` memo 直接订阅 text() → 每键**同步全量重渲染** render()（markdown-it+DOMPurify），~10KB 处即破一帧，374KB 每键卡死。**修复 `9ba4b1d`**：PreviewArea 大文档/含 mermaid → render 防抖 120ms（小文档仍即时）；374KB 真实增量打字 ~1341ms/键 → 17ms/键。测试 CT-M2-DEBOUNCE-1/2/3。详见 perf 压测 §2 | 2026-06-09 压测 / 修复 `9ba4b1d` |
 | BHV-009 | 2026-06-03 | **resolved** | LOW | toast a11y。**rc.2 `5975561`**：error/warn → role=alert + aria-live=assertive；info 走容器 polite | 2026-06-03 增量 audit |
 | BHV-010 | 2026-06-03 | **resolved** | LOW | F1.2 行号 / F1.3 字号 / toast 无 e2e 验收覆盖。**v0.9.1 补 ac13 e2e**（行号 toggle / 字号档位 / 复制 toast，双引擎）`a0efd2c` | 2026-06-03 增量 audit |
 
@@ -108,7 +109,7 @@
 | F-V13-2 | 2026-06-04 | deferred (v1.3.x) | LOW | `hasMath` 启发式正则 ≠ katex tokenizer，理论上漏判真公式 → katex 不加载 → 卡 raw（常见用例已测，exotic 未穷举）| 2026-06-04 audit |
 | F-V13-3 | 2026-06-04 | deferred (v1.3.x) | LOW | size 闸改"首屏"后不再防 lazy chunk 膨胀（katex chunk 多大都不计）；建议补 total-dist 软上限提示 | 2026-06-04 audit |
 | F-V13-4 | 2026-06-04 | **resolved** | LOW | **线上眼验发现**：index.html CSP `default-src 'self'` 无 `font-src` → Vite 内联（<4096B）的 1 个 KaTeX 字体（data:font/woff2）被 CSP 拦截（线上 console error）。20 字体中 19 个 self-hosted 不受影响，仅该 1 个 family 回退系统字体（cosmetic，公式仍渲染）。v0.4.0 起存在，v1.4 眼验时 surface。**修复 `31ba5c7`**：CSP 加 `font-src 'self' data:` + 内联 SVG favicon（顺带消 favicon 404）；线上 cache-bust 复验 console 0 error，`\mathcal`/`\mathfrak` 字体正常渲染 | 2026-06-04 v0.5.0 线上眼验 |
-| F-V14-1 | 2026-06-04 | deferred (v1.4.x) | LOW | mermaid 每次 text 变重渲染（innerHTML 整体替换重置占位）；代次令牌丢弃过期替换但 `mermaid.render` 仍实际执行 → 含图文档快速打字 CPU 浪费；可按源文 hash 缓存 | 2026-06-04 audit |
+| F-V14-1 | 2026-06-04 | **resolved**（2026-06-09 压测）| LOW | mermaid 每次 text 变重渲染（重置占位 + `mermaid.render` 实际执行）→ CPU 浪费 + 闪烁。**压测**：同步延迟仅 +3ms（有图 9ms vs 无图 6ms）→ 延迟假设推翻；但闪烁/CPU 属实。**修复 `9ba4b1d`**：BHV-008' 防抖条件含 mermaid 即防抖 → 连续打字不重发占位，顺带消除闪烁+重复异步渲染。详见 perf 压测 §3 | 2026-06-04 audit / 2026-06-09 压测 / 修复 `9ba4b1d` |
 | F-V14-2 | 2026-06-04 | deferred (v1.4.x) | LOW | SVG XSS 仅 e2e 覆盖（jsdom 无法真渲染 mermaid，PP-003 家族）→ 安全门槛无单测 backstop | 2026-06-04 audit |
 | F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图。**rc.2 重评估仍 defer**：正确修需 regenerate placeholders(SVG 已替换)，触 mermaid 异步+XSS 门槛路径，风险>价值 | 2026-06-04 audit |
 | F-V15-1 | 2026-06-05 | **resolved** | MEDIUM | PWA precache 82 entries/**3.7MB**：globPatterns `**/*.js` 全量 precache mermaid 所有 diagram 子 chunk。**修复 `551c28d`**：chunkFileNames 按名路由 mermaid 生态 chunk→`assets/mmd/`，globIgnores + runtimeCaching(CacheFirst, cache-on-use)；app+katex 仍 precache（离线公式始终可用），mermaid 图按用过的离线可用。**precache 3.7MB→1.18MB（−68%）**；离线 e2e 实证（含 app 离线加载无误路由 + 图 cache-on-use）| 2026-06-05 v1.5 audit |
@@ -120,12 +121,12 @@
 | F-V16-2 | 2026-06-05 | **resolved** | LOW | 无手动重命名（TBD-v16-5a）→ 多篇可能同标题（Untitled/同首行）辨识度低。**v1.8 解决 `c66c21e`**：M9 +rename（titleManual 锁）+ DocList 内联重命名 + 搜索过滤（ADR-012）| 2026-06-05 audit |
 | F-V16-3 | 2026-06-05 | proposed | LOW | IDB 不可用（隐私模式）仅单文档 localStorage 降级；多文档 in-memory 不跨 reload（罕见，已 toast）| 2026-06-05 audit |
 | F-V16-4 | 2026-06-05 | proposed | LOW | 多 tab 并发写 documents/activeDocId → last-write-wins，无 versionchange 协调（已知边界）| 2026-06-05 audit |
-| F-V16-5 | 2026-06-05 | proposed | LOW | startup getAll 全量 doc(含 text)入内存；100+ 大文档内存/启动成本增（未压测）| 2026-06-05 audit |
+| F-V16-5 | 2026-06-05 | **dismissed**（2026-06-09 压测）| LOW | startup getAll 全量 doc 入内存，100+ 大文档成本（静态推断）。**压测推翻**：200 docs getAll 21ms / 1000 docs 102ms（一次性，可接受，远超个人草稿器现实用量）→ meta/text 懒加载在当前规模不值得。详见 perf 压测 §4 | 2026-06-05 audit / 2026-06-09 压测 |
 | F-V17-1 | 2026-06-05 | proposed | LOW (info) | `#root min-height→height:100vh` 修潜伏布局（面板从不滚/整页滚，v1.7 前就在）；full e2e 79 无回归，但全局布局改动，移动/小屏边界留意 | 2026-06-05 v1.7 audit |
 | F-V17-2 | 2026-06-05 | proposed | LOW | source-line 对齐到块顶，块内偏移不细调（长段落内滚动预览跳段首）| 2026-06-05 audit |
 | F-V17-3 | 2026-06-05 | proposed | LOW | lineHeight 换算在长行软换行下偏差（视觉行≠逻辑行，scrollTop/lineHeight 高估行号）| 2026-06-05 audit |
 | F-V17-4 | 2026-06-05 | proposed | LOW (info) | rAF 单帧反馈环窗口；极端高频 scroll 理论可能漏防一帧（未实测抖动）| 2026-06-05 audit |
-| F-V18-1 | 2026-06-05 | proposed | LOW | 搜索 docs() 每次 query 变全量扫 records（含 text）includes；100+ 大文档线性扫（同 F-V16-5 家族，未压测）| 2026-06-05 v1.8 audit |
+| F-V18-1 | 2026-06-05 | **dismissed**（2026-06-09 压测）| LOW | 搜索 docs() 每 query 全量线性扫（含 text）includes（同 F-V16-5 家族）。**压测推翻**：200 docs 1–3ms/query / 1000 docs 5–20ms/query（真实规模无感，1000 边界仍 <1 帧多）→ 倒排索引在当前规模不值得。详见 perf 压测 §5 | 2026-06-05 v1.8 audit / 2026-06-09 压测 |
 | F-V18-2 | 2026-06-05 | proposed | LOW (info) | 搜索仅过滤列表，不跳转/高亮匹配位置（共识范围内）| 2026-06-05 audit |
 | F-V18-3 | 2026-06-05 | **resolved** | LOW | 重命名双击发现性低。**rc.2 `5975561`**：doc-list 加常显 ✎ 入口(mobile 无 hover 也可用) | 2026-06-05 audit |
 | F-V18-4 | 2026-06-05 | proposed | LOW (info) | 搜索过滤后 active doc 可能不在结果中（仍 active + 编辑区显示，列表无高亮项）轻微不一致 | 2026-06-05 audit |
@@ -172,3 +173,4 @@
 | 2026-06-08 | **v0.9.1 清债 consolidation**（报告 `2026-06-08-v0.9.1-consolidation.md`）：非功能 PATCH，挑高价值子集清 4 条 → **F-V11-3（旗舰/家族漏网 guardStore）+ F-V12-2（looksBinary）+ F-V11-5（死 key 复用）+ BHV-010（ac13 e2e）resolved**；明确 defer 多 tab/race/perf/SVG单测/UX（理由见报告）。unit 171 + e2e ac13 6；剩 30 条多为 info/边缘/perf-待压测 |
 | 2026-06-08 | v2.0 增量 audit（报告 `2026-06-08-v2.0-increment.md`）：**架构跳变（破纯 FE）+ 安全核心**，**mock 验证基线**。逻辑层无 critical/high（匿名零回归 e2e 实证 + supabase lazy + Gateway 边界 + LWW/并集/tombstone 数据安全）。**2 MEDIUM（F-V20-1 真impl 未验 / F-V20-2 RLS 真隔离未达）= AC-v20-6 发布门槛 PENDING → 不打 v1.0.0，打 v1.0.0-rc.1**；5 LOW（F-V20-3~7）。真云全路径 0 次真验（最大盲点，诚实标）|
 | 2026-06-09 | **清债 consolidation 第二轮**（v1.0.0-rc.2，`5975561`）：清 4 条 → **BHV-006（字号边界 disabled）+ BHV-009（toast a11y assertive）+ F-V12-1（空 payload→null）+ F-V18-3（✎ 重命名入口）resolved**；F-V14-3 重评估仍 defer（修触 mermaid XSS 门槛路径，风险>价值）。unit 181 + e2e 93。剩 open 多为 info/perf-未压测/F-V20 真云-pending |
+| 2026-06-09 | **perf 压测 4 条「未压测」finding**（报告 `docs/perf/stress-2026-06-09-large-dataset.md`，测量优先）：BHV-008（gutter on/off 等价 378/374ms）+ F-V16-5（1000 docs getAll 102ms）+ F-V18-1（1000 docs 搜索 5–20ms）**三条原假设被数据推翻 → dismissed**；F-V14-1 延迟假设推翻（+3ms）但闪烁属实。**压测浮现真问题 BHV-008'（MEDIUM）**：大文档 preview 每键同步全量重渲染阻塞输入 → 修复 = 大文档/含 mermaid render 防抖 120ms（374KB 打字 1341ms/键 → 17ms/键），顺带 resolved F-V14-1 闪烁。测试 CT-M2-DEBOUNCE-1/2/3；unit 184 + e2e 93 全绿 |

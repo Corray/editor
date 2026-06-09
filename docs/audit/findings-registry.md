@@ -74,10 +74,10 @@
 | BHV-002 | 2026-05-20 | **resolved** (#12) | MEDIUM | AC-4 mobile tab UI 实现 + E2E-AC4-002 / 003 unskip 通过 | #12 commit `a9fc822` |
 | BHV-003 | 2026-05-20 | **resolved** (#15) | LOW | perf bench 一次性跑通并记基线（docs/perf/baseline-v0.1.0.md）：Lighthouse 92 / input→preview 34ms / bundle 64.26KB gz，三项全过预算；deploy.yml 加 bundle-size CI 闸（`pnpm size`）+ E2E-AC5-002 延迟实测。Lighthouse CI 仍按 TBD-T1 留 v1.1 | #15 commit `13a7dce` |
 | BHV-005 | 2026-06-02 | **resolved** (#15) | MEDIUM | **GAP-003 回归**：header 加 A-/A+/# 3 按钮后 7 按钮在 320px 不换行 → document 横向溢出（破 AC-4-001）；BHV-004 跑 e2e 时捕获（GAP-003 当时只跑 unit+desktop visual 漏 e2e）。修：`.header-actions { flex-wrap: wrap }` | #15 commit `eac71bb` |
-| BHV-006 | 2026-06-03 | deferred (v1.1) | LOW | 字号 A−/A+ 在 13/17 边界点击 no-op 但按钮无 disabled/视觉态 → 无反馈（UX 打磨）| 2026-06-03 增量 audit |
+| BHV-006 | 2026-06-03 | **resolved** | LOW | 字号边界无反馈。**rc.2 `5975561`**：canIncrease/canDecreaseFontSize 访问器 + A−/A+ disabled 态 | 2026-06-03 增量 audit |
 | BHV-007 | 2026-06-03 | deferred (v1.1) | LOW | 行号 toggle off→on 时若 textarea 已滚动，gutter 从 scrollTop 0 起，下次 scroll 才同步 → 短暂错位 | 2026-06-03 增量 audit |
 | BHV-008 | 2026-06-03 | deferred (v1.1) | LOW | gutter 每逻辑行 1 DOM 节点，近 1MB 大文档放大渲染/内存成本（静态推断，未压测）| 2026-06-03 增量 audit |
-| BHV-009 | 2026-06-03 | deferred (v1.1) | LOW | toast 容器统一 aria-live=polite；error/warn 语义宜 assertive（a11y，未真机验）| 2026-06-03 增量 audit |
+| BHV-009 | 2026-06-03 | **resolved** | LOW | toast a11y。**rc.2 `5975561`**：error/warn → role=alert + aria-live=assertive；info 走容器 polite | 2026-06-03 增量 audit |
 | BHV-010 | 2026-06-03 | **resolved** | LOW | F1.2 行号 / F1.3 字号 / toast 无 e2e 验收覆盖。**v0.9.1 补 ac13 e2e**（行号 toggle / 字号档位 / 复制 toast，双引擎）`a0efd2c` | 2026-06-03 增量 audit |
 
 ### v1.1 增量审查（2026-06-04 / 报告 `2026-06-04-v1.1-increment.md`）
@@ -110,7 +110,7 @@
 | F-V13-4 | 2026-06-04 | **resolved** | LOW | **线上眼验发现**：index.html CSP `default-src 'self'` 无 `font-src` → Vite 内联（<4096B）的 1 个 KaTeX 字体（data:font/woff2）被 CSP 拦截（线上 console error）。20 字体中 19 个 self-hosted 不受影响，仅该 1 个 family 回退系统字体（cosmetic，公式仍渲染）。v0.4.0 起存在，v1.4 眼验时 surface。**修复 `31ba5c7`**：CSP 加 `font-src 'self' data:` + 内联 SVG favicon（顺带消 favicon 404）；线上 cache-bust 复验 console 0 error，`\mathcal`/`\mathfrak` 字体正常渲染 | 2026-06-04 v0.5.0 线上眼验 |
 | F-V14-1 | 2026-06-04 | deferred (v1.4.x) | LOW | mermaid 每次 text 变重渲染（innerHTML 整体替换重置占位）；代次令牌丢弃过期替换但 `mermaid.render` 仍实际执行 → 含图文档快速打字 CPU 浪费；可按源文 hash 缓存 | 2026-06-04 audit |
 | F-V14-2 | 2026-06-04 | deferred (v1.4.x) | LOW | SVG XSS 仅 e2e 覆盖（jsdom 无法真渲染 mermaid，PP-003 家族）→ 安全门槛无单测 backstop | 2026-06-04 audit |
-| F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图（mermaid effect 只 dep html() 不 dep theme）→ 偏离 TBD-v14-5(a)"切换时重渲染"；初始渲染跟随当前主题，live 切换后旧图保持旧主题到下次编辑 | 2026-06-04 audit |
+| F-V14-3 | 2026-06-04 | deferred (v1.4.x) | LOW | 主题切换不重渲染已存图。**rc.2 重评估仍 defer**：正确修需 regenerate placeholders(SVG 已替换)，触 mermaid 异步+XSS 门槛路径，风险>价值 | 2026-06-04 audit |
 | F-V15-1 | 2026-06-05 | **resolved** | MEDIUM | PWA precache 82 entries/**3.7MB**：globPatterns `**/*.js` 全量 precache mermaid 所有 diagram 子 chunk。**修复 `551c28d`**：chunkFileNames 按名路由 mermaid 生态 chunk→`assets/mmd/`，globIgnores + runtimeCaching(CacheFirst, cache-on-use)；app+katex 仍 precache（离线公式始终可用），mermaid 图按用过的离线可用。**precache 3.7MB→1.18MB（−68%）**；离线 e2e 实证（含 app 离线加载无误路由 + 图 cache-on-use）| 2026-06-05 v1.5 audit |
 | F-V15-2 | 2026-06-05 | **resolved** | LOW | globPatterns precache 可能永不用资源 → 同 `551c28d` globIgnores assets/mmd/ 修复 | 2026-06-05 audit |
 | F-V15-3 | 2026-06-05 | proposed | LOW | AC-v15-4 更新提示仅单测 mock 覆盖，无真实"两次部署"e2e（test-plan §3 声明难模拟）；线上眼验可补 | 2026-06-05 audit |
@@ -127,7 +127,7 @@
 | F-V17-4 | 2026-06-05 | proposed | LOW (info) | rAF 单帧反馈环窗口；极端高频 scroll 理论可能漏防一帧（未实测抖动）| 2026-06-05 audit |
 | F-V18-1 | 2026-06-05 | proposed | LOW | 搜索 docs() 每次 query 变全量扫 records（含 text）includes；100+ 大文档线性扫（同 F-V16-5 家族，未压测）| 2026-06-05 v1.8 audit |
 | F-V18-2 | 2026-06-05 | proposed | LOW (info) | 搜索仅过滤列表，不跳转/高亮匹配位置（共识范围内）| 2026-06-05 audit |
-| F-V18-3 | 2026-06-05 | proposed | LOW | 内联重命名靠双击，无可见编辑图标 → 发现性低（title tooltip 部分缓解）| 2026-06-05 audit |
+| F-V18-3 | 2026-06-05 | **resolved** | LOW | 重命名双击发现性低。**rc.2 `5975561`**：doc-list 加常显 ✎ 入口(mobile 无 hover 也可用) | 2026-06-05 audit |
 | F-V18-4 | 2026-06-05 | proposed | LOW (info) | 搜索过滤后 active doc 可能不在结果中（仍 active + 编辑区显示，列表无高亮项）轻微不一致 | 2026-06-05 audit |
 | F-V20-1 | 2026-06-08 | **proposed** | MEDIUM | supabase.ts 真后端**未运行时验证**（无真项目，按文档 API 写，mock 只验契约）→ 真 auth/同步行为未实证。pending 用户 provision 后线上验 | 2026-06-08 v2.0 audit |
 | F-V20-2 | 2026-06-08 | **proposed** | MEDIUM | **AC-v20-6 RLS 真隔离发布门槛未达**：mock 模拟 ≠ 真 RLS；须真项目跑 RLS SQL + 两用户线上验 + 人工审策略。**阻 v1.0.0**（故打 rc）| 2026-06-08 audit |
@@ -171,3 +171,4 @@
 | 2026-06-05 | v1.8 增量 audit（报告 `2026-06-05-v1.8-increment.md`）：**无 critical/high/medium**。**F-V16-2 resolved**（重命名 titleManual 锁）；无 DB 升级 + 旧记录兼容 + 无 XSS 面（重命名纯文本）；实现期 2 bug（query TDZ / Esc-unmount-blur）测试捕获。4 LOW（F-V18-1~4：搜索 perf / 不跳转 / 双击发现性 / 搜索-active 不一致）deferred |
 | 2026-06-08 | **v0.9.1 清债 consolidation**（报告 `2026-06-08-v0.9.1-consolidation.md`）：非功能 PATCH，挑高价值子集清 4 条 → **F-V11-3（旗舰/家族漏网 guardStore）+ F-V12-2（looksBinary）+ F-V11-5（死 key 复用）+ BHV-010（ac13 e2e）resolved**；明确 defer 多 tab/race/perf/SVG单测/UX（理由见报告）。unit 171 + e2e ac13 6；剩 30 条多为 info/边缘/perf-待压测 |
 | 2026-06-08 | v2.0 增量 audit（报告 `2026-06-08-v2.0-increment.md`）：**架构跳变（破纯 FE）+ 安全核心**，**mock 验证基线**。逻辑层无 critical/high（匿名零回归 e2e 实证 + supabase lazy + Gateway 边界 + LWW/并集/tombstone 数据安全）。**2 MEDIUM（F-V20-1 真impl 未验 / F-V20-2 RLS 真隔离未达）= AC-v20-6 发布门槛 PENDING → 不打 v1.0.0，打 v1.0.0-rc.1**；5 LOW（F-V20-3~7）。真云全路径 0 次真验（最大盲点，诚实标）|
+| 2026-06-09 | **清债 consolidation 第二轮**（v1.0.0-rc.2，`5975561`）：清 4 条 → **BHV-006（字号边界 disabled）+ BHV-009（toast a11y assertive）+ F-V12-1（空 payload→null）+ F-V18-3（✎ 重命名入口）resolved**；F-V14-3 重评估仍 defer（修触 mermaid XSS 门槛路径，风险>价值）。unit 181 + e2e 93。剩 open 多为 info/perf-未压测/F-V20 真云-pending |

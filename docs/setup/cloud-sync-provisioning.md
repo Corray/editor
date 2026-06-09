@@ -26,6 +26,11 @@ supabase.com → New project → 记下 **Project URL** 和 **anon public key**�
 ### 3. 配 Auth（Dashboard）
 - Authentication → Providers → **Email** 启用（magic link 无需密码）
 - Authentication → URL Configuration → **Site URL / Redirect URLs** 加 `https://corray.github.io/editor/`（magic link 回调落点）
+  - ⚠️ **必须含 `/editor/` 子路径**：代码已自动带 `emailRedirectTo=<origin>/editor/`（review R2 / 2026-06-09），但 Supabase 只放行 allowlist 内的 redirect —— Redirect URLs 没加 `/editor/` 则该回调被拒、登录失败。
+- Email 模板（Authentication → Email Templates → Magic Link）：保持**默认含 `{{ .ConfirmationURL }}`**（→ 发 magic link）；若改成含 `{{ .Token }}` 会变成发 OTP 码（review R4）。
+- 开放注册：`signInWithOtp` 默认 `shouldCreateUser` 开放（任意 email 即发即注册），MVP 接受；要限制 → Authentication → Sign In / Up 关闭 email signup（review R5）。
+
+> 真实现 review（auth flow / API 用法 / RLS 策略对照 supabase-js v2 官方文档）见 [`docs/audit/2026-06-09-supabase-impl-review.md`](../audit/2026-06-09-supabase-impl-review.md)。flow 决策 = implicit（跨浏览器 magic link 友好）。
 
 ### 4. 配置 env
 

@@ -4,6 +4,48 @@
 
 ---
 
+## v1.0.0-rc.3 — perf 压测 + 大文档 preview 防抖（rc 线打磨）（2026-06-09）
+
+**Tag:** `v1.0.0-rc.3` @ commit `7da3274`
+**Range:** `b8a90f8..7da3274`（rc.2 以来）
+**部署:** https://corray.github.io/editor/（env-less → 同步禁用，匿名正常）
+**类型:** 非功能 perf consolidation（测量优先；rc 线打磨，仍 RC——云安全门槛 pending-provision，见 rc.1）。
+
+### Scope — 压测 4 条「未压测」finding（`9ba4b1d` 修 / `0787635` 报告）
+
+> 测量优先：先造数据集实测 → 数据定性 → 真问题才优化。详见 `docs/perf/stress-2026-06-09-large-dataset.md`。
+
+| 编号 | 原假设 | 实测 | 处置 |
+|------|--------|------|------|
+| BHV-008 | gutter 放大大文档成本 | 5000 行/374KB：gutter ON 378ms vs OFF 374ms（等价）| **dismissed**（数据推翻）|
+| F-V16-5 | 多文档 startup getAll 慢 | 200 docs 21ms / 1000 docs 102ms | **dismissed**（数据推翻）|
+| F-V18-1 | 多文档搜索线性扫慢 | 200 docs 1–3ms / 1000 docs 5–20ms per query | **dismissed**（数据推翻）|
+| F-V14-1 | mermaid 重渲染拖慢 | 同步延迟 +3ms（9 vs 6ms）；闪烁/CPU 属实 | **resolved**（防抖消闪烁）|
+| **BHV-008'** | （压测浮现）| 大文档 preview `html` memo 每键同步全量重渲染阻塞输入 | **resolved**（防抖）|
+
+**修复（`9ba4b1d`）：** PreviewArea 引入 `renderText` 防抖信号——小文档（<10KB 且不含 mermaid）即时渲染；大文档/含 mermaid → trailing-debounce 120ms。374KB 真实增量打字 **1341ms/键 → 17ms/键**；含 mermaid 也防抖顺带消除每键占位闪烁。
+
+**改判说明（诚实）：** 最初把 BHV-008 的 374ms 误归因为 preview render；拆解发现 gutter off 仍 374ms，真瓶颈是 `html` memo 直接订阅 `text()` 每键同步 render。合成测试（全量 `.value=` 替换）一度误导（539ms 伪影），改 `execCommand('insertText')` 增量打字才拿到真实 17ms。
+
+### Quality Gates [已验证: 2026-06-09 本机]
+
+- 184 unit（+CT-M2-DEBOUNCE-1/2/3 大文档防抖/小文档即时/mermaid 防抖）
+- 93 e2e / 1 skip（无回归；mermaid/KaTeX/perf e2e 在防抖下 `waitFor` 吸收 120ms）
+- 首屏 82.64 KB gz（env-less，+workbox 等同 rc.2 量级）；typecheck 0；doc-hash（56 引用）+ fb 闸 pass
+
+### Known Limitations（v1.0.0-rc.3）
+
+- **残留 tech-debt**：防抖后单次 deferred render 在 374KB 下仍 ~1.3s（dev）；彻底解需增量/虚拟化渲染（大架构改动），对 markdown 草稿器属极端体量，未做
+- **dev≠prod**：压测在 dev（未压缩）测，结论用相对量级+架构判断，非 prod SLA（prod 输入延迟基线见 `baseline-v0.1.0.md` 1000 行 34ms）
+- 仍 RC：v1.0.0 云安全发布门槛（F-V20-2 RLS 真隔离 / AC-v20-6）pending Supabase provision，见 `docs/setup/cloud-sync-provisioning.md`
+
+### Closure
+
+- BHV-008 / F-V16-5 / F-V18-1 → dismissed（带数据）；BHV-008'（新）+ F-V14-1 → resolved；findings-registry 变更记录追加
+- 非功能 / 无 DB / 无新 XSS 面；package.json 1.0.0-rc.2 → 1.0.0-rc.3
+
+---
+
 ## v1.0.0-rc.2 — 清债 consolidation 第二轮（rc 线打磨）（2026-06-09）
 
 **Tag:** `v1.0.0-rc.2` @ commit `b8a90f8`

@@ -116,18 +116,33 @@
 - **related**: PP-003 #5/#6/#7/#8/#9 / F-V12-4 / F-V13-4 / F-V15-3 / FB-005（Playwright 陷阱家族，根因不同）
 - **upstream_issue**: local-only（2026-06-04 决定暂不上报 standard）—— 候选已备妥（submit-fb 草拟 submissions/chenrui/2026-06-04-playwright-hash-routing-cold-load.md），但未 push 团队 Bitbucket 库；触发条件 = 第 2 项目复现 或 PM 决定上报。注：standard 实际 remote = bitbucket chatly-biz-tool/agent-dev-standard（早期 FB 标的 github URL 失真）
 
+## FB-007 — perf 测量保真度（测量优先 + 合成负载贴近真实交互路径）
+- **date**: 2026-06-09
+- **file**: ../../submissions/chenrui/2026-06-09-perf-measurement-fidelity.md
+- **category**: meta
+- **skills**: (testing / perf)
+- **modules**: (all)
+- **phases**: —
+- **severity**: low
+- **status**: candidate
+- **occurrences**: 1（editor 单轮压测，两个 sub-instance：假设驱动归因 + 合成负载伪影）
+- **guidance**: perf 测量方法论陷阱——① 测量优先于优化（禁假设驱动，先用数据证瓶颈再动手）② 合成负载须贴近真实交互（增量 vs 全量替换 / 冷 vs 热 / 真实事件 vs 程序模拟，形态对了数才可信）③ 分清同步阻塞 / 异步 deferred / 后台 CPU 浪费三类成本，分别量 ④ dev≠prod 显式标注（绝对值不当 SLA，用相对量级+架构判断）⑤ perf finding 收口二选一=带数据 dismiss 或 优化+再测
+- **scan_when**: 任何 perf 压测 / 优化前；用合成 microbenchmark 测交互延迟时；perf finding 定性收口时
+- **related**: FB-006（测量/验证保真度家族，维度不同：功能对错 vs 性能瓶颈）/ PP-003
+- **upstream_issue**: local-only（候选暂存 submissions/chenrui/2026-06-09-perf-measurement-fidelity.md，未上报 Bitbucket standard；触发 = 第 2 项目复现 或 PM 决定上报。遵 IPR-T-002 不预写未实际产生的上报状态）
+
 ---
 
 ## 统计
 
 | 维度 | 数量 |
 |------|------|
-| 总计 | 6 |
+| 总计 | 7 |
 | critical | 0 |
 | high | 0 |
 | medium | 0 |
-| low | 6 |
-| candidate 状态 | 5 |
+| low | 7 |
+| candidate 状态 | 6 |
 | applied 状态 | 1 |
 | observing 状态 | 0 |
 

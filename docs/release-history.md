@@ -4,6 +4,38 @@
 
 ---
 
+## v1.0.0-rc.2 — 清债 consolidation 第二轮（rc 线打磨）（2026-06-09）
+
+**Tag:** `v1.0.0-rc.2` @ commit `b8a90f8`
+**Range:** `e160724..b8a90f8`（rc.1 以来）
+**部署:** https://corray.github.io/editor/（env-less → 同步禁用，匿名正常）
+**类型:** 非功能 debt consolidation（rc 线打磨，仍 RC——云安全门槛 pending-provision，见 rc.1）。
+
+### Scope — 清 4 条 LOW（`5975561`）
+
+| 编号 | 处置 |
+|------|------|
+| BHV-006 | 字号到 13/17 边界 → A−/A+ `disabled` + 视觉态（`canIncrease/canDecreaseFontSize` 访问器）|
+| BHV-009 | toast error/warn → `role=alert` + `aria-live=assertive`（info 走容器 polite）a11y |
+| F-V12-1 | 空 share payload（`#doc=1.`→''）→ `readSharedDocument` 返 null（不建空文档）|
+| F-V18-3 | doc-list 加常显 ✎ 重命名入口（不只双击；mobile 无 hover 也可用）|
+
+**明确 defer**：F-V14-3（主题重渲染 mermaid）重评估后仍 defer——正确修需 regenerate placeholders（SVG 已替换），触 mermaid 异步+XSS 门槛路径，**风险 > 价值**。其余 open 多为 info / perf-未压测 / F-V20 真云-pending。
+
+### Quality Gates [已验证: 2026-06-09 本机]
+
+- 181 unit（+PREF-009 边界 / +LOAD-EMPTY / +TOAST-011 a11y）
+- 93 e2e / 1 skip（ac13 BHV010-2 改为断言按钮 disabled；无回归）
+- 首屏 82.54 KB gz（env-less）；typecheck 0；doc-hash + fb 闸 pass
+
+### Closure
+
+- 4 findings resolved；F-V14-3 诚实重评估后保持 defer（不强行修触风险路径）
+- 非功能 / 无 DB / 无新 XSS 面；仍 RC（升 v1.0.0 待 provision，见 `docs/setup/cloud-sync-provisioning.md`）
+- package.json 1.0.0-rc.1 → 1.0.0-rc.2
+
+---
+
 ## v1.0.0-rc.1 — 账号 + 云同步（v2.0 / mock 实现 / Release Candidate）（2026-06-08）
 
 **Tag:** `v1.0.0-rc.1` @ commit `e160724`

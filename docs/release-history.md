@@ -4,6 +4,44 @@
 
 ---
 
+## v1.1.0-rc.1 — 编辑增强包（v2.1 / PM 新拍 scope 首版）（2026-06-11）
+
+**Tag:** `v1.1.0-rc.1` @ commit `7fe6f91`
+**Range:** `7da3274..7fe6f91`（rc.3 以来；含 b82cd18 RLS 静态审）
+**部署:** https://corray.github.io/editor/（env-less → 同步禁用，匿名正常）
+**类型:** 功能 minor（路线图耗尽后首个 PM 新拍 scope）。**仍 RC**——rc 后缀诚实延续「云同步未验」标记（TBD-v21-0a），云验过后一次性出 1.1.x 正式。
+
+### Scope — 编辑增强包（共识 v2.1 / ADR-017 / `989fcc7` + perf `74eac69`）
+
+- **查找/替换**：Cmd/Ctrl+F 编辑面板内拦截唤起嵌入查找栏；字面量大小写不敏感、n/m 计数、Enter/Shift+Enter 跳转（选区+滚动估算）、替换当前/全部（toast 计数）；Esc 关闭回焦
+- **格式快捷键**：Cmd/Ctrl+B/I/K toggle 包裹/解包（I 防误吞 B 的 `**`；K 链接 url 占位选中）
+- **列表自动延续**：`- / * / 1. / - [ ]` 四前缀续行（数字递增 / checkbox 重置 / 缩进保留）+ 空项回车退出；`isComposing` 守 IME（中文输入 Enter 确认候选词不拦截）
+- **字数统计**：编辑面板底部 status bar `N 字 · 约 M 分钟`（CJK 逐字 + 非 CJK 分词，单遍扫描 + createDeferred 出输入路径）
+- **undo 核心约束（AC-v21-7）**：所有程序化编辑经 `execCommand('insertText')` 进原生 undo 栈（deprecated 显式技术债 + setRangeText fallback / ADR-017 D1），Cmd+Z 可撤销 e2e 实证
+
+### Quality Gates [已验证: 2026-06-11 本机]
+
+- 220 unit（+36：CT-WC×8 / CT-FMT×9 / CT-LIST×10 / CT-FIND×9）
+- 108 e2e / 2 skip（ac14 新 8 用例双引擎；AC14-3b undo 仅 chromium——Playwright WebKit undo 全合并为测试环境引擎特性，探针实证，F-V21-1）
+- 首屏 84.63 KB gz（+2.1KB，预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-11 增量）
+
+报告：`docs/audit/2026-06-11-v2.1-increment.md`。**无 critical/high/medium**。实现期「测量优先」自查暴露 wordcount 27.6ms/374KB/键阻塞（BHV-008' 家族）→ tag 前修 `74eac69`（单遍 4.4ms + deferred）。4 LOW（F-V21-1~4）。另：RLS 静态人工审收口 AC-v20-6 门槛②（`2026-06-11-rls-schema-review.md`，b82cd18）。
+
+### Known Limitations（v1.1.0-rc.1）
+
+- 查找导航期间选区高亮不可见（textarea 失焦不渲染选区，浏览器行为）——反馈靠计数+滚动，Esc 回焦后可见（F-V21-2）
+- undo 粒度 webkit 未实证（F-V21-1，真 Safari 待手测）
+- 仍 RC：v1.x 正式版被云安全门槛（F-V20-1/2 / AC-v20-6 门槛①）阻塞，pending Supabase provision（用户显式挂起），见 `docs/setup/cloud-sync-provisioning.md`
+
+### Closure
+
+- findings-registry：+F-V21-1~4（proposed LOW）+ F-V20-8/9（RLS 静态审 info）；变更记录追加 2 行
+- 共识/module-list/ADR-017/api-spec/test-plan v2.1 全链落档；api-spec §6 实现追溯回填；package.json 1.0.0-rc.3 → 1.1.0-rc.1
+
+---
+
 ## v1.0.0-rc.3 — perf 压测 + 大文档 preview 防抖（rc 线打磨）（2026-06-09）
 
 **Tag:** `v1.0.0-rc.3` @ commit `7da3274`

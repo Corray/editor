@@ -4,6 +4,45 @@
 
 ---
 
+## v1.2.0-rc.1 — 大纲/TOC 面板（v2.2）（2026-06-11）
+
+**Tag:** `v1.2.0-rc.1` @ commit `a5b6e53`
+**Range:** `7fe6f91..a5b6e53`（v1.1.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/（env-less → 同步禁用，匿名正常）
+**类型:** 功能 minor（2026-06-11 三项拍板 scope 第三项收尾）。**仍 RC**（云同步未验标记延续）。
+
+### Scope — 大纲面板（共识 v2.2 / ADR-018 / `7626be0`）
+
+- **M12 大纲**（新模块，纯派生态）：源文 ATX 标题单遍解析（≤3 前导空格 / 尾随闭合 # 剥离 / fenced ``` 与 ~~~ 内伪标题排除 / CRLF 容错；setext 不支持，文档化）
+- **sidebar 上下分区**（桌面 only）：DocList 上半 + 大纲下半各自滚动；app 层组合（DocList children slot，M12 不依赖 M9）；移动端行为不变
+- **点击跳转**：光标置标题行首 + scrollTop 估算居中 → scroll 事件自然驱动 M10 预览联动（零新协议）
+- **deferred 解析**：复用 v2.1 wordcount 范式，不进每键输入路径
+
+### Quality Gates [已验证: 2026-06-11 本机]
+
+- 230 unit（+10：CT-OL 解析边界含 fence 嵌套/未闭合/缩进代码）
+- 116 e2e / 2 skip（ac15 新 4 用例双引擎，预览联动 scrollTop 实证）
+- 首屏 85.93 KB gz（+1.3，预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-11 增量）
+
+报告：`docs/audit/2026-06-11-v2.2-increment.md`。**无 critical/high/medium**；2 LOW info（F-V22-1 webkit 单次 flake 留观 / F-V22-2 跳转×手滚竞争理论窗口）。
+
+### Known Limitations（v1.2.0-rc.1）
+
+- setext 标题（=== / --- 下划线式）不进大纲（ADR-018 D1 文档化）
+- 跳转滚动为行号×行高估算（软换行偏差，F-V17-3 同限）
+- 移动端无大纲入口（TBD-v22-1a 桌面 only，M10 先例）
+- 仍 RC：正式版被云安全门槛（F-V20-1/2）阻塞，pending Supabase provision（用户显式挂起）
+
+### Closure
+
+- findings-registry：+F-V22-1/2（proposed LOW info）；变更记录追加
+- 共识/module-list M12/ADR-018/api-spec/test-plan v2.2 全链落档；api-spec §4 追溯回填；package.json 1.1.0-rc.1 → 1.2.0-rc.1
+- **2026-06-11 三项拍板 scope（编辑增强包 / TOC / 字数统计）全部交付**
+
+---
+
 ## v1.1.0-rc.1 — 编辑增强包（v2.1 / PM 新拍 scope 首版）（2026-06-11）
 
 **Tag:** `v1.1.0-rc.1` @ commit `7fe6f91`

@@ -58,6 +58,8 @@ const EXPECTED_KEYS = [
   'find.replaced',
   'wordcount.empty',
   'wordcount.fmt',
+  'outline.title',
+  'outline.empty',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

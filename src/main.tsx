@@ -1,5 +1,12 @@
 /* @refresh reload */
-import { Show, createSignal, createEffect, onCleanup } from 'solid-js';
+import {
+  Show,
+  createSignal,
+  createEffect,
+  createDeferred,
+  createMemo,
+  onCleanup,
+} from 'solid-js';
 import type { Accessor, Setter } from 'solid-js';
 import { render } from 'solid-js/web';
 import { createDocumentState } from '@/modules/m1-editor/state';
@@ -16,6 +23,9 @@ import {
 } from '@/modules/m9-doc-manager/api';
 import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
 import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
+import { parseOutline } from '@/modules/m12-outline/outline';
+import type { OutlineItem } from '@/modules/m12-outline/outline';
+import { OutlinePanel } from '@/modules/m12-outline/OutlinePanel';
 import { createScrollSync } from '@/modules/m10-scroll-sync/sync';
 import { createSyncFeature } from '@/modules/m11-sync/feature';
 import type { SyncFeature } from '@/modules/m11-sync/feature';
@@ -158,6 +168,23 @@ function AppShell(props: AppShellProps) {
 
   const [drawerOpen, setDrawerOpen] = createSignal(false);
 
+  // M12 大纲（v2.2 / ADR-018）：deferred 解析（出输入路径）+ 点击跳转编辑器行。
+  const outlineText = createDeferred(() => props.state.text(), {
+    timeoutMs: 300,
+  });
+  const outline = createMemo(() => parseOutline(outlineText()));
+  const onOutlineJump = (item: OutlineItem): void => {
+    const ed = editorEl();
+    if (!ed) return;
+    ed.focus();
+    ed.setSelectionRange(item.offset, item.offset); // 光标置行首
+    const cs = getComputedStyle(ed);
+    let lh = parseFloat(cs.lineHeight);
+    if (!Number.isFinite(lh)) lh = (parseFloat(cs.fontSize) || 15) * 1.6;
+    // 行号估算居中（软换行偏差同 F-V17-3 接受）；scroll 事件触发 M10 联动预览
+    ed.scrollTop = Math.max(0, item.line * lh - ed.clientHeight / 2);
+  };
+
   // M10 滚动同步（v1.7 / ADR-011）：仅桌面双栏挂载；viewport 切换 / 字号变 → 重建。
   const [editorEl, setEditorEl] = createSignal<HTMLTextAreaElement>();
   const [previewEl, setPreviewEl] = createSignal<HTMLElement>();
@@ -295,7 +322,9 @@ function AppShell(props: AppShellProps) {
         }
       >
         <div class="workspace">
-          <DocList docs={props.docManager} />
+          <DocList docs={props.docManager}>
+            <OutlinePanel items={outline} onJump={onOutlineJump} />
+          </DocList>
           <div class="panes">
             <div class="editor-pane">
               <EditorArea

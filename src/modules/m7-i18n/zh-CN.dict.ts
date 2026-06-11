@@ -40,6 +40,10 @@ export const zhCNDict = {
   'wordcount.empty': '0 字',
   'wordcount.fmt': '{n} 字 · 约 {m} 分钟',
 
+  // M12 大纲 (v2.2 / ADR-018)
+  'outline.title': '大纲',
+  'outline.empty': '暂无标题',
+
   // M5 mobile tab
   'tab.edit': '编辑',
   'tab.preview': '预览',

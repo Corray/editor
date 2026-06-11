@@ -91,13 +91,79 @@
 }
 
 /* --- M9 doc list (desktop sidebar + shared body) --- */
+/* v2.2: sidebar = 上半 DocList + 下半大纲（各自滚动 / ADR-018 D3） */
 .doc-sidebar {
   width: 220px;
   flex-shrink: 0;
   border-right: 1px solid var(--border);
-  overflow-y: auto;
   background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
+
+.doc-sidebar > .doc-list {
+  flex: 1 1 50%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* --- M12 outline panel (v2.2 / ADR-018) --- */
+.outline-panel {
+  flex: 1 1 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+.outline-panel__header {
+  padding: 0.5rem 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  user-select: none;
+}
+
+.outline-panel__empty {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.outline-panel__items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.5rem;
+}
+
+.outline-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.2rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outline-item:hover {
+  background: var(--border);
+}
+
+.outline-item--l2 { padding-left: 1.5rem; }
+.outline-item--l3 { padding-left: 2.25rem; }
+.outline-item--l4 { padding-left: 3rem; }
+.outline-item--l5 { padding-left: 3.75rem; }
+.outline-item--l6 { padding-left: 4.5rem; }
 
 .doc-list {
   display: flex;

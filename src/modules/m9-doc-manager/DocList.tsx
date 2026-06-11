@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal, type JSX } from 'solid-js';
 import { t } from '@/modules/m7-i18n/i18n';
 import type { DocManagerAPI } from './api';
 
@@ -114,11 +114,12 @@ function DocListBody(props: InnerProps) {
   );
 }
 
-/** 桌面左侧 sidebar。 */
-export function DocList(props: { docs: DocManagerAPI }) {
+/** 桌面左侧 sidebar。children 渲染于文档列表之后（v2.2 大纲分区，app 层组合 / ADR-018 D3）。 */
+export function DocList(props: { docs: DocManagerAPI; children?: JSX.Element }) {
   return (
     <aside class="doc-sidebar" aria-label={t('doc.list')}>
       <DocListBody docs={props.docs} />
+      {props.children}
     </aside>
   );
 }

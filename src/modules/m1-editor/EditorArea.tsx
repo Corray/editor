@@ -1,5 +1,10 @@
 import { createMemo, For, Show, type Accessor } from 'solid-js';
 import type { DocumentState } from './state';
+import { createFindController } from './find';
+import { FindBar } from './FindBar';
+import { applyFormat, continueList } from './commands';
+import { countWords, formatWordCount } from './wordcount';
+import { t } from '@/modules/m7-i18n/i18n';
 
 export interface EditorAreaProps {
   state: DocumentState;
@@ -13,13 +18,16 @@ export interface EditorAreaProps {
 }
 
 /**
- * Markdown source textarea，可选行号 gutter。
+ * Markdown source textarea，可选行号 gutter；v2.1 编辑增强（ADR-017）：
  *
  * - 双向绑定 `state.text()` ↔ textarea.value
  * - onInput 实时写回 state.setText（M3 持久化模块 debounce 接收）
  * - 关闭浏览器 spellcheck 避免 Markdown 语法红线
  * - showLineNumbers 开时：左侧 gutter 渲染逐行号 + textarea 关软换行；
  *   gutter 自身 overflow:hidden，靠 onScroll 同步 textarea 的 scrollTop。
+ * - 〔v2.1〕Cmd/Ctrl+F 容器内拦截唤起查找栏（焦点在编辑面板外不拦，浏览器原生查找可用）；
+ *   Cmd/Ctrl+B/I/K 格式 toggle；Enter 列表延续（e.isComposing 守 IME）；
+ *   底部 status bar 字数统计。
  *
  * 已知限制（TODO(mvp-scope)）：textarea 关软换行后底部出现横向滚动条，
  *   占用约 1 行高度而 gutter 无横向条，极端长行场景下底部可能差半行；
@@ -27,6 +35,12 @@ export interface EditorAreaProps {
  */
 export function EditorArea(props: EditorAreaProps) {
   let gutterRef: HTMLDivElement | undefined;
+  let taRef: HTMLTextAreaElement | undefined;
+
+  const find = createFindController(props.state, () => taRef);
+  const wordCountText = createMemo(() =>
+    formatWordCount(countWords(props.state.text()), t),
+  );
 
   const showGutter = () => props.showLineNumbers?.() ?? false;
   const lineCount = createMemo(() => props.state.text().split('\n').length);
@@ -37,32 +51,69 @@ export function EditorArea(props: EditorAreaProps) {
     if (gutterRef) gutterRef.scrollTop = e.currentTarget.scrollTop;
   };
 
+  // v2.1 keydown 编排（容器级捕获 find；textarea 级格式/列表）
+  const onKeyDown = (e: KeyboardEvent): void => {
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && !e.altKey && e.key.toLowerCase() === 'f') {
+      e.preventDefault();
+      find.show();
+      return;
+    }
+    if (e.target !== taRef || !taRef) return;
+    if (mod && !e.altKey && !e.shiftKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'b' || k === 'i' || k === 'k') {
+        e.preventDefault();
+        applyFormat(taRef, k === 'b' ? 'bold' : k === 'i' ? 'italic' : 'link');
+        return;
+      }
+    }
+    if (
+      e.key === 'Enter' &&
+      !e.isComposing && // IME 守卫（ADR-017 D4）：确认候选词的 Enter 不拦截
+      !mod &&
+      !e.shiftKey &&
+      !e.altKey
+    ) {
+      if (continueList(taRef)) e.preventDefault();
+      return;
+    }
+    if (e.key === 'Escape' && find.open()) find.hide();
+  };
+
   return (
-    <div
-      class="editor-with-gutter"
-      classList={{ 'editor-with-gutter--numbered': showGutter() }}
-    >
-      <Show when={showGutter()}>
-        <div
-          class="editor-gutter"
-          ref={(el) => (gutterRef = el)}
-          aria-hidden="true"
-        >
-          <For each={Array.from({ length: lineCount() }, (_, i) => i + 1)}>
-            {(n) => <div class="editor-gutter__line">{n}</div>}
-          </For>
-        </div>
-      </Show>
-      <textarea
-        class="editor-area"
-        classList={{ 'editor-area--nowrap': showGutter() }}
-        aria-label="Markdown editor"
-        ref={(el) => props.editorRef?.(el)}
-        value={props.state.text()}
-        onInput={(e) => props.state.setText(e.currentTarget.value)}
-        onScroll={syncScroll}
-        spellcheck="false"
-      />
+    <div class="editor-chrome" onKeyDown={onKeyDown}>
+      <FindBar find={find} />
+      <div
+        class="editor-with-gutter"
+        classList={{ 'editor-with-gutter--numbered': showGutter() }}
+      >
+        <Show when={showGutter()}>
+          <div
+            class="editor-gutter"
+            ref={(el) => (gutterRef = el)}
+            aria-hidden="true"
+          >
+            <For each={Array.from({ length: lineCount() }, (_, i) => i + 1)}>
+              {(n) => <div class="editor-gutter__line">{n}</div>}
+            </For>
+          </div>
+        </Show>
+        <textarea
+          class="editor-area"
+          classList={{ 'editor-area--nowrap': showGutter() }}
+          aria-label="Markdown editor"
+          ref={(el) => {
+            taRef = el;
+            props.editorRef?.(el);
+          }}
+          value={props.state.text()}
+          onInput={(e) => props.state.setText(e.currentTarget.value)}
+          onScroll={syncScroll}
+          spellcheck="false"
+        />
+      </div>
+      <div class="editor-status">{wordCountText()}</div>
     </div>
   );
 }

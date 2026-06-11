@@ -28,6 +28,18 @@ export const zhCNDict = {
   'editor.fontIncrease': '增大字号',
   'editor.lineNumbers': '切换行号',
 
+  // M1 查找/替换 + 字数统计 (v2.1 / ADR-017)
+  'find.placeholder': '查找…',
+  'find.replacePlaceholder': '替换为…',
+  'find.prev': '上一个',
+  'find.next': '下一个',
+  'find.replace': '替换',
+  'find.replaceAll': '全部替换',
+  'find.close': '关闭查找',
+  'find.replaced': '已替换 {n} 处',
+  'wordcount.empty': '0 字',
+  'wordcount.fmt': '{n} 字 · 约 {m} 分钟',
+
   // M5 mobile tab
   'tab.edit': '编辑',
   'tab.preview': '预览',

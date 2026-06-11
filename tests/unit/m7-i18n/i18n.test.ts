@@ -48,6 +48,16 @@ const EXPECTED_KEYS = [
   'auth.checkEmail',
   'auth.failed',
   'auth.privacy',
+  'find.placeholder',
+  'find.replacePlaceholder',
+  'find.prev',
+  'find.next',
+  'find.replace',
+  'find.replaceAll',
+  'find.close',
+  'find.replaced',
+  'wordcount.empty',
+  'wordcount.fmt',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

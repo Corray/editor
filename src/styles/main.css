@@ -251,6 +251,66 @@
   font-style: italic;
 }
 
+/* v2.1 editor chrome column: find-bar / editor / status-bar (ADR-017) */
+.editor-chrome {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.find-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.find-input {
+  flex: 1 1 8rem;
+  min-width: 6rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.find-count {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.find-button {
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.find-button:hover {
+  border-color: var(--fg);
+}
+
+.editor-status {
+  flex: 0 0 auto;
+  padding: 0.25rem 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+  user-select: none;
+}
+
 /* editor + optional line-number gutter share the editor-pane flex slot */
 .editor-with-gutter {
   flex: 1;

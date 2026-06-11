@@ -46,6 +46,7 @@
 | **M8 PWA/离线**〔v1.5 新增〕| Service Worker precache 离线 + Manifest 可安装 + 更新提示 | 共识 v1.5 | PRD §7 v1.1 候选 | FE | proposed (v1.5) | vite-plugin-pwa 1.3.0 / Workbox 7.4.1（构建期）、Service Worker / Cache API、`virtual:pwa-register` | 横切基础设施；更新提示 → shared/toast.ts；不依赖业务模块 |
 | **M9 文档管理**〔v1.6 新增〕| 多文档模型（列表 + active）+ CRUD + 单→多迁移 + 标题派生 + documents store I/O | 共识 v1.6 | PRD §7 v1.1 候选 | FE | proposed (v1.6) | IndexedDB documents store（DB v2）、`crypto.randomUUID` | → M1（切换 set DocumentState）、← M3（M3 经 saveActiveText 写）、被 M5（sidebar/抽屉）+ M4（import/share 涟漪）消费 |
 | **M10 滚动同步**〔v1.7 新增〕| 桌面编辑↔预览滚动联动（source-line 映射 + 双向 + 反馈环防护）| 共识 v1.7 | defer 项（非 PRD §7）| FE | proposed (v1.7) | DOM scroll API、requestAnimationFrame | ← M2（读 data-source-line）、← M1/M5（editor/preview DOM ref），桌面 only |
+| **M12 大纲**〔v2.2 新增〕| 源文 ATX 标题解析（跳 fenced）→ 大纲面板 + 点击跳转编辑器行（预览靠 M10 联动） | 共识 v2.2 | PM 新拍 scope | FE | proposed (v2.2) | — | 纯派生态；OutlinePanel 由 AppShell 组合进 M9 sidebar 下半分区（children slot，M12 不依赖 M9）；跳转消费 M1 textarea ref |
 | **M11 同步网关 + 账号**〔v2.0 新增 / **破纯 FE**〕| 封装 supabase-js：账号(magic link auth) + 文档云同步(local-first + LWW) | 共识 v2.0 | PRD §7 v2.0 | FE→BaaS | proposed (v2.0) | `@supabase/supabase-js` 2.107.0 + Supabase(Auth/Postgres/RLS) | Gateway 封装(arch §7)；→ M9(push/pull/首登 merge)；UI 登录态；**security-review 全程** |
 
 ### 状态枚举（refers `artifact-based-handoff.md`）

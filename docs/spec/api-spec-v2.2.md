@@ -45,8 +45,10 @@ export interface OutlinePanelProps {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| outline.ts parseOutline（ATX + fenced 跳过）| ⏳ | — |
-| OutlinePanel（缩进列表 + 空态）| ⏳ | — |
-| DocList children slot + sidebar 分区 CSS | ⏳ | — |
-| AppShell deferred parse + onJump 编排 | ⏳ | — |
-| i18n outline.*（+EXPECTED_KEYS）| ⏳ | — |
+| outline.ts parseOutline（ATX + fenced 跳过）| ✓ | `7626be0` |
+| OutlinePanel（缩进列表 + 空态）| ✓ | `7626be0` |
+| DocList children slot + sidebar 分区 CSS | ✓ | `7626be0` |
+| AppShell deferred parse + onJump 编排 | ✓ | `7626be0` |
+| i18n outline.*（+EXPECTED_KEYS）| ✓ | `7626be0` |
+
+> 测试：unit +10（CT-OL×10）→ 230；e2e +4 用例双引擎（ac15）→ 116 + 2 skip。

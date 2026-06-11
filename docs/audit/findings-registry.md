@@ -143,6 +143,8 @@
 | F-V21-2 | 2026-06-11 | proposed | LOW (info) | 查找导航期间 textarea 失焦不渲染选区高亮（浏览器行为）；反馈靠 n/m 计数+滚动，Esc 回焦后可见。富高亮 = mirror-div overlay 复杂度，defer（共识张力 A 已声明）| 2026-06-11 audit |
 | F-V21-3 | 2026-06-11 | proposed | LOW (info) | execCommand deprecated 显式技术债（ADR-017 文档化 + TODO 标注 + fallback 就位 + e2e 双引擎守行为），登记备查无行动项 | 2026-06-11 audit |
 | F-V21-4 | 2026-06-11 | proposed | LOW (info) | replaceAll 单次全文 insertText（一步 undo 设计），超大文档未压测；偶发操作非每键路径，defer | 2026-06-11 audit |
+| F-V22-1 | 2026-06-11 | proposed | LOW (info) | E2E-AC15-2 webkit 首跑一次 flake（预览联动 scrollTop poll 时序），重跑全绿；留观复发再查 | 2026-06-11 v2.2 audit |
+| F-V22-2 | 2026-06-11 | proposed | LOW (info) | 大纲跳转滚动 × 用户即时手滚预览的 M10 双向短暂竞争（rAF 反馈环兜底，F-V17-4 家族）；未观察到实际异常 | 2026-06-11 v2.2 audit |
 
 ### Issue-process 审查
 
@@ -183,3 +185,4 @@
 | 2026-06-09 | **perf 压测 4 条「未压测」finding**（报告 `docs/perf/stress-2026-06-09-large-dataset.md`，测量优先）：BHV-008（gutter on/off 等价 378/374ms）+ F-V16-5（1000 docs getAll 102ms）+ F-V18-1（1000 docs 搜索 5–20ms）**三条原假设被数据推翻 → dismissed**；F-V14-1 延迟假设推翻（+3ms）但闪烁属实。**压测浮现真问题 BHV-008'（MEDIUM）**：大文档 preview 每键同步全量重渲染阻塞输入 → 修复 = 大文档/含 mermaid render 防抖 120ms（374KB 打字 1341ms/键 → 17ms/键），顺带 resolved F-V14-1 闪烁。测试 CT-M2-DEBOUNCE-1/2/3；unit 184 + e2e 93 全绿 |
 | 2026-06-11 | **RLS schema 静态人工审**（报告 `2026-06-11-rls-schema-review.md`，推 v1.0.0 准备）：AC-v20-6 门槛 ②"人工审策略"完成——11 检查项全过（4 操作 policy 齐全 / INSERT+UPDATE 双 WITH CHECK / 匿名全拒 / client-schema 列一致 / 幂等），新增 2 info（F-V20-8 PK 存在性 oracle / F-V20-9 无尺寸上限）均 MVP 接受。门槛 ①两用户线上验仍 pending provision，**F-V20-1/2 状态不变，仍阻 v1.0.0** |
 | 2026-06-11 | v2.1 增量 audit（报告 `2026-06-11-v2.1-increment.md`）：编辑增强包（查找/替换 + B/I/K + 列表延续 + 字数），**无 critical/high/medium**。实现期「测量优先」自查暴露 wordcount 27.6ms/374KB/键阻塞（BHV-008' 家族）→ **tag 前修 `74eac69`**（单遍扫描 4.4ms + createDeferred 出输入路径）；AC-v21-7 undo 门槛 chromium 实证（webkit 为 Playwright 测试环境引擎特性，探针实证后 skip）。4 LOW（F-V21-1~4）。unit 220 + e2e 108 |
+| 2026-06-11 | v2.2 增量 audit（报告 `2026-06-11-v2.2-increment.md`）：大纲面板（M12 新模块），**无 critical/high/medium**。解析边界 10 条 unit 枚举（fence 嵌套/未闭合/缩进代码/CRLF）；跳转复用 M10 零新协议（预览联动 e2e 实证）；M12 模块边界干净（app 层组合）。2 LOW info（F-V22-1 webkit flake 留观 / F-V22-2 跳转×手滚竞争）。unit 230 + e2e 116 |

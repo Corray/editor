@@ -1,4 +1,4 @@
-import { createMemo, For, Show, type Accessor } from 'solid-js';
+import { createDeferred, createMemo, For, Show, type Accessor } from 'solid-js';
 import type { DocumentState } from './state';
 import { createFindController } from './find';
 import { FindBar } from './FindBar';
@@ -38,8 +38,13 @@ export function EditorArea(props: EditorAreaProps) {
   let taRef: HTMLTextAreaElement | undefined;
 
   const find = createFindController(props.state, () => taRef);
+  // 字数统计走 deferred（空闲时段更新）—— 大文档单遍扫描 ~4ms/374KB，
+  // 不进每键同步输入路径（BHV-008' 家族教训，实测见 wordcount.ts 头注）
+  const deferredText = createDeferred(() => props.state.text(), {
+    timeoutMs: 300,
+  });
   const wordCountText = createMemo(() =>
-    formatWordCount(countWords(props.state.text()), t),
+    formatWordCount(countWords(deferredText()), t),
   );
 
   const showGutter = () => props.showLineNumbers?.() ?? false;

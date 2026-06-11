@@ -78,10 +78,12 @@ export function formatWordCount(wc: WordCount, t: I18nT): string; // "N 字 · ~
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| edit-text.ts replaceRange（execCommand+fallback）| ⏳ | — |
-| find.ts FindController（扫描/跳转/替换）| ⏳ | — |
-| commands.ts applyFormat（B/I/K toggle）| ⏳ | — |
-| commands.ts continueList（4 前缀 + 空退 + IME 守卫）| ⏳ | — |
-| wordcount.ts countWords/formatWordCount | ⏳ | — |
-| EditorArea 集成（FindBar + keydown + status bar）| ⏳ | — |
-| i18n find.* / wordcount.* | ⏳ | — |
+| edit-text.ts replaceRange（execCommand+fallback）| ✓ | `989fcc7` |
+| find.ts FindController（扫描/跳转/替换）| ✓ | `989fcc7` |
+| commands.ts applyFormat（B/I/K toggle）| ✓ | `989fcc7` |
+| commands.ts continueList（4 前缀 + 空退 + IME 守卫）| ✓ | `989fcc7` |
+| wordcount.ts countWords/formatWordCount | ✓ | `989fcc7` |
+| EditorArea 集成（FindBar 组件 + keydown + status bar；查找控制器收编 EditorArea 内部装配，不经 props —— 桌面/移动两实例各自持有，spec §5 的 `find?` prop 方案简化）| ✓ | `989fcc7` |
+| i18n find.* / wordcount.*（+EXPECTED_KEYS 白名单）| ✓ | `989fcc7` |
+
+> 测试：unit +36（CT-WC×8 / CT-FMT×9 / CT-LIST×10 / CT-FIND×9）→ 220；e2e +8 用例（ac14，双引擎 15 pass + 1 webkit skip，见 F-V21-1）→ 108。undo 门槛 AC-v21-7 chromium 实证。

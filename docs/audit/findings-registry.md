@@ -143,12 +143,15 @@
 | F-V21-2 | 2026-06-11 | proposed | LOW (info) | 查找导航期间 textarea 失焦不渲染选区高亮（浏览器行为）；反馈靠 n/m 计数+滚动，Esc 回焦后可见。富高亮 = mirror-div overlay 复杂度，defer（共识张力 A 已声明）| 2026-06-11 audit |
 | F-V21-3 | 2026-06-11 | proposed | LOW (info) | execCommand deprecated 显式技术债（ADR-017 文档化 + TODO 标注 + fallback 就位 + e2e 双引擎守行为），登记备查无行动项 | 2026-06-11 audit |
 | F-V21-4 | 2026-06-11 | proposed | LOW (info) | replaceAll 单次全文 insertText（一步 undo 设计），超大文档未压测；偶发操作非每键路径，defer | 2026-06-11 audit |
-| F-V22-1 | 2026-06-11 | proposed | LOW (info) | E2E-AC15-2 webkit 首跑一次 flake（预览联动 scrollTop poll 时序），重跑全绿；留观复发再查 | 2026-06-11 v2.2 audit |
+| F-V22-1 | 2026-06-11 | **fixing**（2026-06-12 加固）| LOW | E2E-AC15-2 webkit 预览联动 poll flake **二次复发**（2026-06-11 首现 + 2026-06-12 全量回归再现，均重跑过）→ 达复发阈值，加固 = poll 显式 10s（`c270057`）；环境噪声定性（负载下 rAF 链路慢），再复发则查 M10 attach 时序 | 2026-06-11 v2.2 audit / 2026-06-12 加固 |
 | F-V22-2 | 2026-06-11 | proposed | LOW (info) | 大纲跳转滚动 × 用户即时手滚预览的 M10 双向短暂竞争（rAF 反馈环兜底，F-V17-4 家族）；未观察到实际异常 | 2026-06-11 v2.2 audit |
 | F-V23-1 | 2026-06-12 | proposed | LOW (info) | hljs chunk（162KB raw）进 SW precache（katex 同策略，离线高亮可用）；precache 累计 1.57MB（较 F-V15-1 修订时 +33%），再有重 chunk 应重评 runtimeCaching 分流 | 2026-06-12 v2.3 audit |
 | F-V23-2 | 2026-06-12 | proposed | LOW (info) | 自绘 9 组 token 映射较 hljs 官方主题粗（scope 归并），少数细分 token 沿用默认色；视觉打磨 defer | 2026-06-12 v2.3 audit |
 | F-V24-1 | 2026-06-12 | proposed | LOW (info) | Tab 拦截 a11y 缓解 = Esc 放行一次 + 帮助面板文字说明；无 aria-keyshortcuts/读屏提示，深度 a11y 审计 defer | 2026-06-12 v2.4 audit |
 | F-V24-2 | 2026-06-12 | proposed | LOW (info) | TOC 高亮仅随编辑器视口（拍定 TBD-v24-3a）；预览滚动不驱动（设计内）| 2026-06-12 v2.4 audit |
+| F-V25-1 | 2026-06-12 | proposed | LOW (info) | 导出 HTML 的 KaTeX 样式依赖 CDN link（SRI 锁内容）；离线打开排版降级结构在（TBD-v25-3a 拍定取舍）| 2026-06-12 v2.5 audit |
+| F-V25-2 | 2026-06-12 | proposed | LOW (info) | 移动编辑 tab 导出走降级源（mermaid 占位）；预览 tab/桌面保真。边缘文档化 | 2026-06-12 v2.5 audit |
+| F-V25-3 | 2026-06-12 | proposed | LOW (info) | print 在移动编辑 tab 下预览未挂载 → 空内容；桌面正常。边缘 defer | 2026-06-12 v2.5 audit |
 
 ### Issue-process 审查
 
@@ -192,3 +195,4 @@
 | 2026-06-11 | v2.2 增量 audit（报告 `2026-06-11-v2.2-increment.md`）：大纲面板（M12 新模块），**无 critical/high/medium**。解析边界 10 条 unit 枚举（fence 嵌套/未闭合/缩进代码/CRLF）；跳转复用 M10 零新协议（预览联动 e2e 实证）；M12 模块边界干净（app 层组合）。2 LOW info（F-V22-1 webkit flake 留观 / F-V22-2 跳转×手滚竞争）。unit 230 + e2e 116 |
 | 2026-06-12 | v2.3 增量 audit（报告 `2026-06-12-v2.3-increment.md`）：语法高亮（hljs lib/common 懒加载），**无 critical/high/medium**。**sanitize 零放宽**（XSS 门槛 unit+e2e 双引擎实证）；降级路径全枚举（未载/未知语言/无标注/加载失败）；实现期自查修 hasCode 正则误判（CT-HL-1 锁死）。2 LOW info（F-V23-1 precache +33% 留观 / F-V23-2 token 映射粗）。unit 238 + e2e 122 |
 | 2026-06-12 | v2.4 增量 audit（报告 `2026-06-12-v2.4-increment.md`）：编辑打磨包（Tab 缩进/帮助面板/TOC 高亮），**无 critical/high/medium**。实现期捕获 webkit「点按钮不转移焦点 → main 冒泡收不到 Esc」→ 改 window 级监听（范式：全局快捷键一律 window 级）；负载超时假阴性定性（27.6min 7 failed → 空载复跑 131/131 全过）。2 LOW info（F-V24-1 a11y 深审 defer / F-V24-2 高亮仅编辑器视口）。unit 249 + e2e 131 |
+| 2026-06-12 | v2.5 增量 audit（报告 `2026-06-12-v2.5-increment.md`）：打印 print CSS + 导出独立 HTML，**无 critical/high/medium**。导出产物**双重 sanitize**（unit+e2e 实证）；KaTeX CDN SRI 本地同版本文件计算（应用本体 CSP 零变化）；print 强制浅色+滚动容器解除双引擎验。**F-V22-1 二次复发 → 加固**（poll 10s）。3 LOW info（F-V25-1~3）。unit 255 + e2e 134 |

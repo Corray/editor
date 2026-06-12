@@ -38,7 +38,9 @@ export function createExportAPI(
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| ExportHtml.ts（模板/二次 sanitize/SRI 常量）| ⏳ | — |
-| ExportAPI.downloadHtml + AppShell 注入 + header 按钮 | ⏳ | — |
-| @media print 块 | ⏳ | — |
-| i18n + HelpDialog 条目 | ⏳ | — |
+| ExportHtml.ts（模板/二次 sanitize/SRI 常量——本地 katex@0.17.0 文件 openssl 计算）| ✓ | `c270057` |
+| ExportAPI.downloadHtml + AppShell 注入 + header 按钮 | ✓ | `c270057` |
+| @media print 块（chrome 全隐/强制浅色/滚动容器解除）| ✓ | `c270057` |
+| i18n + HelpDialog 条目（8→9，ac17 断言同步）| ✓ | `c270057` |
+
+> 测试：unit +6（CT-XH）→ 255；e2e +2 用例双引擎（ac18：下载内容断言 + emulateMedia print）→ 134 + 3 skip。首屏 88.77KB。附带：ac15-2 webkit poll 加固（F-V22-1 二次复发 → 10s）。

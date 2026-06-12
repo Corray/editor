@@ -1,11 +1,32 @@
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
+import type { HLJSApi } from 'highlight.js';
+
+// —— 语法高亮（v2.3 / ADR-019）——
+// hljs 懒加载；MD_OPTS.highlight 闭包在 render 期读取 → 加载完成后无需重建渲染器。
+let hljsLib: HLJSApi | null = null;
+let hljsLoad: Promise<void> | null = null;
 
 const MD_OPTS = {
   html: false,
   linkify: false,
   breaks: false,
   typographer: false,
+  /**
+   * fenced code 着色（ADR-019 D2/D3）：hljs 已载且语言已注册 → class-based 着色
+   * HTML（仅 span+class，过 render() 默认 DOMPurify 不放宽）；否则返 '' =
+   * markdown-it escapeHtml 降级（未载/未知语言/无标注统一无色现状）。
+   * mermaid fence 在自定义 fence 规则先拦截，不进本闭包。
+   */
+  highlight: (code: string, lang: string): string => {
+    if (!hljsLib || !lang || !hljsLib.getLanguage(lang)) return '';
+    try {
+      return hljsLib.highlight(code, { language: lang, ignoreIllegals: true })
+        .value;
+    } catch {
+      return '';
+    }
+  },
 } as const;
 
 /**
@@ -101,6 +122,29 @@ export function ensureKatex(): Promise<void> {
     })();
   }
   return loadPromise;
+}
+
+/**
+ * 文本是否含「带语言标注的非 mermaid fence」（决定是否懒加载 highlight.js）。
+ * 误判最坏 = 多加载一次，无害（hasMath 范式）。
+ */
+export function hasCode(markdown: string): boolean {
+  return /(^|\n) {0,3}(?:`{3,}|~{3,}) *(?!mermaid\b)[a-zA-Z]/.test(markdown);
+}
+
+/** highlight.js 是否已加载（PreviewArea 决定加载完是否 re-render）。 */
+export function highlightReady(): boolean {
+  return hljsLib !== null;
+}
+
+/** 一次性懒加载 highlight.js lib/common（~37 常用语言，memoized / ADR-019 D1）。 */
+export function ensureHighlight(): Promise<void> {
+  if (!hljsLoad) {
+    hljsLoad = import('highlight.js/lib/common').then((m) => {
+      hljsLib = m.default;
+    });
+  }
+  return hljsLoad;
 }
 
 // —— Mermaid（v1.4 / ADR-008）——

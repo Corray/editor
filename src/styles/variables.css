@@ -6,6 +6,16 @@
   --border: #e5e7eb;
   --accent: #2563eb;
   --code-bg: #f3f4f6;
+  /* v2.3 语法高亮 token（ADR-019 D4，github-light 近似） */
+  --hl-keyword: #cf222e;
+  --hl-string: #0a3069;
+  --hl-number: #0550ae;
+  --hl-comment: #6e7781;
+  --hl-title: #8250df;
+  --hl-attr: #953800;
+  --hl-type: #0550ae;
+  --hl-meta: #8250df;
+  --hl-tag: #116329;
 }
 
 [data-theme='dark'] {
@@ -15,6 +25,16 @@
   --border: #1f2937;
   --accent: #60a5fa;
   --code-bg: #1f1f1f;
+  /* v2.3 语法高亮 token（github-dark 近似） */
+  --hl-keyword: #ff7b72;
+  --hl-string: #a5d6ff;
+  --hl-number: #79c0ff;
+  --hl-comment: #8b949e;
+  --hl-title: #d2a8ff;
+  --hl-attr: #ffa657;
+  --hl-type: #79c0ff;
+  --hl-meta: #d2a8ff;
+  --hl-tag: #7ee787;
 }
 
 body {

@@ -429,6 +429,66 @@
   overflow-x: auto;
 }
 
+/* v2.3 syntax highlight tokens (ADR-019 D4) — class-based, theme via vars */
+.preview-content .hljs-keyword,
+.preview-content .hljs-literal,
+.preview-content .hljs-built_in,
+.preview-content .hljs-selector-tag {
+  color: var(--hl-keyword);
+}
+
+.preview-content .hljs-string,
+.preview-content .hljs-regexp,
+.preview-content .hljs-selector-attr,
+.preview-content .hljs-selector-pseudo {
+  color: var(--hl-string);
+}
+
+.preview-content .hljs-number,
+.preview-content .hljs-symbol {
+  color: var(--hl-number);
+}
+
+.preview-content .hljs-comment,
+.preview-content .hljs-quote {
+  color: var(--hl-comment);
+  font-style: italic;
+}
+
+.preview-content .hljs-title,
+.preview-content .hljs-section {
+  color: var(--hl-title);
+}
+
+.preview-content .hljs-attr,
+.preview-content .hljs-attribute,
+.preview-content .hljs-variable,
+.preview-content .hljs-template-variable,
+.preview-content .hljs-selector-id,
+.preview-content .hljs-selector-class {
+  color: var(--hl-attr);
+}
+
+.preview-content .hljs-type,
+.preview-content .hljs-params {
+  color: var(--hl-type);
+}
+
+.preview-content .hljs-meta,
+.preview-content .hljs-doctag {
+  color: var(--hl-meta);
+}
+
+.preview-content .hljs-tag,
+.preview-content .hljs-name,
+.preview-content .hljs-addition {
+  color: var(--hl-tag);
+}
+
+.preview-content .hljs-deletion {
+  color: var(--hl-keyword);
+}
+
 /* preview-content basic markdown typography */
 .preview-content > :first-child {
   margin-top: 0;

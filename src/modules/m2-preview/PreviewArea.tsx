@@ -14,6 +14,9 @@ import {
   ensureMermaid,
   renderMermaid,
   hasMermaid,
+  hasCode,
+  ensureHighlight,
+  highlightReady,
 } from './pipeline';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -46,6 +49,8 @@ export function PreviewArea(props: PreviewAreaProps) {
   // innerHTML 唯一合法源 = pipeline.render()（已 DOMPurify sanitize；ADR-002）。
   // v1.3 KaTeX 懒加载：含公式且未载 → 一次性 import → bump katexVer 触发重算。
   const [katexVer, setKatexVer] = createSignal(0);
+  // v2.3 highlight.js 懒加载（ADR-019，katexVer 同构）。
+  const [hlVer, setHlVer] = createSignal(0);
 
   // 防抖渲染源：renderText 跟随 state.text()，但大文档 / 含 mermaid 时延迟到输入停顿。
   // textarea 仍即时响应（输入处理廉价）；仅昂贵的 render() 被推迟。
@@ -65,9 +70,13 @@ export function PreviewArea(props: PreviewAreaProps) {
 
   const html = createMemo(() => {
     katexVer();
+    hlVer();
     const text = renderText();
     if (hasMath(text) && !katexReady()) {
       void ensureKatex().then(() => setKatexVer((v) => v + 1));
+    }
+    if (hasCode(text) && !highlightReady()) {
+      void ensureHighlight().then(() => setHlVer((v) => v + 1));
     }
     return render(text);
   });

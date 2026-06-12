@@ -37,7 +37,7 @@
 | 模块 | 职责（一句话）| 共识 §| PRD F | owner | 状态 | 对外依赖（外部） | 内部依赖（本项目）|
 |------|-------|-------|-------|-------|------|----------|----------|
 | **M1 编辑** | 维护 Markdown 源文 + 输入交互；**〔v2.1〕+查找/替换 + 格式快捷键(B/I/K toggle) + 列表自动延续 + 字数统计** | §3 / §4 (隐) + 共识 v2.1 | F1 | FE | in-dev (#6 textarea + state + API；v2.1 编辑增强) | 〔v2.1〕`document.execCommand('insertText')`（undo 保持，ADR-017）| 〔v2.1〕chrome 文案 ← M7；status bar 被 M5 容纳 |
-| **M2 预览** | 实时渲染 Markdown 为 HTML | §4.2 | F2 | FE | in-dev (#1 pipeline + #8 PreviewArea 挂载) | sanitize 库 DOMPurify v3.4.5（ADR-002 accepted）、Markdown 渲染库 markdown-it v14.1.1（ADR-001 accepted） | ← M1 |
+| **M2 预览** | 实时渲染 Markdown 为 HTML；**〔v2.3〕+fenced code 语法高亮（hljs 懒加载，不放宽 sanitize）** | §4.2 + 共识 v2.3 | F2 | FE | in-dev (#1 pipeline + #8 PreviewArea 挂载；v2.3 highlight) | sanitize 库 DOMPurify v3.4.5（ADR-002 accepted）、Markdown 渲染库 markdown-it v14.1.1（ADR-001 accepted）、〔v2.3〕highlight.js 11.11.1 lib/common 懒加载（ADR-019）| ← M1 |
 | **M3 持久化** | localStorage 读写 + 状态机；**〔v1.6〕写目标改 active doc（经 M9）** | §4.1 / §5 | F3 | FE | in-dev (#2 store + debounce；v1.6 改造写目标) | localStorage Web API + shared/toast.ts；〔v1.6〕← M9 | ← M1 |
 | **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | in-dev (#9 实现) | File / Blob API、Clipboard API | ← M1（text accessor）, ← M2 pipeline.render |
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | in-dev (#12 完整 LayoutAPI) | matchMedia API（reactive viewport）+ Solid signals | 容纳 M1/M2 + 装饰 M6 |

@@ -31,7 +31,9 @@ variables.css：`--hl-keyword / --hl-string / --hl-number / --hl-comment / --hl-
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| pipeline hasCode/ensureHighlight/highlightReady + MD_OPTS.highlight | ⏳ | — |
-| PreviewArea hlVer 集成 | ⏳ | — |
-| variables.css --hl-* + main.css token 规则 | ⏳ | — |
-| 依赖 highlight.js@11.11.1 | ⏳ | — |
+| pipeline hasCode/ensureHighlight/highlightReady + MD_OPTS.highlight | ✓ | `f966af3` |
+| PreviewArea hlVer 集成 | ✓ | `f966af3` |
+| variables.css --hl-* + main.css token 规则 | ✓ | `f966af3` |
+| 依赖 highlight.js@11.11.1 | ✓ | `f966af3` |
+
+> 测试：unit +8（CT-HL）→ 238；e2e +3 用例双引擎（ac16，含 XSS 门槛）→ 122 + 2 skip。hljs chunk 162KB raw（precache 1405→1570KB）；首屏 86.47KB（+0.5）。

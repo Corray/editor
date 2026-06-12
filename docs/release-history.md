@@ -4,6 +4,42 @@
 
 ---
 
+## v1.4.0-rc.1 — 编辑细节打磨包（v2.4）（2026-06-12）
+
+**Tag:** `v1.4.0-rc.1` @ commit `794b985`
+**Range:** `ac06fd2..794b985`（v1.3.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（四项 scope 第二项；余 v2.5 打印导出 → v2.6 版本快照）。仍 RC。
+
+### Scope — 三件打磨（共识 v2.4 / ADR-020 / `f780847`）
+
+- **Tab/Shift+Tab 缩进**：2 空格；多行选区整体加减（单次 replaceRange 一步 undo）；**Esc 后下一个 Tab 放行**原生焦点移动（a11y 逃逸）
+- **快捷键帮助面板**：header ⌨ 按钮 + Cmd/Ctrl+/ 唤起，8 条快捷键，Esc/遮罩关闭
+- **TOC 当前位置高亮**：编辑器滚动（rAF 节流）→ 视口顶部 section 高亮（解 TBD-v22-4 defer）
+
+### Quality Gates [已验证: 2026-06-12 本机空载复跑]
+
+- 249 unit（+11：CT-IND×7 / CT-AOI×4）
+- 131 e2e / 3 skip（ac17 新 5 用例；+1 skip = ac17-2 webkit undo，F-V21-1 同限）
+- 首屏 87.61 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-12 增量）
+
+报告：`docs/audit/2026-06-12-v2.4-increment.md`。**无 critical/high/medium**。实现期两个值得记的处置：① webkit 点按钮不转移焦点 → 全局快捷键改 **window 级监听**（范式）；② 负载超时假阴性（27.6min 7 failed → 空载复跑 131/131 全过，先查负载再查代码）。2 LOW info（F-V24-1~2）。
+
+### Known Limitations
+
+- a11y 深度审计（aria-keyshortcuts/读屏）defer（F-V24-1）
+- TOC 高亮仅随编辑器视口，预览滚动不驱动（设计内，F-V24-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V24-1/2（info）；变更记录追加
+- spec 全链落档 + api-spec 追溯回填；package.json → 1.4.0-rc.1
+
+---
+
 ## v1.3.0-rc.1 — 代码块语法高亮（v2.3）（2026-06-12）
 
 **Tag:** `v1.3.0-rc.1` @ commit `ac06fd2`

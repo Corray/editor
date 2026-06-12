@@ -759,3 +759,43 @@
     animation: none;
   }
 }
+
+/* v2.5 print (ADR-021 D1): chrome 全隐 + 仅预览内容 + 强制浅色 + 解除滚动容器 */
+@media print {
+  :root,
+  [data-theme='dark'] {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --code-bg: #f3f4f6;
+  }
+
+  .app-header,
+  .doc-sidebar,
+  .editor-pane,
+  .mobile-tabs,
+  .editor-status,
+  .find-bar,
+  .toast-container,
+  .doc-drawer-backdrop,
+  .help-backdrop {
+    display: none !important;
+  }
+
+  /* 解除 v1.7 滚动容器链（#root 100vh + overflow:hidden 会只打印首屏） */
+  #root,
+  .app-shell,
+  .workspace,
+  .panes,
+  .preview-pane {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .preview-pane {
+    border-left: none;
+    padding: 0;
+  }
+}

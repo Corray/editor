@@ -68,12 +68,15 @@ test.describe('AC-v22 大纲/TOC 面板', () => {
     // 光标落在 '# 第二章' 行首
     const offset = DOC.indexOf('# 第二章');
     expect(after.sel[0]).toBe(offset);
-    // 预览经 M10 联动跟随（编辑器 scroll 事件驱动）
+    // 预览经 M10 联动跟随（编辑器 scroll 事件驱动）。
+    // F-V22-1：webkit 下该 poll 二次 flake（负载下 rAF 链路慢）→ 显式放宽到 10s
     await expect
-      .poll(() =>
-        page.evaluate(
-          () => document.querySelector('.preview-pane')!.scrollTop,
-        ),
+      .poll(
+        () =>
+          page.evaluate(
+            () => document.querySelector('.preview-pane')!.scrollTop,
+          ),
+        { timeout: 10_000 },
       )
       .toBeGreaterThan(0);
   });

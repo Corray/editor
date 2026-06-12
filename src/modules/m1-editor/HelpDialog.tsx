@@ -9,6 +9,7 @@ const SHORTCUT_KEYS = [
   ['Tab / Shift+Tab', 'help.k.indent'],
   ['Enter', 'help.k.list'],
   ['Cmd/Ctrl + /', 'help.k.help'],
+  ['Cmd/Ctrl + P', 'help.k.print'],
   ['Esc', 'help.k.esc'],
 ] as const;
 

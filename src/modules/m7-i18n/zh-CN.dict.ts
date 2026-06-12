@@ -55,6 +55,10 @@ export const zhCNDict = {
   'help.k.list': '列表自动延续（空项回车退出）',
   'help.k.help': '打开本面板',
   'help.k.esc': '关闭面板 / 下一个 Tab 移动焦点',
+  'help.k.print': '打印（仅预览内容，可存 PDF）',
+
+  // M4 导出 HTML (v2.5 / ADR-021)
+  'exportHtml.button': '导出 HTML',
 
   // M5 mobile tab
   'tab.edit': '编辑',

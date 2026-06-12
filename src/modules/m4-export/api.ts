@@ -1,5 +1,6 @@
 import type { Accessor } from 'solid-js';
 import { downloadMarkdown } from './ExportMd';
+import { buildHtmlDocument, downloadHtml } from './ExportHtml';
 import { copyHtml } from './CopyHtml';
 import { buildShareUrl } from './ShareUrl';
 import { readMarkdownFile } from './ImportFile';
@@ -10,6 +11,8 @@ import { t } from '@/modules/m7-i18n/i18n';
 export interface ExportAPI {
   downloadMarkdown(): void;
   copyHtml(): Promise<boolean>;
+  /** v2.5：导出自包含 .html（预览 DOM 最终态优先，未挂载降级 render(text)） */
+  downloadHtml(): void;
 }
 
 /** URL 分享（v1.2 / ADR-006）。 */
@@ -30,12 +33,20 @@ export interface ImportAPI {
  * `copyHtml` resolves the current text through `pipeline.render` (DOMPurify-
  * sanitized) — M4 does **not** depend on M2's DOM mount; see api-spec §3.4.
  */
-export function createExportAPI(text: Accessor<string>): ExportAPI {
+export function createExportAPI(
+  text: Accessor<string>,
+  // v2.5（ADR-021 D2）：app 层注入预览 DOM 读取器（M4 不直查 M2 DOM）；null = 未挂载
+  getPreviewHtml?: () => string | null,
+): ExportAPI {
   return {
     downloadMarkdown: () => downloadMarkdown(text()),
     // v1.7：剥离 data-source-line（M2 滚动同步内部属性，不该进用户复制的 HTML）
     copyHtml: () =>
       copyHtml(render(text()).replace(/ data-source-line="\d+"/g, '')),
+    downloadHtml: () => {
+      const body = getPreviewHtml?.() ?? render(text());
+      downloadHtml(buildHtmlDocument(body));
+    },
   };
 }
 
@@ -66,6 +77,7 @@ export const importer: ImportAPI = {
 };
 
 export { downloadMarkdown, getFileName } from './ExportMd';
+export { buildHtmlDocument, downloadHtml } from './ExportHtml';
 export { copyHtml } from './CopyHtml';
 export { buildShareUrl, readSharedDocument, SHARE_URL_MAX } from './ShareUrl';
 export { readMarkdownFile, looksBinary } from './ImportFile';

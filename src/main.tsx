@@ -274,6 +274,13 @@ function AppShell(props: AppShellProps) {
           <button type="button" class="header-button" onClick={onCopy}>
             {t('copy.button')}
           </button>
+          <button
+            type="button"
+            class="header-button"
+            onClick={() => props.exporter.downloadHtml()}
+          >
+            {t('exportHtml.button')}
+          </button>
           <button type="button" class="header-button" onClick={onShare}>
             {t('share.button')}
           </button>
@@ -427,7 +434,13 @@ async function bootstrap(): Promise<void> {
     const persist = createPersistence(state.text, docManager);
     const sync = createSyncFeature(docManager); // v2.0：env 缺失 → enabled=false（纯本地不变）
     const theme = createTheme();
-    const exporter = createExportAPI(state.text);
+    const exporter = createExportAPI(
+      state.text,
+      // v2.5（ADR-021 D2）：预览 DOM 最终态优先（mermaid SVG 保真）；未挂载 → null 降级
+      () =>
+        document.querySelector<HTMLElement>('.preview-content')?.innerHTML ??
+        null,
+    );
     const share = createShareAPI(state.text);
     const layout = createLayout();
     const prefs = createEditorPrefs();

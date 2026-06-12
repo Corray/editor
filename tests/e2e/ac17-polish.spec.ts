@@ -58,7 +58,7 @@ test.describe('AC-v24 编辑打磨（Tab 缩进 + 帮助面板 + TOC 高亮）',
     await page.getByRole('button', { name: '快捷键' }).click();
     const dialog = page.getByRole('dialog', { name: '键盘快捷键' });
     await expect(dialog).toBeVisible();
-    await expect(dialog.locator('.help-dialog__row')).toHaveCount(8);
+    await expect(dialog.locator('.help-dialog__row')).toHaveCount(9); // v2.5 +Cmd+P
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
     // Cmd+/ 从编辑器内唤起

@@ -4,6 +4,43 @@
 
 ---
 
+## v1.3.0-rc.1 — 代码块语法高亮（v2.3）（2026-06-12）
+
+**Tag:** `v1.3.0-rc.1` @ commit `ac06fd2`
+**Range:** `a5b6e53..ac06fd2`（v1.2.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（2026-06-12 四项拍板 scope 第一项；队列：v2.4 打磨包 → v2.5 打印导出 → v2.6 版本快照）。仍 RC。
+
+### Scope — 语法高亮（共识 v2.3 / ADR-019 / `f966af3`）
+
+- highlight.js 11.11.1 `lib/common`（~37 常用语言）懒加载 lazy chunk（162KB raw，进 precache 离线可用，katex 同策略）
+- markdown-it `highlight` 闭包注入——hljs 加载完成后**渲染器零重建**生效；未载/未知语言/无标注统一降级无色（现状）
+- **sanitize 零放宽**（ADR-002 红线）：hljs class-based 输出走既有 DOMPurify 默认配置；XSS 门槛 unit + e2e 双引擎实证（AC-v23-4）
+- 自绘 `--hl-*` CSS 变量主题（github light/dark 近似）——浅深色切换即时跟随，零重渲染
+
+### Quality Gates [已验证: 2026-06-12 本机]
+
+- 238 unit（+8 CT-HL：启发式/降级/XSS/非法语法）
+- 122 e2e / 2 skip（ac16 新 3 用例双引擎：着色/XSS/主题跟随）
+- 首屏 86.47 KB gz（+0.5，预算 150）；precache 1570KB；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-12 增量）
+
+报告：`docs/audit/2026-06-12-v2.3-increment.md`。**无 critical/high/medium**；实现期自查修 hasCode 正则误判（fence 量词笔误，CT-HL-1 锁死）。2 LOW info（F-V23-1 precache +33% 留观 / F-V23-2 token 映射粗）。
+
+### Known Limitations（v1.3.0-rc.1）
+
+- 编辑器（textarea）侧不着色（共识范围外，mirror-div 架构级改动）
+- 非 common 子集语言降级无色；token 映射 9 组归并（细分 scope 沿默认色，F-V23-2）
+- 仍 RC：云安全门槛 pending provision（用户挂起）
+
+### Closure
+
+- findings-registry：+F-V23-1/2（info）；变更记录追加
+- spec 全链落档 + api-spec §3 追溯回填；新依赖 highlight.js@11.11.1；package.json → 1.3.0-rc.1
+
+---
+
 ## v1.2.0-rc.1 — 大纲/TOC 面板（v2.2）（2026-06-11）
 
 **Tag:** `v1.2.0-rc.1` @ commit `a5b6e53`

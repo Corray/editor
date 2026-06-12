@@ -40,7 +40,9 @@ export function HelpDialog(props: { open: boolean; onClose: () => void }): JSX.E
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| indentSelection + EditorArea Tab/Esc 编排 | ⏳ | — |
-| activeOutlineIndex + OutlinePanel activeIndex + AppShell scroll 监听 | ⏳ | — |
-| HelpDialog + header 按钮 + Cmd+/ | ⏳ | — |
-| i18n help.*（+EXPECTED_KEYS）| ⏳ | — |
+| indentSelection + EditorArea Tab/Esc 编排 | ✓ | `f780847` |
+| activeOutlineIndex + OutlinePanel activeIndex + AppShell scroll 监听 | ✓ | `f780847` |
+| HelpDialog + header 按钮 + Cmd+/（**window 级监听**——WebKit 点按钮不转移焦点，main 冒泡收不到 Esc，实现期 e2e 捕获修正）| ✓ | `f780847` |
+| i18n help.*（+EXPECTED_KEYS）| ✓ | `f780847` |
+
+> 测试：unit +11（CT-IND×7 / CT-AOI×4）→ 249；e2e +5 用例（ac17，9 pass + 1 webkit undo skip）→ 131 + 3 skip。首屏 87.61KB。

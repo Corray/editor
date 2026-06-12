@@ -4,6 +4,35 @@
 
 ---
 
+## v1.5.0-rc.1 — 打印 / 导出 HTML（v2.5）（2026-06-12）
+
+**Tag:** `v1.5.0-rc.1` @ commit `d7fc867`
+**Range:** `794b985..d7fc867`（v1.4.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（四项 scope 第三项；余 v2.6 版本快照 L3 压轴）。仍 RC。
+
+### Scope — 打印 + 导出（共识 v2.5 / ADR-021 / `c270057`）
+
+- **print CSS**：Cmd+P → 仅预览内容（chrome 全隐）+ 强制浅色（深色主题下亦然）+ 解除 v1.7 滚动容器链（全文打印非首屏）；可存 PDF
+- **导出独立 .html**：header 按钮；内容源 = 预览 DOM 最终态（mermaid SVG 保真，未挂载降级 render）；**双重 sanitize**（FORBID foreignObject/script + 剥 data-source-line）；内联浅色排版/高亮样式；含公式时注 KaTeX CDN link（**SRI 从本地 katex@0.17.0 同版本文件计算**，应用本体 CSP 零变化）
+- 帮助面板 +Cmd+P 条目（9 条）
+
+### Quality Gates [已验证: 2026-06-12 本机]
+
+- 255 unit（+6 CT-XH）；134 e2e / 3 skip（ac18 新 2 用例双引擎：下载内容断言 + emulateMedia print）
+- 首屏 88.77 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-12 增量）
+
+报告：`docs/audit/2026-06-12-v2.5-increment.md`。**无 critical/high/medium**；**F-V22-1 二次复发 → 加固**（ac15-2 webkit poll 10s，环境噪声定性）。3 LOW info（F-V25-1~3：CDN 离线降级 / 移动降级源 / 移动打印空内容，均文档化）。
+
+### Closure
+
+- findings-registry：+F-V25-1~3（info）+ F-V22-1 → fixing（加固）；变更记录追加
+- spec 全链落档 + api-spec 追溯回填；package.json → 1.5.0-rc.1
+
+---
+
 ## v1.4.0-rc.1 — 编辑细节打磨包（v2.4）（2026-06-12）
 
 **Tag:** `v1.4.0-rc.1` @ commit `794b985`

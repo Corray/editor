@@ -44,6 +44,18 @@ export const zhCNDict = {
   'outline.title': '大纲',
   'outline.empty': '暂无标题',
 
+  // M1 快捷键帮助 (v2.4 / ADR-020)
+  'help.button': '快捷键',
+  'help.title': '键盘快捷键',
+  'help.k.find': '查找 / 替换',
+  'help.k.bold': '加粗（选区 toggle）',
+  'help.k.italic': '斜体（选区 toggle）',
+  'help.k.link': '插入链接',
+  'help.k.indent': '缩进 / 取消缩进',
+  'help.k.list': '列表自动延续（空项回车退出）',
+  'help.k.help': '打开本面板',
+  'help.k.esc': '关闭面板 / 下一个 Tab 移动焦点',
+
   // M5 mobile tab
   'tab.edit': '编辑',
   'tab.preview': '预览',

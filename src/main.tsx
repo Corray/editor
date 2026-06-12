@@ -14,6 +14,7 @@ import type { DocumentState } from '@/modules/m1-editor/state';
 import { createEditorAPI, createEditorPrefs } from '@/modules/m1-editor/api';
 import type { EditorAPI, EditorPrefsAPI } from '@/modules/m1-editor/api';
 import { EditorArea } from '@/modules/m1-editor/EditorArea';
+import { HelpDialog } from '@/modules/m1-editor/HelpDialog';
 import { PreviewArea } from '@/modules/m2-preview/PreviewArea';
 import { createPersistence } from '@/modules/m3-persistence/store';
 import type { PersistenceAPI } from '@/modules/m3-persistence/api';
@@ -23,7 +24,7 @@ import {
 } from '@/modules/m9-doc-manager/api';
 import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
 import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
-import { parseOutline } from '@/modules/m12-outline/outline';
+import { parseOutline, activeOutlineIndex } from '@/modules/m12-outline/outline';
 import type { OutlineItem } from '@/modules/m12-outline/outline';
 import { OutlinePanel } from '@/modules/m12-outline/OutlinePanel';
 import { createScrollSync } from '@/modules/m10-scroll-sync/sync';
@@ -185,9 +186,53 @@ function AppShell(props: AppShellProps) {
     ed.scrollTop = Math.max(0, item.line * lh - ed.clientHeight / 2);
   };
 
+  // v2.4 快捷键帮助（ADR-020 D2）：header 按钮 + Cmd/Ctrl+/。
+  // window 级监听（非 main onKeyDown）：WebKit 点按钮不转移焦点 → keydown 从 body
+  // 冒泡不经过 main，Esc 收不到；window 级与焦点位置解耦。
+  const [helpOpen, setHelpOpen] = createSignal(false);
+  createEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault();
+        setHelpOpen((v) => !v);
+      } else if (e.key === 'Escape' && helpOpen()) {
+        setHelpOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    onCleanup(() => window.removeEventListener('keydown', onKey));
+  });
+
   // M10 滚动同步（v1.7 / ADR-011）：仅桌面双栏挂载；viewport 切换 / 字号变 → 重建。
   const [editorEl, setEditorEl] = createSignal<HTMLTextAreaElement>();
   const [previewEl, setPreviewEl] = createSignal<HTMLElement>();
+
+  // v2.4 TOC 当前位置高亮（ADR-020 D3）：editor scroll rAF 节流 → 视口顶行 → activeIdx。
+  const [topLine, setTopLine] = createSignal(0);
+  const outlineActive = createMemo(() =>
+    activeOutlineIndex(outline(), topLine()),
+  );
+  createEffect(() => {
+    const ed = editorEl();
+    if (!ed) return;
+    let raf = 0;
+    const onScroll = (): void => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const cs = getComputedStyle(ed);
+        let lh = parseFloat(cs.lineHeight);
+        if (!Number.isFinite(lh)) lh = (parseFloat(cs.fontSize) || 15) * 1.6;
+        setTopLine(Math.floor(ed.scrollTop / lh));
+      });
+    };
+    ed.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // 初始
+    onCleanup(() => {
+      ed.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    });
+  });
   createEffect(() => {
     props.prefs.fontSize(); // dep：字号变 → 行高变 → 重建以更新映射
     if (props.layout.viewport() !== 'desktop') return;
@@ -295,6 +340,15 @@ function AppShell(props: AppShellProps) {
           </Show>
           <button
             type="button"
+            class="header-button"
+            onClick={() => setHelpOpen(true)}
+            aria-label={t('help.button')}
+            title={t('help.button')}
+          >
+            ⌨
+          </button>
+          <button
+            type="button"
             class="theme-toggle"
             onClick={() => props.theme.toggle()}
             aria-label={t('theme.toggle')}
@@ -303,6 +357,7 @@ function AppShell(props: AppShellProps) {
           </button>
         </div>
       </header>
+      <HelpDialog open={helpOpen()} onClose={() => setHelpOpen(false)} />
       <Show
         when={props.layout.viewport() === 'desktop'}
         fallback={
@@ -323,7 +378,11 @@ function AppShell(props: AppShellProps) {
       >
         <div class="workspace">
           <DocList docs={props.docManager}>
-            <OutlinePanel items={outline} onJump={onOutlineJump} />
+            <OutlinePanel
+              items={outline}
+              onJump={onOutlineJump}
+              activeIndex={outlineActive}
+            />
           </DocList>
           <div class="panes">
             <div class="editor-pane">

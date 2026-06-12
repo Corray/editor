@@ -88,6 +88,69 @@ export function applyFormat(ta: HTMLTextAreaElement, kind: FormatKind): void {
   else wrapLink(ta);
 }
 
+const INDENT = '  '; // 2 空格（ADR-020 D1 / TBD-v24-1a）
+
+/**
+ * Tab/Shift+Tab 缩进（ADR-020 D1）。
+ * 单光标：Tab 插 2 空格 / Shift+Tab 当前行行首删 ≤2 空格；
+ * 有选区：覆盖行整体加/减，单次 replaceRange（一步 undo），选区重算保持覆盖。
+ */
+export function indentSelection(
+  ta: HTMLTextAreaElement,
+  dedent: boolean,
+): void {
+  const value = ta.value;
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+
+  // 单光标 + Tab：纯插入
+  if (s === e && !dedent) {
+    replaceRange(ta, s, s, INDENT, {
+      start: s + INDENT.length,
+      end: s + INDENT.length,
+    });
+    return;
+  }
+
+  // 覆盖行区间 [blockStart, blockEnd)
+  const blockStart = value.lastIndexOf('\n', s - 1) + 1;
+  const lineEndIdx = value.indexOf('\n', e === s ? s : e - 1);
+  const blockEnd = lineEndIdx === -1 ? value.length : lineEndIdx;
+  const block = value.slice(blockStart, blockEnd);
+  const lines = block.split('\n');
+
+  let firstDelta = 0;
+  let totalDelta = 0;
+  const out = lines
+    .map((line, i) => {
+      let next: string;
+      if (dedent) {
+        const removed = line.startsWith(INDENT)
+          ? INDENT.length
+          : line.startsWith(' ')
+            ? 1
+            : 0;
+        next = line.slice(removed);
+        if (i === 0) firstDelta = -removed;
+        totalDelta -= removed;
+      } else {
+        next = INDENT + line;
+        if (i === 0) firstDelta = INDENT.length;
+        totalDelta += INDENT.length;
+      }
+      return next;
+    })
+    .join('\n');
+
+  if (out === block) return; // 全部 dedent 不动 → no-op（不污染 undo 栈）
+  const newStart = Math.max(blockStart, s + firstDelta);
+  const newEnd = Math.max(newStart, e + totalDelta);
+  replaceRange(ta, blockStart, blockEnd, out, {
+    start: newStart,
+    end: newEnd,
+  });
+}
+
 /** 列表前缀：`- ` / `* ` / `- [ ] ` / `- [x] ` / `1. `（缩进保留）。 */
 const LIST_PREFIX_RE = /^(\s*)(?:([-*]) (?:\[([ x])\] )?|(\d+)\. )/;
 

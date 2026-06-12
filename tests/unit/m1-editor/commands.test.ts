@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { applyFormat, continueList } from '@/modules/m1-editor/commands';
+import {
+  applyFormat,
+  continueList,
+  indentSelection,
+} from '@/modules/m1-editor/commands';
 
 // jsdom 无 document.execCommand → replaceRange 走 fallback（setRangeText+input 事件），
 // 顺带覆盖 ADR-017 D1 降级路径；真 execCommand+undo 链路在 e2e ac14 验（AC-v21-7）。
@@ -138,5 +142,55 @@ describe('M1 continueList — CT-LIST (AC-v21-5)', () => {
     const ta = makeTA('9. nine', 7);
     expect(continueList(ta)).toBe(true);
     expect(ta.value).toBe('9. nine\n10. ');
+  });
+});
+
+// 测试计划 v2.4 §家族 缩进族
+describe('M1 indentSelection — CT-IND (AC-v24-1/2)', () => {
+  it('CT-IND-1: 单光标 Tab → 光标处插 2 空格', () => {
+    const ta = makeTA('ab', 1);
+    indentSelection(ta, false);
+    expect(ta.value).toBe('a  b');
+    expect(ta.selectionStart).toBe(3);
+  });
+
+  it('CT-IND-2: 单光标 Shift+Tab → 当前行行首删 2 空格（光标随移）', () => {
+    const ta = makeTA('  ab', 4);
+    indentSelection(ta, true);
+    expect(ta.value).toBe('ab');
+    expect(ta.selectionStart).toBe(2);
+  });
+
+  it('CT-IND-3: dedent 只有 1 空格 → 删尽 1', () => {
+    const ta = makeTA(' ab', 3);
+    indentSelection(ta, true);
+    expect(ta.value).toBe('ab');
+  });
+
+  it('CT-IND-4: dedent 无缩进 → no-op（不污染 undo 栈）', () => {
+    const ta = makeTA('ab', 2);
+    indentSelection(ta, true);
+    expect(ta.value).toBe('ab');
+  });
+
+  it('CT-IND-5: 多行选区 Tab → 每行 +2 空格，选区保持覆盖', () => {
+    const ta = makeTA('aa\nbb\ncc', 0, 8);
+    indentSelection(ta, false);
+    expect(ta.value).toBe('  aa\n  bb\n  cc');
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toContain('cc');
+    expect(ta.selectionStart).toBe(2); // 首行内容起点
+    expect(ta.selectionEnd).toBe(14);
+  });
+
+  it('CT-IND-6: 多行选区 Shift+Tab → 每行 −2，混合缩进各删其有', () => {
+    const ta = makeTA('  aa\n bb\ncc', 0, 11);
+    indentSelection(ta, true);
+    expect(ta.value).toBe('aa\nbb\ncc');
+  });
+
+  it('CT-IND-7: 选区跨部分行（中间起点/终点）→ 仍按整行处理', () => {
+    const ta = makeTA('aa\nbb\ncc', 4, 7); // b 中间到 c 中间
+    indentSelection(ta, false);
+    expect(ta.value).toBe('aa\n  bb\n  cc');
   });
 });

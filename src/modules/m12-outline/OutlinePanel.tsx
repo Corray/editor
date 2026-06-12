@@ -5,6 +5,8 @@ import { t } from '@/modules/m7-i18n/i18n';
 export interface OutlinePanelProps {
   items: Accessor<OutlineItem[]>;
   onJump: (item: OutlineItem) => void;
+  /** 当前 section 高亮 index（v2.4 / ADR-020 D3）；省略 = 不高亮 */
+  activeIndex?: Accessor<number>;
 }
 
 /**
@@ -22,11 +24,14 @@ export function OutlinePanel(props: OutlinePanelProps) {
       >
         <ul class="outline-panel__items">
           <For each={props.items()}>
-            {(item) => (
+            {(item, i) => (
               <li>
                 <button
                   type="button"
                   class={`outline-item outline-item--l${item.level}`}
+                  classList={{
+                    'outline-item--active': props.activeIndex?.() === i(),
+                  }}
                   onClick={() => props.onJump(item)}
                   title={item.text}
                 >

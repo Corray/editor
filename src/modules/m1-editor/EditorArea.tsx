@@ -2,7 +2,7 @@ import { createDeferred, createMemo, For, Show, type Accessor } from 'solid-js';
 import type { DocumentState } from './state';
 import { createFindController } from './find';
 import { FindBar } from './FindBar';
-import { applyFormat, continueList } from './commands';
+import { applyFormat, continueList, indentSelection } from './commands';
 import { countWords, formatWordCount } from './wordcount';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -56,7 +56,10 @@ export function EditorArea(props: EditorAreaProps) {
     if (gutterRef) gutterRef.scrollTop = e.currentTarget.scrollTop;
   };
 
-  // v2.1 keydown 编排（容器级捕获 find；textarea 级格式/列表）
+  // v2.4 a11y 逃逸（ADR-020 D1）：Esc 置位 → 下一个 Tab 放行原生焦点移动；其他键复位
+  let allowTabOnce = false;
+
+  // v2.1 keydown 编排（容器级捕获 find；textarea 级格式/列表/缩进）
   const onKeyDown = (e: KeyboardEvent): void => {
     const mod = e.metaKey || e.ctrlKey;
     if (mod && !e.altKey && e.key.toLowerCase() === 'f') {
@@ -65,6 +68,7 @@ export function EditorArea(props: EditorAreaProps) {
       return;
     }
     if (e.target !== taRef || !taRef) return;
+    if (e.key !== 'Tab' && e.key !== 'Escape') allowTabOnce = false;
     if (mod && !e.altKey && !e.shiftKey) {
       const k = e.key.toLowerCase();
       if (k === 'b' || k === 'i' || k === 'k') {
@@ -72,6 +76,15 @@ export function EditorArea(props: EditorAreaProps) {
         applyFormat(taRef, k === 'b' ? 'bold' : k === 'i' ? 'italic' : 'link');
         return;
       }
+    }
+    if (e.key === 'Tab' && !mod && !e.altKey) {
+      if (allowTabOnce) {
+        allowTabOnce = false; // 放行一次（原生焦点移动）
+        return;
+      }
+      e.preventDefault();
+      indentSelection(taRef, e.shiftKey);
+      return;
     }
     if (
       e.key === 'Enter' &&
@@ -83,7 +96,10 @@ export function EditorArea(props: EditorAreaProps) {
       if (continueList(taRef)) e.preventDefault();
       return;
     }
-    if (e.key === 'Escape' && find.open()) find.hide();
+    if (e.key === 'Escape') {
+      if (find.open()) find.hide();
+      else allowTabOnce = true; // a11y：下一个 Tab 放行
+    }
   };
 
   return (

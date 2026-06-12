@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { parseOutline } from '@/modules/m12-outline/outline';
+import {
+  parseOutline,
+  activeOutlineIndex,
+} from '@/modules/m12-outline/outline';
 
 // 测试计划 v2.2 §2 解析族
 describe('M12 parseOutline — CT-OL (AC-v22-1/2/5)', () => {
@@ -67,5 +70,30 @@ describe('M12 parseOutline — CT-OL (AC-v22-1/2/5)', () => {
     const items = parseOutline(text);
     expect(items[0]?.offset).toBe(4);
     expect(text.slice(items[0]!.offset, items[0]!.offset + 3)).toBe('# H');
+  });
+});
+
+// 测试计划 v2.4 §家族 高亮族（AC-v24-6）
+describe('M12 activeOutlineIndex — CT-AOI', () => {
+  const items = parseOutline('# A\nx\nx\n## B\nx\n# C');
+  // lines: A=0 B=3 C=5
+
+  it('CT-AOI-1: topLine 在两标题间 → 取前者', () => {
+    expect(activeOutlineIndex(items, 1)).toBe(0);
+    expect(activeOutlineIndex(items, 4)).toBe(1);
+  });
+
+  it('CT-AOI-2: 恰在标题行 → 取该标题', () => {
+    expect(activeOutlineIndex(items, 3)).toBe(1);
+    expect(activeOutlineIndex(items, 5)).toBe(2);
+  });
+
+  it('CT-AOI-3: 首标题前 → -1；超尾 → 最后一个', () => {
+    expect(activeOutlineIndex(parseOutline('x\nx\n# A'), 0)).toBe(-1);
+    expect(activeOutlineIndex(items, 999)).toBe(2);
+  });
+
+  it('CT-AOI-4: 空 items → -1', () => {
+    expect(activeOutlineIndex([], 5)).toBe(-1);
   });
 });

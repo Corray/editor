@@ -17,6 +17,20 @@ export interface OutlineItem {
   offset: number;
 }
 
+/** ≤ topLine 的最后一个标题 index；无 → -1（TOC 当前位置高亮 / ADR-020 D3）。 */
+export function activeOutlineIndex(
+  items: OutlineItem[],
+  topLine: number,
+): number {
+  let active = -1;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item && item.line <= topLine) active = i;
+    else break;
+  }
+  return active;
+}
+
 const HEADING_RE = /^ {0,3}(#{1,6})\s+(.*)$/;
 const FENCE_RE = /^ {0,3}(`{3,}|~{3,})/;
 

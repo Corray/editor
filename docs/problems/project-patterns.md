@@ -107,6 +107,17 @@
 
 ---
 
+### PP-005 — IndexedDB DB_VERSION bump 必须全仓 grep 硬编码版本号
+
+- **首次出现**：2026-06-15（v2.6 版本快照 / DB v2→3）
+- **模式描述**：升 `DB_VERSION`（store.ts 单点）后，**测试侧硬编码的旧版本号 `open('editor', N)` 不会跟着改** —— 应用升 v3 后 test helper 仍 `open('editor', 2)` → `VersionError`（不能开比现存更低版本）→ idb open `onerror` 静默 resolve → helper 没真清库/读库 → 测试**串扰**（前测残留泄到后测）。本版命中两处：e2e `_storage.ts`（resetStorage/readActiveDocText）+ unit `doc-manager.test.ts`（rawDocsCount/迁移断言）
+- **危害**：失败信号**滞后且误导** —— ac2-persistence webkit 报 "expected '# legacy doc' got ''"，表面像迁移回归，实际是 helper 没清库 → documents 非空 → 迁移路径不触发。隔离单测不必现（DB 全新），仅跨测共享 worker 时现 → 偶发 flake 状
+- **remediation**：bump `DB_VERSION` 时**立即** `grep -rn "open('editor'" tests/ src/` 扫硬编码版本号，逐个评估同步升 + upgrade 块是否需建新 store。属 fix-pattern-scan「改一处 schema 版本 → 扫同族版本引用」具体实例
+- **实例**：e2e `_storage.ts` open v2→3（+建 snapshots+clear 三 store；死代码 readIdbDoc 删）；unit `doc-manager.test.ts` `openDB('editor',2)`×2→3
+- **跨项目升级路径**：任何有 IndexedDB 版本演进的项目适用；第 2 个项目复现 → 考虑升 FB（schema 版本集中常量 + 禁测试硬编码 / lint）
+
+---
+
 ## 维护节奏
 
 - 每完成一个大型阶段（multiphase audit / release）时 PM 检查是否有新模式抽象

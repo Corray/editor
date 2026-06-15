@@ -69,7 +69,10 @@ export function HistoryDialog(props: {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| store DB v3 + snapshots CRUD + prune | ⏳ | — |
-| manager piggyback + cascade + snapshotNow/listSnapshots/restoreSnapshot | ⏳ | — |
-| HistoryDialog + DocList ⏱ 入口 + AppShell 装配 | ⏳ | — |
-| i18n history.*（+EXPECTED_KEYS）| ⏳ | — |
+| store DB v3 + snapshots CRUD + prune（getAllFromIndex byDoc）| ✓ | `4f3afb0` |
+| manager piggyback（lastSnap 缓存 + seed）+ cascade + snapshotNow/listSnapshots/restoreSnapshot | ✓ | `4f3afb0` |
+| HistoryDialog + DocList ⏱ 入口（IDB-gated）+ AppShell 装配（snapshots 信号 + confirm 恢复）| ✓ | `4f3afb0` |
+| i18n history.*（+EXPECTED_KEYS）| ✓ | `4f3afb0` |
+
+> 测试：unit +8（CT-SNAP store×3 / 升级×1 / manager×4，fake-indexeddb）→ 263；e2e +2 用例双引擎（ac19：手动快照 + 恢复+保护快照）→ 138 + 3 skip。首屏 90.52KB。
+> **附带回归修复**：DB_VERSION 2→3 后 e2e `_storage.ts` helper（resetStorage/readActiveDocText）硬编码 open v2 → VersionError 静默失败 → 测试串扰；升 v3 + 建/清 snapshots store + 删死代码 readIdbDoc。同步既有 doc-manager unit 硬编码 `openDB('editor',2)` → 3。

@@ -4,6 +4,47 @@
 
 ---
 
+## v1.6.0-rc.1 — 文档版本快照（v2.6 / L3 持久化根基）（2026-06-15）
+
+**Tag:** `v1.6.0-rc.1` @ commit `e21ce28`
+**Range:** `d7fc867..e21ce28`（v1.5.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（**四项拍板 scope 压轴**，L3 动持久化根基）。仍 RC。
+
+### Scope — 版本快照（共识 v2.6 / ADR-022 / `4f3afb0`）
+
+- **自动快照**：挂在 M9 `saveActiveText` 单写者入口 piggyback（**无定时器、零空转**）；距上张 >5min + 内容变才存，首次保存存基线；`lastSnap` 内存缓存（重启 seed 去重）
+- **手动快照 + 历史弹层**：doc-list ⏱ 入口（仅 IDB 可用）→ HistoryDialog（相对时间 + 字数 + auto/manual/restore 徽标 + 立即快照）
+- **恢复**：confirm → **先存当前内容为 restore 保护快照**（防误恢复丢数据）→ 灌入目标版本
+- **配额/清理**：每文档 30 张 FIFO；删文档 cascade 删快照（无孤儿）
+- **DB v2→v3 additive**：新增 snapshots store（keyPath id + byDoc index），**零旧数据迁移**（升级零损 unit 实证）；快照纯本地，**M11 云同步契约零变化**（不进 documents/RLS）
+- 降级态（IDB 不可用）→ 快照入口不渲染 + store no-op
+
+### Quality Gates [已验证: 2026-06-15 本机]
+
+- 263 unit（+8 CT-SNAP：store CRUD/FIFO/cascade + DB 升级零损 + manager piggyback/manual/restore，fake-indexeddb）
+- 138 e2e / 3 skip（ac19 新 2 用例双引擎：手动快照 + 恢复+保护快照）
+- 首屏 90.52 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-15 增量）
+
+报告：`docs/audit/2026-06-15-v2.6-increment.md`。**L3 无 critical/high/medium**（additive 升级零损 + 单写者纪律 + 恢复保护 + cascade + FIFO 全 unit 枚举）。**实现期捕获 DB 版本 bump 的 e2e helper 回归**（`_storage` open v2 → VersionError 静默 → 测试串扰）→ 修 helper 升 v3 + **PP-005 落档**（bump DB 须全仓 grep 版本号）；ac5 perf 负载 flake（隔离过）。4 LOW info（F-V26-1~4）。
+
+### Known Limitations
+
+- 快照间隔/上限硬编码（5min / 30），无用户设置（F-V26-2）
+- 30 张 × 超大文档 ≈ 11MB/文档，配额非无界（F-V26-1）
+- 多 tab 并发写同文档快照缓存不共享（F-V26-4，多 tab 边缘）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V26-1~4（info）；变更记录追加；PP-005 落 project-patterns
+- spec 全链（共识/module-list M9/ADR-022/data-model/api/test-plan v2.6）落档 + api-spec 追溯回填；package.json → 1.6.0-rc.1
+- **2026-06-12 四项拍板 scope 全部交付**（v2.3 语法高亮 / v2.4 编辑打磨 / v2.5 打印导出 / v2.6 版本快照）
+
+---
+
 ## v1.5.0-rc.1 — 打印 / 导出 HTML（v2.5）（2026-06-12）
 
 **Tag:** `v1.5.0-rc.1` @ commit `d7fc867`

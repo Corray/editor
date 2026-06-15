@@ -164,6 +164,144 @@
   border-left: 2px solid var(--accent);
 }
 
+/* v2.6 版本历史浮层 (ADR-022) — 复用 help-dialog 视觉骨架 */
+.history-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.history-dialog {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 20rem;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.history-dialog__close {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.history-dialog__snap {
+  margin: 0.5rem 1rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.25rem;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+.history-dialog__snap:hover {
+  opacity: 0.9;
+}
+
+.history-dialog__empty {
+  padding: 0.5rem 1rem 1rem;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.history-dialog__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.5rem;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.history-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+
+.history-item__time {
+  color: var(--fg);
+}
+.history-item__count {
+  color: var(--muted);
+}
+
+.history-badge {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  padding: 0.05rem 0.375rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.history-badge--manual {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.history-badge--restore {
+  border-color: #d97706;
+  color: #d97706;
+}
+
+.history-item__restore {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+.history-item__restore:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.doc-list__history-btn {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  flex-shrink: 0;
+}
+.doc-list__history-btn:hover {
+  color: var(--accent);
+}
+
 /* v2.4 快捷键帮助浮层 (ADR-020 D2) */
 .help-backdrop {
   position: fixed;

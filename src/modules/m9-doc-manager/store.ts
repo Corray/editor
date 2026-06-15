@@ -22,13 +22,30 @@ export interface DocRecord {
   titleManual?: boolean;
 }
 
+/** v2.6：文档版本快照（ADR-022 / data-model v2.6）。immutable。 */
+export interface SnapRecord {
+  id: string; // SN_<uuid>
+  docId: string; // D_<uuid>（index byDoc）
+  title: string;
+  text: string;
+  createdAt: number; // epoch ms（排序键 + auto 间隔判定）
+  kind: 'auto' | 'manual' | 'restore';
+}
+
 const DB_NAME = 'editor';
-const DB_VERSION = 2;
+const DB_VERSION = 3; // v2.6：+snapshots store（additive）
 const KV = 'kv';
 const DOCS = 'documents';
+const SNAPS = 'snapshots';
+const SNAP_BY_DOC = 'byDoc';
 const ACTIVE_KEY = 'activeDocId';
 const LEGACY_SINGLE_KEY = 'document'; // v1.1 kv 单 doc key
 const LEGACY_LS_KEY = 'editor.document.v1'; // v1.0 localStorage（degrade 用）
+
+/** v2.6：每文档快照上限，FIFO 删最旧（ADR-022 D3）。 */
+export const MAX_SNAPSHOTS_PER_DOC = 30;
+/** v2.6：自动快照最小间隔（ADR-022 D2）。 */
+export const AUTO_SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 let idbUnavailable = false;
@@ -43,6 +60,11 @@ function openEditorDb(): Promise<IDBPDatabase> {
         }
         if (oldVersion < 2 && !db.objectStoreNames.contains(DOCS)) {
           db.createObjectStore(DOCS, { keyPath: 'id' });
+        }
+        // v2.6（ADR-022 D1）：additive —— 不读不改 kv/documents，零数据迁移
+        if (oldVersion < 3 && !db.objectStoreNames.contains(SNAPS)) {
+          const s = db.createObjectStore(SNAPS, { keyPath: 'id' });
+          s.createIndex(SNAP_BY_DOC, 'docId');
         }
       },
     });
@@ -186,4 +208,62 @@ export async function setActiveId(id: string): Promise<void> {
   const db = await tryGetDb();
   if (!db) return;
   await db.put(KV, id, ACTIVE_KEY);
+}
+
+// —— v2.6 版本快照（ADR-022 / snapshots store）——
+
+/**
+ * 存快照 + prune（超 MAX_SNAPSHOTS_PER_DOC → FIFO 删最旧 createdAt / ADR-022 D3）。
+ * 降级（IDB 不可用）→ no-op（快照纯本地，无 localStorage 降级）。
+ */
+export async function putSnapshot(rec: SnapRecord): Promise<void> {
+  const db = await tryGetDb();
+  if (!db) return;
+  await db.put(SNAPS, rec);
+  // prune：取该文档全部，超上限删最旧
+  const all = (await db.getAllFromIndex(
+    SNAPS,
+    SNAP_BY_DOC,
+    rec.docId,
+  )) as SnapRecord[];
+  if (all.length > MAX_SNAPSHOTS_PER_DOC) {
+    const byOldest = all.sort((a, b) => a.createdAt - b.createdAt);
+    const excess = byOldest.slice(0, all.length - MAX_SNAPSHOTS_PER_DOC);
+    for (const s of excess) await db.delete(SNAPS, s.id);
+  }
+}
+
+/** 列某文档快照（createdAt desc）。降级 → []。 */
+export async function listSnapshotsByDoc(
+  docId: string,
+): Promise<SnapRecord[]> {
+  const db = await tryGetDb();
+  if (!db) return [];
+  const all = (await db.getAllFromIndex(
+    SNAPS,
+    SNAP_BY_DOC,
+    docId,
+  )) as SnapRecord[];
+  return all.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** 删某文档全部快照（cascade / ADR-022 D3）。降级 → no-op。 */
+export async function deleteSnapshotsByDoc(docId: string): Promise<void> {
+  const db = await tryGetDb();
+  if (!db) return;
+  const keys = await db.getAllKeysFromIndex(SNAPS, SNAP_BY_DOC, docId);
+  for (const k of keys) await db.delete(SNAPS, k);
+}
+
+/** 该文档最近一张快照 createdAt（auto 间隔判定）；无 / 降级 → null。 */
+export async function latestSnapshotAt(docId: string): Promise<number | null> {
+  const snaps = await listSnapshotsByDoc(docId);
+  return snaps.length > 0 ? snaps[0]!.createdAt : null;
+}
+
+/** 取单张快照（恢复用）。降级 → null。 */
+export async function getSnapshot(id: string): Promise<SnapRecord | null> {
+  const db = await tryGetDb();
+  if (!db) return null;
+  return ((await db.get(SNAPS, id)) as SnapRecord | undefined) ?? null;
 }

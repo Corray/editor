@@ -27,7 +27,7 @@ async function seedV1Single(text: string): Promise<void> {
   db.close();
 }
 async function rawDocsCount(): Promise<number> {
-  const db = await openDB('editor', 2);
+  const db = await openDB('editor', 3);
   const n = (await db.getAll('documents')).length;
   db.close();
   return n;
@@ -72,7 +72,7 @@ describe('M9 migration (ADR-010 D3 / data-model v1.6 §3)', () => {
     expect(init.docs[0]!.id).toMatch(/^D_/);
     expect(init.activeId).toBe(init.docs[0]!.id);
     // 旧单 doc key 已删
-    const db = await openDB('editor', 2);
+    const db = await openDB('editor', 3);
     expect(await db.get('kv', 'document')).toBeUndefined();
     expect(await db.get('kv', 'activeDocId')).toBe(init.activeId);
   });

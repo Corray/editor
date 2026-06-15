@@ -35,6 +35,9 @@ function mockDocManager(
     rename: vi.fn(async () => {}),
     setSyncHooks: vi.fn(),
     mergeRemote: vi.fn(async () => []),
+    snapshotNow: vi.fn(async () => {}),
+    listSnapshots: vi.fn(async () => []),
+    restoreSnapshot: vi.fn(async () => {}),
   };
 }
 

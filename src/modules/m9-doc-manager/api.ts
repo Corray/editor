@@ -33,8 +33,14 @@ export interface DocManagerAPI {
   mergeRemote(remote: import('@/modules/m11-sync/api').RemoteDoc[]): Promise<
     import('./store').DocRecord[]
   >;
+  /** v2.6：立即对 active 文档存 manual 快照（ADR-022）。 */
+  snapshotNow(): Promise<void>;
+  /** v2.6：列某文档快照（默认 active），createdAt desc。 */
+  listSnapshots(docId?: string): Promise<import('./store').SnapRecord[]>;
+  /** v2.6：恢复快照（先存 restore 保护快照 → 灌入目标 text + 持久化）。 */
+  restoreSnapshot(snapId: string): Promise<void>;
 }
 
 export { createDocManager } from './manager';
-export { loadInitialDocs } from './store';
-export type { DocRecord, InitialDocs } from './store';
+export { loadInitialDocs, isIdbUnavailable } from './store';
+export type { DocRecord, InitialDocs, SnapRecord } from './store';

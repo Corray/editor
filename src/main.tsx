@@ -24,6 +24,9 @@ import {
 } from '@/modules/m9-doc-manager/api';
 import type { DocManagerAPI } from '@/modules/m9-doc-manager/api';
 import { DocList, DocDrawer } from '@/modules/m9-doc-manager/DocList';
+import { HistoryDialog } from '@/modules/m9-doc-manager/HistoryDialog';
+import { isIdbUnavailable } from '@/modules/m9-doc-manager/api';
+import type { SnapRecord } from '@/modules/m9-doc-manager/api';
 import { parseOutline, activeOutlineIndex } from '@/modules/m12-outline/outline';
 import type { OutlineItem } from '@/modules/m12-outline/outline';
 import { OutlinePanel } from '@/modules/m12-outline/OutlinePanel';
@@ -168,6 +171,31 @@ function AppShell(props: AppShellProps) {
   };
 
   const [drawerOpen, setDrawerOpen] = createSignal(false);
+
+  // v2.6 版本历史（ADR-022）：IDB 可用才暴露入口。snapshots 信号按需刷新。
+  const idbOk = !isIdbUnavailable();
+  const [historyOpen, setHistoryOpen] = createSignal(false);
+  const [historyDocId, setHistoryDocId] = createSignal<string>('');
+  const [snapshots, setSnapshots] = createSignal<SnapRecord[]>([]);
+  const refreshSnapshots = async (): Promise<void> => {
+    setSnapshots(await props.docManager.listSnapshots(historyDocId()));
+  };
+  const openHistory = (id: string): void => {
+    setHistoryDocId(id);
+    setHistoryOpen(true);
+    void refreshSnapshots();
+  };
+  const onSnapshotNow = async (): Promise<void> => {
+    await props.docManager.snapshotNow();
+    await refreshSnapshots();
+    toast.show(t('history.snapped'), 'info');
+  };
+  const onRestore = async (snapId: string): Promise<void> => {
+    if (!window.confirm(t('history.restore.confirm'))) return;
+    await props.docManager.restoreSnapshot(snapId);
+    await refreshSnapshots(); // 新增的 restore 保护快照即时可见
+    toast.show(t('history.restored'), 'info');
+  };
 
   // M12 大纲（v2.2 / ADR-018）：deferred 解析（出输入路径）+ 点击跳转编辑器行。
   const outlineText = createDeferred(() => props.state.text(), {
@@ -365,6 +393,13 @@ function AppShell(props: AppShellProps) {
         </div>
       </header>
       <HelpDialog open={helpOpen()} onClose={() => setHelpOpen(false)} />
+      <HistoryDialog
+        open={historyOpen()}
+        onClose={() => setHistoryOpen(false)}
+        snapshots={snapshots}
+        onSnapshotNow={() => void onSnapshotNow()}
+        onRestore={(id) => void onRestore(id)}
+      />
       <Show
         when={props.layout.viewport() === 'desktop'}
         fallback={
@@ -379,12 +414,16 @@ function AppShell(props: AppShellProps) {
               docs={props.docManager}
               open={drawerOpen()}
               onClose={() => setDrawerOpen(false)}
+              onHistory={idbOk ? openHistory : undefined}
             />
           </>
         }
       >
         <div class="workspace">
-          <DocList docs={props.docManager}>
+          <DocList
+            docs={props.docManager}
+            onHistory={idbOk ? openHistory : undefined}
+          >
             <OutlinePanel
               items={outline}
               onJump={onOutlineJump}

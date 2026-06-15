@@ -12,21 +12,27 @@ export async function resetStorage(page: Page): Promise<void> {
   await page.evaluate(async () => {
     localStorage.clear();
     await new Promise<void>((resolve) => {
-      // v1.6: DB version 2 — clear BOTH stores (kv 含 activeDocId + documents).
+      // v2.6: DB version 3 — clear kv + documents + snapshots.
       // open with version+upgrade matching the app schema (F-V11-2) to avoid
-      // racing a storeless DB ahead of the app.
-      const open = indexedDB.open('editor', 2);
+      // racing a storeless DB ahead of the app（版本须 = 应用 DB_VERSION，否则
+      // 应用已升 v3 后此处开 v2 触发 VersionError → 静默不清库 / 测试串扰）。
+      const open = indexedDB.open('editor', 3);
       open.onupgradeneeded = () => {
         const db = open.result;
         if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
         if (!db.objectStoreNames.contains('documents'))
           db.createObjectStore('documents', { keyPath: 'id' });
+        if (!db.objectStoreNames.contains('snapshots')) {
+          const s = db.createObjectStore('snapshots', { keyPath: 'id' });
+          s.createIndex('byDoc', 'docId');
+        }
       };
       open.onsuccess = () => {
         const db = open.result;
-        const tx = db.transaction(['kv', 'documents'], 'readwrite');
+        const tx = db.transaction(['kv', 'documents', 'snapshots'], 'readwrite');
         tx.objectStore('kv').clear();
         tx.objectStore('documents').clear();
+        tx.objectStore('snapshots').clear();
         tx.oncomplete = () => {
           db.close();
           resolve();
@@ -48,7 +54,7 @@ export async function readActiveDocText(
   return page.evaluate(
     () =>
       new Promise<string | undefined>((resolve) => {
-        const open = indexedDB.open('editor', 2);
+        const open = indexedDB.open('editor', 3);
         open.onsuccess = () => {
           const db = open.result;
           const tx = db.transaction(['kv', 'documents']);
@@ -84,31 +90,4 @@ export async function readActiveDocText(
 /** Seed a legacy v1.0 localStorage document (for migration tests). */
 export async function seedLegacyDoc(page: Page, text: string): Promise<void> {
   await page.evaluate((t) => localStorage.setItem('editor.document.v1', t), text);
-}
-
-/** Read the current IndexedDB document value (undefined if absent). */
-export async function readIdbDoc(page: Page): Promise<string | undefined> {
-  return page.evaluate(
-    () =>
-      new Promise<string | undefined>((resolve) => {
-        const open = indexedDB.open('editor', 1);
-        open.onupgradeneeded = () => {
-          const db = open.result;
-          if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
-        };
-        open.onsuccess = () => {
-          const db = open.result;
-          const req = db.transaction('kv').objectStore('kv').get('document');
-          req.onsuccess = () => {
-            db.close();
-            resolve(req.result as string | undefined);
-          };
-          req.onerror = () => {
-            db.close();
-            resolve(undefined);
-          };
-        };
-        open.onerror = () => resolve(undefined);
-      }),
-  );
 }

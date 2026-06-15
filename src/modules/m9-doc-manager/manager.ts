@@ -2,13 +2,20 @@ import { createSignal } from 'solid-js';
 import { toast } from '@/shared/toast';
 import { t } from '@/modules/m7-i18n/i18n';
 import { deriveTitle } from './title';
-import { newDocId } from './idPrefix';
+import { newDocId, newSnapshotId } from './idPrefix';
 import {
   loadInitialDocs,
   putDoc,
   deleteDocRecord,
   setActiveId,
+  putSnapshot,
+  listSnapshotsByDoc,
+  deleteSnapshotsByDoc,
+  getSnapshot,
+  isIdbUnavailable,
+  AUTO_SNAPSHOT_INTERVAL_MS,
   type DocRecord,
+  type SnapRecord,
   type InitialDocs,
 } from './store';
 import type { DocManagerAPI, DocMeta } from './api';
@@ -65,6 +72,49 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   let syncHooks: SyncHooks | null = null;
   const pushed = (doc: DocRecord) => syncHooks?.onLocalChange(doc);
 
+  // v2.6（ADR-022 D2）：每文档「上一张快照」内存缓存（at+text），避免每次保存查 store。
+  // undefined = 本会话未 seed；null = seed 过但该文档无快照。
+  const lastSnap = new Map<string, { at: number; text: string } | null>();
+
+  /** 存一张快照（manual/restore/seed 用）+ 更新缓存。降级 no-op。 */
+  async function storeSnapshot(
+    doc: DocRecord,
+    kind: SnapRecord['kind'],
+  ): Promise<void> {
+    if (isIdbUnavailable()) return;
+    const at = now();
+    const rec: SnapRecord = {
+      id: newSnapshotId(),
+      docId: doc.id,
+      title: doc.title,
+      text: doc.text,
+      createdAt: at,
+      kind,
+    };
+    await putSnapshot(rec);
+    lastSnap.set(doc.id, { at, text: doc.text });
+  }
+
+  /**
+   * 自动快照 piggyback（ADR-022 D2）：挂在 saveActiveText 写后，fire-and-forget。
+   * 间隔（>5min 距上张）+ 内容去重（≠上张 text）；首次保存（无历史）存基线。
+   */
+  async function maybeAutoSnapshot(doc: DocRecord): Promise<void> {
+    if (isIdbUnavailable()) return;
+    let last = lastSnap.get(doc.id);
+    if (last === undefined) {
+      // 本会话首次：seed 一次（含重启后已有快照的去重）
+      const snaps = await listSnapshotsByDoc(doc.id);
+      last = snaps[0] ? { at: snaps[0].createdAt, text: snaps[0].text } : null;
+      lastSnap.set(doc.id, last);
+    }
+    if (last) {
+      if (now() - last.at <= AUTO_SNAPSHOT_INTERVAL_MS) return; // 间隔内
+      if (last.text === doc.text) return; // 内容未变
+    }
+    await storeSnapshot(doc, 'auto');
+  }
+
   const [query, setQuerySignal] = createSignal<string>(''); // v1.8 搜索词（须先于 metaList 首调）
   const [activeId, setActiveSignal] = createSignal<string>(deps.initial.activeId);
   const [docs, setDocs] = createSignal<DocMeta[]>(metaList());
@@ -101,6 +151,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     refresh();
     await putDoc(updated, true);
     pushed(updated); // v2.0：登录态 → push 到云
+    void maybeAutoSnapshot(updated); // v2.6：自动快照 piggyback（不阻塞保存主路径）
   }
 
   async function rename(id: string, title: string): Promise<void> {
@@ -154,6 +205,8 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     const wasActive = id === activeId();
     records.delete(id);
     await guardStore(deleteDocRecord(id)); // F-V11-3：删除失败不静默
+    await guardStore(deleteSnapshotsByDoc(id)); // v2.6：cascade 删快照（无孤儿 / ADR-022 D3）
+    lastSnap.delete(id);
     syncHooks?.onLocalDelete(id, now()); // v2.0：登录态 → 云端软删 tombstone（防多设备复活）
 
     if (records.size === 0) {
@@ -188,6 +241,35 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   // v2.0：M11 登录态注入同步钩子；登出传 null（恢复匿名行为）
   function setSyncHooks(hooks: SyncHooks | null): void {
     syncHooks = hooks;
+  }
+
+  // —— v2.6 版本快照（ADR-022）——
+
+  /** 立即对 active 文档存 manual 快照。 */
+  async function snapshotNow(): Promise<void> {
+    const rec = records.get(activeId());
+    if (!rec) return;
+    await guardStore(storeSnapshot(rec, 'manual'));
+  }
+
+  /** 列某文档快照（默认 active）；createdAt desc。 */
+  async function listSnapshots(docId: string = activeId()): Promise<SnapRecord[]> {
+    return listSnapshotsByDoc(docId);
+  }
+
+  /**
+   * 恢复快照（ADR-022 D4）：① 先对当前内容存 restore 保护快照（防误恢复丢当前未存版本）
+   * → ② 灌入目标 text + 持久化。非 active 文档的快照先切过去。
+   */
+  async function restoreSnapshot(snapId: string): Promise<void> {
+    const snap = await getSnapshot(snapId);
+    if (!snap) return;
+    if (snap.docId !== activeId()) await switchTo(snap.docId);
+    const rec = records.get(snap.docId);
+    if (!rec) return;
+    await guardStore(storeSnapshot(rec, 'restore')); // ① 保护当前内容
+    setEditorText(snap.text); // ② 更新编辑区显示
+    await saveActiveText(snap.text); // 持久化 + bump updatedAt（含 push/auto 快照去重）
   }
 
   /** 远端 → 本地记录（titleManual 启发式：title≠自动派生 → 视为手动，保住跨设备重命名）。 */
@@ -265,5 +347,8 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
     rename,
     setSyncHooks,
     mergeRemote,
+    snapshotNow,
+    listSnapshots,
+    restoreSnapshot,
   };
 }

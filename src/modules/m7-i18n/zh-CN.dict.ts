@@ -60,6 +60,24 @@ export const zhCNDict = {
   // M4 导出 HTML (v2.5 / ADR-021)
   'exportHtml.button': '导出 HTML',
 
+  // M9 版本快照 (v2.6 / ADR-022)
+  'history.button': '版本历史',
+  'history.title': '版本历史',
+  'history.empty': '暂无快照',
+  'history.snapshotNow': '立即快照',
+  'history.restore': '恢复',
+  'history.restore.confirm': '恢复到此版本？当前内容会先存为一张保护快照。',
+  'history.restored': '已恢复（当前内容已存为保护快照）',
+  'history.snapped': '已保存快照',
+  'history.words': '{n} 字',
+  'history.justNow': '刚刚',
+  'history.minAgo': '{n} 分钟前',
+  'history.hourAgo': '{n} 小时前',
+  'history.dayAgo': '{n} 天前',
+  'history.kind.auto': '自动',
+  'history.kind.manual': '手动',
+  'history.kind.restore': '恢复点',
+
   // M5 mobile tab
   'tab.edit': '编辑',
   'tab.preview': '预览',

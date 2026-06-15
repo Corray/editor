@@ -5,6 +5,8 @@ import type { DocManagerAPI } from './api';
 interface InnerProps {
   docs: DocManagerAPI;
   onAfterSelect?: () => void; // 移动端选中后关抽屉
+  /** v2.6：打开某文档版本历史（仅 IDB 可用时传入；不传 → 不渲染 ⏱ 入口）。 */
+  onHistory?: (id: string) => void;
 }
 
 /** 共享列表主体：搜索 + 新建 + 文档项（标题 / 内联重命名 + 删除）。active 高亮。 */
@@ -97,6 +99,20 @@ function DocListBody(props: InnerProps) {
                 >
                   ✎
                 </button>
+                {/* v2.6：版本历史入口（仅 IDB 可用时 onHistory 传入 / ADR-022 D5）*/}
+                <Show when={props.onHistory}>
+                  <button
+                    type="button"
+                    class="doc-list__history-btn"
+                    aria-label={t('history.button')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      props.onHistory!(d.id);
+                    }}
+                  >
+                    ⏱
+                  </button>
+                </Show>
               </Show>
               <button
                 type="button"
@@ -115,10 +131,14 @@ function DocListBody(props: InnerProps) {
 }
 
 /** 桌面左侧 sidebar。children 渲染于文档列表之后（v2.2 大纲分区，app 层组合 / ADR-018 D3）。 */
-export function DocList(props: { docs: DocManagerAPI; children?: JSX.Element }) {
+export function DocList(props: {
+  docs: DocManagerAPI;
+  children?: JSX.Element;
+  onHistory?: (id: string) => void;
+}) {
   return (
     <aside class="doc-sidebar" aria-label={t('doc.list')}>
-      <DocListBody docs={props.docs} />
+      <DocListBody docs={props.docs} onHistory={props.onHistory} />
       {props.children}
     </aside>
   );
@@ -129,6 +149,7 @@ export function DocDrawer(props: {
   docs: DocManagerAPI;
   open: boolean;
   onClose: () => void;
+  onHistory?: (id: string) => void;
 }) {
   return (
     <Show when={props.open}>
@@ -147,7 +168,11 @@ export function DocDrawer(props: {
           >
             ×
           </button>
-          <DocListBody docs={props.docs} onAfterSelect={props.onClose} />
+          <DocListBody
+            docs={props.docs}
+            onAfterSelect={props.onClose}
+            onHistory={props.onHistory}
+          />
         </div>
       </div>
     </Show>

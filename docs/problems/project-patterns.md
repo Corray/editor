@@ -116,6 +116,18 @@
 - **实例**：e2e `_storage.ts` open v2→3（+建 snapshots+clear 三 store；死代码 readIdbDoc 删）；unit `doc-manager.test.ts` `openDB('editor',2)`×2→3
 - **跨项目升级路径**：任何有 IndexedDB 版本演进的项目适用；第 2 个项目复现 → 考虑升 FB（schema 版本集中常量 + 禁测试硬编码 / lint）
 
+### PP-006 — 引入「环境相关默认」须给 e2e 确定性基线
+
+- **首次出现**：2026-06-17（v3.0 国际化 / navigator.language 首访语言检测）
+- **模式描述**：v3.0 给 i18n 加 `navigator.language` 首访检测（en* → 英文）。Playwright 默认 locale = **en-US** → 测试浏览器首访启**英文** → 所有断言中文文案的既有 e2e（ac22 '设置'/'清空' 等，潜在全部）瞬间失败。根因 = 新增「环境相关默认」（navigator / 时区 / 系统主题 prefers-color-scheme 等）未给测试固定基线
+- **危害**：回归面**广且隐蔽** —— 不是某个 spec 的问题，是默认值漂移污染全套中文文案断言；单测不现（jsdom navigator 不同），仅 e2e 现
+- **remediation**：引入任何「环境相关默认」时，同步在 e2e 隔离 helper（resetStorage）seed 确定性值（本例 `editor.lang.v1='zh-CN'`）；测非默认分支的 spec 自行 override。与 PP-005 同源（改动波及既有测试的隐式假设——前者 DB 版本号，后者默认语言/元素位置）
+- **实例**：
+  - `resetStorage` seed `editor.lang.v1='zh-CN'`（systemic 修复，多数 e2e beforeEach 调它）
+  - ac23（测英文）beforeEach 后 override en-US
+  - 附带：v3.0 加语言 select 破坏 ac22 `.last()` 定位 → 全 select 加 aria-label，测试 getByLabel 定位（不靠位置 / PP-005 家族）
+- **跨项目升级路径**：任何加 locale/timezone/prefers-color-scheme 等环境默认的项目适用；第 2 个项目复现 → 考虑升 FB（e2e 环境基线 fixture 规约）
+
 ---
 
 ## 维护节奏

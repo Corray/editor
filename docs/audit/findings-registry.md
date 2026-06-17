@@ -163,6 +163,8 @@
 | F-V28-3 | 2026-06-17 | proposed | LOW (info) | 单元格导航选中 trim 后文本，含前后多空格时光标定位到 trim 边界（视觉略差）；可接受 | 2026-06-17 v2.8 audit |
 | F-V29-1 | 2026-06-17 | proposed | LOW (info) | 设置仅收口快照间隔/上限 2 项；字号/行号/主题保留专门入口未搬进（避免重复，张力 A）| 2026-06-17 v2.9 audit |
 | F-V29-2 | 2026-06-17 | proposed | LOW (info) | 调小快照上限不立即裁剪已有超额，下次 putSnapshot 才 prune 到新值（渐进收敛）| 2026-06-17 v2.9 audit |
+| F-V30-1 | 2026-06-17 | proposed | LOW (info) | 仅中/英两语言；更多语言需各加全量 dict（Record<DictKey> 保证完整性，翻译量线性增）| 2026-06-17 v3.0 audit |
+| F-V30-2 | 2026-06-17 | proposed | LOW (info) | 用户文档内容不翻译（仅 UI chrome）；符合范围，文档化 | 2026-06-17 v3.0 audit |
 
 ### Issue-process 审查
 
@@ -211,3 +213,4 @@
 | 2026-06-17 | v2.7 增量 audit（报告 `2026-06-17-v2.7-increment.md`）：Markdown 格式工具栏（8 按钮），**无 critical/high/medium**。**高复用**（4/8 走既有 applyFormat，新代码仅 toggleLinePrefix+wrapCodeBlock+组件）；全经 replaceRange undo 保持 + 移动 viewport 可见 e2e 实证；实现期处置工具栏夺焦（mousedown preventDefault）。2 LOW info（F-V27-1~2）。unit 274 + e2e 148。打磨批第一项 |
 | 2026-06-17 | v2.8 增量 audit（报告 `2026-06-17-v2.8-increment.md`）：表格编辑辅助（插入+Tab 单元格导航），**无 critical/high/medium**。**Tab 三级分流**（allowTabOnce → tableCellNav → indentSelection）互斥清晰，非表格行零回归 e2e 实证；单元格导航全路径 unit 枚举。3 LOW info（F-V28-1~3：无列宽对齐/非\|起头变体/trim 边界）。unit 283 + e2e 156。打磨批第二项 |
 | 2026-06-17 | v2.9 增量 audit（报告 `2026-06-17-v2.9-increment.md`）：设置面板 M13（收口散落常量），**无 critical/high/medium**。**架构价值**：快照间隔/上限从硬编码收口 M13 单一来源 + 纯 IDB 层不耦合 Solid（store 收数值参数 / manager 读 accessor）；向后兼容零行为变化 unit 实证（settings 缺省回原常量）。实现期 tsc 抓测试 afterEach 表达式返回类型错（vitest 漏过 / 教训：提交前 build 非仅 vitest）+ SettingsDialog Esc 漏加（ac22 捕获）。2 LOW info（F-V29-1~2）。unit 292 + e2e 162。打磨批第三项 |
+| 2026-06-17 | v3.0 增量 audit（报告 `2026-06-17-v3.0-increment.md`）：国际化 en-US（全量 dict + 语言切换 + 持久化 + navigator 检测），**无 critical/high/medium**。**完整性编译期强制**（`Record<DictKey,string>` 漏译=tsc 报错）+ 运行时 key 集相等双保险。**v3.0 引入两处测试回归**：① navigator.language 检测 × Playwright en-US locale → 既有中文 e2e 全失败 → resetStorage seed zh-CN systemic 修复 + **PP-006 落档**；② 加语言 select 破坏 ac22 `.last()` 位置 → select 全加 aria-label。2 LOW info（F-V30-1~2）。unit 297 + e2e 166。**第二批打磨 scope 全交付** |

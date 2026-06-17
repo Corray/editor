@@ -32,7 +32,10 @@ const DICTS: Record<Lang, Record<string, string>> = { 'zh-CN': zhCNDict, 'en-US'
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| api.ts Lang 扩 + i18n.ts DICTS/初始检测/setLang 持久化 | ⏳ | — |
-| en-US.dict.ts 全量翻译 | ⏳ | — |
-| SettingsDialog 语言 select 接 setLang | ⏳ | — |
-| i18n.test EXPECTED_KEYS 校验 en dict 完整性 | ⏳ | — |
+| api.ts Lang 扩 + i18n.ts DICTS/初始检测/setLang 持久化 | ✓ | `3168c99` |
+| en-US.dict.ts 全量翻译（`Record<DictKey,string>` 编译期强制全覆盖）| ✓ | `3168c99` |
+| SettingsDialog 语言 select 接 setLang（+全 select aria-label）| ✓ | `3168c99` |
+| i18n.test CT-I18N（en key 集==zh + 占位符保留 + 切换 + 持久化）| ✓ | `3168c99` |
+
+> 测试：unit +5（CT-I18N：完整性/非空/占位符/切换/持久化）→ 297；e2e +2 用例双引擎（ac23）→ 166+4skip。首屏 93.80KB。
+> **回归修复**：v3.0 加 navigator.language 检测 → Playwright 默认 locale=en-US → 既有中文 e2e 全启英文失败 → `resetStorage` seed zh-CN 确定性基线（systemic）；ac22 select 改 aria-label 定位（v3.0 加语言 select 破坏 `.last()` 位置假设）。en dict 全覆盖靠 `Record<DictKey>` 编译期保证（漏译 = tsc 报错，强于运行时校验）。

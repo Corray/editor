@@ -42,7 +42,7 @@
 | **M4 导出** | 下载 .md + 复制 HTML | §4.3 | F4 | FE | in-dev (#9 实现) | File / Blob API、Clipboard API | ← M1（text accessor）, ← M2 pipeline.render |
 | **M5 布局** | 响应式双栏 / tab 切换 | §3 (依赖图) | F5 | FE | in-dev (#12 完整 LayoutAPI) | matchMedia API（reactive viewport）+ Solid signals | 容纳 M1/M2 + 装饰 M6 |
 | **M6 主题** | 浅深色切换 + 持久化 | §4.4 | F6 | FE | in-dev (#5 实现) | `prefers-color-scheme` media query、localStorage | → 写 `<html>.dataset.theme`（M5 容器及全文档 CSS Variables 响应）|
-| **M7 i18n** | UI 字符串抽象 + 中文 dict | §4.5 | §5 (非功能) | FE | in-dev (#3 实现) | — | 横切，被 M1-M6 chrome 文案消费 |
+| **M7 i18n** | UI 字符串抽象 + 中文 dict；**〔v3.0〕+en-US dict + 语言切换 + 持久化 + 首访检测** | §4.5 + 共识 v3.0 | §5 (非功能) | FE | in-dev (#3 + v3.0 i18n) | 〔v3.0〕`navigator.language` + localStorage | 横切，被 M1-M13 chrome 文案消费；〔v3.0〕语言切换入口在 M13 设置 |
 | **M8 PWA/离线**〔v1.5 新增〕| Service Worker precache 离线 + Manifest 可安装 + 更新提示 | 共识 v1.5 | PRD §7 v1.1 候选 | FE | proposed (v1.5) | vite-plugin-pwa 1.3.0 / Workbox 7.4.1（构建期）、Service Worker / Cache API、`virtual:pwa-register` | 横切基础设施；更新提示 → shared/toast.ts；不依赖业务模块 |
 | **M9 文档管理**〔v1.6 新增〕| 多文档模型（列表 + active）+ CRUD + 单→多迁移 + 标题派生 + documents store I/O；**〔v2.6〕+版本快照（snapshots store DB v3 + 自动 piggyback + 历史/恢复）** | 共识 v1.6 + v2.6 | PRD §7 v1.1 候选 | FE | proposed (v1.6) | IndexedDB documents+snapshots store（DB v3）、`crypto.randomUUID` | → M1（切换 set DocumentState）、← M3（M3 经 saveActiveText 写）、被 M5（sidebar/抽屉）+ M4（import/share 涟漪）消费；〔v2.6〕HistoryDialog 由 AppShell 装配 |
 | **M10 滚动同步**〔v1.7 新增〕| 桌面编辑↔预览滚动联动（source-line 映射 + 双向 + 反馈环防护）| 共识 v1.7 | defer 项（非 PRD §7）| FE | proposed (v1.7) | DOM scroll API、requestAnimationFrame | ← M2（读 data-source-line）、← M1/M5（editor/preview DOM ref），桌面 only |

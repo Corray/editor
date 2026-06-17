@@ -32,7 +32,9 @@ export function tableCellNav(ta: HTMLTextAreaElement, reverse: boolean): boolean
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| commands insertTable / isTableRow / tableCellNav | ⏳ | — |
-| FormatToolbar 表格按钮 | ⏳ | — |
-| EditorArea Tab 分流 | ⏳ | — |
-| i18n fmt.table（+EXPECTED_KEYS）| ⏳ | — |
+| commands insertTable / isTableRow / tableCellNav（含 tableCells `\|` 位置切分）| ✓ | `13a409c` |
+| FormatToolbar 表格按钮（9）| ✓ | `13a409c` |
+| EditorArea Tab 分流（tableCellNav 先于 indentSelection，allowTabOnce 最先）| ✓ | `13a409c` |
+| i18n fmt.table（+EXPECTED_KEYS）| ✓ | `13a409c` |
+
+> 测试：unit +9（CT-TBL：判定/插入/行内跳/反向/跳行/末行新增/非表格行/首行吞）→ 283；e2e +4 用例双引擎（ac21）→ 156+4skip。首屏 91.52KB。

@@ -98,6 +98,16 @@ const EXPECTED_KEYS = [
   'fmt.ol',
   'fmt.codeblock',
   'fmt.table',
+  'settings.button',
+  'settings.title',
+  'settings.autoSnapshot',
+  'settings.interval',
+  'settings.interval.1min',
+  'settings.interval.5min',
+  'settings.interval.10min',
+  'settings.maxSnapshots',
+  'settings.language',
+  'settings.language.zh',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

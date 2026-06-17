@@ -40,13 +40,18 @@ function makeManager(
 ) {
   let editorText = '';
   return {
-    init: async () => {
+    init: async (settings?: {
+      autoSnapshotEnabled: () => boolean;
+      autoSnapshotIntervalMs: () => number;
+      maxSnapshotsPerDoc: () => number;
+    }) => {
       const initial = await store.loadInitialDocs(now());
       const m = createDocManager({
         initial,
         now,
         setEditorText: (txt) => (editorText = txt),
         getEditorText: () => editorText,
+        settings,
       });
       return { m, getEditorText: () => editorText };
     },
@@ -185,5 +190,49 @@ describe('M9 snapshots — manager piggyback/manual/restore (AC-v26-1/2/3)', () 
     await m.remove(doc1); // 删 doc1
     expect(await store.listSnapshotsByDoc(doc1)).toHaveLength(0); // cascade
     expect((await store.listSnapshotsByDoc(doc2)).length).toBeGreaterThan(0); // doc2 不受影响
+  });
+});
+
+// 测试计划 v2.9 §家族 — manager settings 注入（AC-v29-2/3/4/6）
+describe('M9 snapshots — settings 注入 (v2.9 / AC-v29-2/3/4)', () => {
+  it('CT-SNAP-SET1: autoSnapshotEnabled=false → 不产 auto 快照', async () => {
+    const { store, createDocManager } = await freshM9();
+    const { m } = await makeManager(store, createDocManager).init({
+      autoSnapshotEnabled: () => false,
+      autoSnapshotIntervalMs: () => 300_000,
+      maxSnapshotsPerDoc: () => 30,
+    });
+    await m.saveActiveText('A');
+    await new Promise((r) => setTimeout(r, 20));
+    expect(await m.listSnapshots()).toHaveLength(0); // 关闭 → 无 auto
+    await m.snapshotNow(); // 手动仍可
+    expect(await m.listSnapshots()).toHaveLength(1);
+  });
+
+  it('CT-SNAP-SET2: 自定义间隔 1min 生效（超 60s 才存第二张）', async () => {
+    const { store, createDocManager } = await freshM9();
+    const { m } = await makeManager(store, createDocManager).init({
+      autoSnapshotEnabled: () => true,
+      autoSnapshotIntervalMs: () => 60_000, // 1min
+      maxSnapshotsPerDoc: () => 30,
+    });
+    await m.saveActiveText('A'); // 基线
+    await waitSnaps(m, 1);
+    clk = 1_000_000 + 70_000; // 超 1min（但不到默认 5min）
+    await m.saveActiveText('B');
+    const snaps = await waitSnaps(m, 2);
+    expect(snaps).toHaveLength(2); // 1min 间隔下已产第二张
+  });
+
+  it('CT-SNAP-SET3: 自定义上限 10 → FIFO 按 10 裁剪', async () => {
+    const { store } = await freshM9();
+    await store.loadInitialDocs(now());
+    for (let i = 1; i <= 12; i++) {
+      await store.putSnapshot(
+        { id: `SN_${i}`, docId: 'D_a', title: 't', text: `v${i}`, createdAt: i, kind: 'manual' },
+        10, // 自定义上限
+      );
+    }
+    expect(await store.listSnapshotsByDoc('D_a')).toHaveLength(10);
   });
 });

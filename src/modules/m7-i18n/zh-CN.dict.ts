@@ -72,6 +72,18 @@ export const zhCNDict = {
   // M4 导出 HTML (v2.5 / ADR-021)
   'exportHtml.button': '导出 HTML',
 
+  // M13 设置 (v2.9 / ADR-025)
+  'settings.button': '设置',
+  'settings.title': '设置',
+  'settings.autoSnapshot': '自动快照',
+  'settings.interval': '快照间隔',
+  'settings.interval.1min': '1 分钟',
+  'settings.interval.5min': '5 分钟',
+  'settings.interval.10min': '10 分钟',
+  'settings.maxSnapshots': '每文档快照上限',
+  'settings.language': '语言',
+  'settings.language.zh': '中文',
+
   // M9 版本快照 (v2.6 / ADR-022)
   'history.button': '版本历史',
   'history.title': '版本历史',

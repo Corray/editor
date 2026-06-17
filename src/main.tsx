@@ -35,6 +35,9 @@ import { createSyncFeature } from '@/modules/m11-sync/feature';
 import type { SyncFeature } from '@/modules/m11-sync/feature';
 import { createTheme, applyInitialTheme } from '@/modules/m6-theme/theme';
 import type { ThemeAPI } from '@/modules/m6-theme/api';
+import { createSettings } from '@/modules/m13-settings/settings';
+import type { SettingsAPI } from '@/modules/m13-settings/settings';
+import { SettingsDialog } from '@/modules/m13-settings/SettingsDialog';
 import {
   createExportAPI,
   createShareAPI,
@@ -62,6 +65,7 @@ interface AppShellProps {
   share: ShareAPI;
   docManager: DocManagerAPI;
   sync: SyncFeature;
+  settings: SettingsAPI;
 }
 
 interface MobilePanesProps {
@@ -218,13 +222,16 @@ function AppShell(props: AppShellProps) {
   // window 级监听（非 main onKeyDown）：WebKit 点按钮不转移焦点 → keydown 从 body
   // 冒泡不经过 main，Esc 收不到；window 级与焦点位置解耦。
   const [helpOpen, setHelpOpen] = createSignal(false);
+  // v2.9 设置面板（ADR-025 D3）：header ⚙ → 对话框（低频，不加快捷键）。
+  const [settingsOpen, setSettingsOpen] = createSignal(false);
   createEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if ((e.metaKey || e.ctrlKey) && e.key === '/') {
         e.preventDefault();
         setHelpOpen((v) => !v);
-      } else if (e.key === 'Escape' && helpOpen()) {
-        setHelpOpen(false);
+      } else if (e.key === 'Escape') {
+        if (helpOpen()) setHelpOpen(false);
+        if (settingsOpen()) setSettingsOpen(false); // v2.9：Esc 关设置（与 help/history 一致）
       }
     };
     window.addEventListener('keydown', onKey);
@@ -384,6 +391,15 @@ function AppShell(props: AppShellProps) {
           </button>
           <button
             type="button"
+            class="header-button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label={t('settings.button')}
+            title={t('settings.button')}
+          >
+            ⚙
+          </button>
+          <button
+            type="button"
             class="theme-toggle"
             onClick={() => props.theme.toggle()}
             aria-label={t('theme.toggle')}
@@ -399,6 +415,11 @@ function AppShell(props: AppShellProps) {
         snapshots={snapshots}
         onSnapshotNow={() => void onSnapshotNow()}
         onRestore={(id) => void onRestore(id)}
+      />
+      <SettingsDialog
+        open={settingsOpen()}
+        onClose={() => setSettingsOpen(false)}
+        settings={props.settings}
       />
       <Show
         when={props.layout.viewport() === 'desktop'}
@@ -464,11 +485,13 @@ async function bootstrap(): Promise<void> {
   render(() => {
     const state = createDocumentState(activeText);
     const editor = createEditorAPI(state);
+    const settings = createSettings(); // v2.9：用户设置（快照间隔/上限）
     const docManager = createDocManager({
       initial,
       now: () => Date.now(),
       setEditorText: (txt) => editor.setTextFromStorage(txt),
       getEditorText: state.text,
+      settings, // v2.9：M9 快照行为读 settings（ADR-025 D2）
     });
     const persist = createPersistence(state.text, docManager);
     const sync = createSyncFeature(docManager); // v2.0：env 缺失 → enabled=false（纯本地不变）
@@ -505,6 +528,7 @@ async function bootstrap(): Promise<void> {
         share={share}
         docManager={docManager}
         sync={sync}
+        settings={settings}
       />
     );
   }, root);

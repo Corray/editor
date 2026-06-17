@@ -216,7 +216,10 @@ export async function setActiveId(id: string): Promise<void> {
  * 存快照 + prune（超 MAX_SNAPSHOTS_PER_DOC → FIFO 删最旧 createdAt / ADR-022 D3）。
  * 降级（IDB 不可用）→ no-op（快照纯本地，无 localStorage 降级）。
  */
-export async function putSnapshot(rec: SnapRecord): Promise<void> {
+export async function putSnapshot(
+  rec: SnapRecord,
+  maxPerDoc: number = MAX_SNAPSHOTS_PER_DOC, // v2.9：上限参数化（默认向后兼容 / ADR-025 D2）
+): Promise<void> {
   const db = await tryGetDb();
   if (!db) return;
   await db.put(SNAPS, rec);
@@ -226,9 +229,9 @@ export async function putSnapshot(rec: SnapRecord): Promise<void> {
     SNAP_BY_DOC,
     rec.docId,
   )) as SnapRecord[];
-  if (all.length > MAX_SNAPSHOTS_PER_DOC) {
+  if (all.length > maxPerDoc) {
     const byOldest = all.sort((a, b) => a.createdAt - b.createdAt);
-    const excess = byOldest.slice(0, all.length - MAX_SNAPSHOTS_PER_DOC);
+    const excess = byOldest.slice(0, all.length - maxPerDoc);
     for (const s of excess) await db.delete(SNAPS, s.id);
   }
 }

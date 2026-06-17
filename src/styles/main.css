@@ -302,6 +302,73 @@
   color: var(--accent);
 }
 
+/* v2.9 设置面板 (ADR-025 D3) — help/history 同款骨架 */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.settings-dialog {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 20rem;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.settings-dialog__close {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.settings-dialog__body {
+  padding: 0.5rem 1rem 1rem;
+  overflow-y: auto;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.settings-row select {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8125rem;
+}
+
+.settings-row__readonly {
+  color: var(--muted);
+}
+
 /* v2.4 快捷键帮助浮层 (ADR-020 D2) */
 .help-backdrop {
   position: fixed;

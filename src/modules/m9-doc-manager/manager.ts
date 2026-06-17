@@ -45,6 +45,13 @@ export interface SyncHooks {
   onLocalDelete(id: string, updatedAt: number): void;
 }
 
+/** v2.9：M13 设置（快照间隔/上限/开关）。缺省 → 回退 ADR-022 原常量（向后兼容）。 */
+export interface SnapshotSettings {
+  autoSnapshotEnabled: () => boolean;
+  autoSnapshotIntervalMs: () => number;
+  maxSnapshotsPerDoc: () => number;
+}
+
 export interface DocManagerDeps {
   initial: InitialDocs;
   /** epoch ms 供给（测试可注入确定值）。 */
@@ -53,6 +60,8 @@ export interface DocManagerDeps {
   setEditorText: (text: string) => void;
   /** 读当前编辑区文本（切换前 flush 用）。 */
   getEditorText: () => string;
+  /** v2.9：用户设置（ADR-025 D2）；省略 → 快照行为用原硬编码常量。 */
+  settings?: SnapshotSettings;
 }
 
 const toMeta = (d: DocRecord): DocMeta => ({
@@ -67,6 +76,12 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
   // 全量 record 缓存（含 text），避免切换时重读 store
   const records = new Map<string, DocRecord>();
   for (const d of deps.initial.docs) records.set(d.id, d);
+
+  // v2.9（ADR-025 D2）：settings 缺省 → 回退 ADR-022 原常量（向后兼容 / 测试无需注入）
+  const snapEnabled = () => deps.settings?.autoSnapshotEnabled() ?? true;
+  const snapIntervalMs = () =>
+    deps.settings?.autoSnapshotIntervalMs() ?? AUTO_SNAPSHOT_INTERVAL_MS;
+  const snapMaxPerDoc = () => deps.settings?.maxSnapshotsPerDoc();
 
   // v2.0：同步钩子（M11 登录态注入 / 匿名 = null → 行为不变）
   let syncHooks: SyncHooks | null = null;
@@ -91,16 +106,17 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
       createdAt: at,
       kind,
     };
-    await putSnapshot(rec);
+    await putSnapshot(rec, snapMaxPerDoc()); // v2.9：FIFO 上限读 settings（缺省回默认）
     lastSnap.set(doc.id, { at, text: doc.text });
   }
 
   /**
-   * 自动快照 piggyback（ADR-022 D2）：挂在 saveActiveText 写后，fire-and-forget。
-   * 间隔（>5min 距上张）+ 内容去重（≠上张 text）；首次保存（无历史）存基线。
+   * 自动快照 piggyback（ADR-022 D2 / v2.9 settings）：挂在 saveActiveText 写后，fire-and-forget。
+   * settings 关闭 → skip；间隔/上限读 settings（缺省回 ADR-022 常量）；内容去重；首存基线。
    */
   async function maybeAutoSnapshot(doc: DocRecord): Promise<void> {
     if (isIdbUnavailable()) return;
+    if (!snapEnabled()) return; // v2.9：自动快照关闭（手动仍可）
     let last = lastSnap.get(doc.id);
     if (last === undefined) {
       // 本会话首次：seed 一次（含重启后已有快照的去重）
@@ -109,7 +125,7 @@ export function createDocManager(deps: DocManagerDeps): DocManagerAPI {
       lastSnap.set(doc.id, last);
     }
     if (last) {
-      if (now() - last.at <= AUTO_SNAPSHOT_INTERVAL_MS) return; // 间隔内
+      if (now() - last.at <= snapIntervalMs()) return; // 间隔内（v2.9 可调）
       if (last.text === doc.text) return; // 内容未变
     }
     await storeSnapshot(doc, 'auto');

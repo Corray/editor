@@ -1,5 +1,5 @@
 import { Show, For } from 'solid-js';
-import { t } from '@/modules/m7-i18n/i18n';
+import { t, i18n } from '@/modules/m7-i18n/i18n';
 import {
   type SettingsAPI,
   SNAPSHOT_INTERVAL_PRESETS,
@@ -61,6 +61,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
               <label class="settings-row">
                 <span>{t('settings.interval')}</span>
                 <select
+                  aria-label={t('settings.interval')}
                   value={String(s.autoSnapshotIntervalMs())}
                   onChange={(e) =>
                     s.setAutoSnapshotIntervalMs(Number(e.currentTarget.value))
@@ -79,6 +80,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
             <label class="settings-row">
               <span>{t('settings.maxSnapshots')}</span>
               <select
+                aria-label={t('settings.maxSnapshots')}
                 value={String(s.maxSnapshotsPerDoc())}
                 onChange={(e) =>
                   s.setMaxSnapshotsPerDoc(Number(e.currentTarget.value))
@@ -90,10 +92,17 @@ export function SettingsDialog(props: SettingsDialogProps) {
               </select>
             </label>
 
-            {/* 语言（v2.9 只读占位，v3.0 接切换 / TBD-v29-4a） */}
+            {/* 语言切换（v3.0 / ADR-026 D4：接 v2.9 占位 → select；setLang 即时重渲染+持久化） */}
             <label class="settings-row">
               <span>{t('settings.language')}</span>
-              <span class="settings-row__readonly">{t('settings.language.zh')}</span>
+              <select
+                aria-label={t('settings.language')}
+                value={i18n.lang()}
+                onChange={(e) => i18n.setLang(e.currentTarget.value as 'zh-CN' | 'en-US')}
+              >
+                <option value="zh-CN">{t('settings.language.zh')}</option>
+                <option value="en-US">{t('settings.language.en')}</option>
+              </select>
             </label>
           </div>
         </div>

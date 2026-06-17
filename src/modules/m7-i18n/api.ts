@@ -1,6 +1,6 @@
 import type { Accessor } from 'solid-js';
 
-export type Lang = 'zh-CN';
+export type Lang = 'zh-CN' | 'en-US'; // v3.0：+en-US（ADR-026）
 
 export interface I18nAPI {
   readonly lang: Accessor<Lang>;
@@ -14,9 +14,7 @@ export interface I18nAPI {
    */
   t(key: string): string;
 
-  /**
-   * Reserved for v1.1+ language switching. MVP only supports 'zh-CN'.
-   */
+  /** Set language (v3.0：persisted to localStorage; t() reactively re-renders). */
   setLang(lang: Lang): void;
 }
 

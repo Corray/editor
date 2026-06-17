@@ -83,6 +83,7 @@ export const zhCNDict = {
   'settings.maxSnapshots': '每文档快照上限',
   'settings.language': '语言',
   'settings.language.zh': '中文',
+  'settings.language.en': '英文',
 
   // M9 版本快照 (v2.6 / ADR-022)
   'history.button': '版本历史',

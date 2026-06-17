@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { i18n, t } from '@/modules/m7-i18n/i18n';
 import { zhCNDict } from '@/modules/m7-i18n/zh-CN.dict';
+import { enUSDict } from '@/modules/m7-i18n/en-US.dict';
 
 // 各模块预期的 chrome key 白名单 —— 新增 key 时同步本数组。
 // 当前覆盖：app / M2 preview / chrome buttons / M1 prefs / M5 tabs / M3 toast / M4 toast.
@@ -108,6 +109,7 @@ const EXPECTED_KEYS = [
   'settings.maxSnapshots',
   'settings.language',
   'settings.language.zh',
+  'settings.language.en',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {
@@ -128,6 +130,55 @@ describe('M7 i18n — UT-I18N (basic API)', () => {
       if (!(k in zhCNDict)) missing.push(k);
     }
     expect(missing).toEqual([]);
+  });
+});
+
+// 测试计划 v3.0 §家族 完整性 + 切换 + 持久化（AC-v30-1/2/3）
+describe('M7 i18n — v3.0 en-US (CT-I18N)', () => {
+  afterEach(() => {
+    i18n.setLang('zh-CN'); // 复位（模块级 signal 跨测共享）
+    try {
+      localStorage.removeItem('editor.lang.v1');
+    } catch {
+      /* ignore */
+    }
+  });
+
+  it('CT-I18N-1: en dict key 集 == zh dict（无缺漏/无多余）', () => {
+    const zhKeys = Object.keys(zhCNDict).sort();
+    const enKeys = Object.keys(enUSDict).sort();
+    expect(enKeys).toEqual(zhKeys);
+  });
+
+  it('CT-I18N-2: en dict 每值非空（无裸 key 露出）', () => {
+    for (const [k, v] of Object.entries(enUSDict)) {
+      expect(typeof v, `key=${k}`).toBe('string');
+      expect(v.length, `key=${k}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('CT-I18N-3: 含占位符 key 两侧都保留 {n}/{m}', () => {
+    expect(enUSDict['wordcount.fmt']).toContain('{n}');
+    expect(enUSDict['wordcount.fmt']).toContain('{m}');
+    expect(enUSDict['find.replaced']).toContain('{n}');
+    expect(enUSDict['history.minAgo']).toContain('{n}');
+  });
+
+  it('CT-I18N-4: setLang 切换 → t() 返对应语言 + EXPECTED_KEYS 双 dict 均覆盖', () => {
+    i18n.setLang('en-US');
+    expect(t('clear.button')).toBe('Clear');
+    i18n.setLang('zh-CN');
+    expect(t('clear.button')).toBe('清空');
+    // 双 dict 都覆盖白名单
+    for (const k of EXPECTED_KEYS) {
+      expect(k in zhCNDict, `zh missing ${k}`).toBe(true);
+      expect(k in enUSDict, `en missing ${k}`).toBe(true);
+    }
+  });
+
+  it('CT-I18N-5: setLang 持久化到 localStorage', () => {
+    i18n.setLang('en-US');
+    expect(localStorage.getItem('editor.lang.v1')).toBe('en-US');
   });
 });
 

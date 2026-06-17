@@ -11,6 +11,9 @@ import type { Page } from '@playwright/test';
 export async function resetStorage(page: Page): Promise<void> {
   await page.evaluate(async () => {
     localStorage.clear();
+    // v3.0：确定性中文基线 —— Playwright 默认 locale=en-US，i18n 首访检测会启英文，
+    // 破坏既有中文文案断言。显式置 zh-CN（测英文的 spec 自行 override / ac23）。
+    localStorage.setItem('editor.lang.v1', 'zh-CN');
     await new Promise<void>((resolve) => {
       // v2.6: DB version 3 — clear kv + documents + snapshots.
       // open with version+upgrade matching the app schema (F-V11-2) to avoid

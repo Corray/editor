@@ -15,8 +15,8 @@ test.describe('AC-v29 设置面板', () => {
     await page.getByRole('button', { name: '设置' }).click();
     const dialog = page.getByRole('dialog', { name: '设置' });
     await expect(dialog).toBeVisible();
-    // 语言只读占位
-    await expect(dialog.locator('.settings-row__readonly')).toHaveText('中文');
+    // v3.0：语言段已从只读占位改为 select，默认中文
+    await expect(dialog.getByLabel('语言')).toHaveValue('zh-CN');
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
   });
@@ -26,23 +26,25 @@ test.describe('AC-v29 设置面板', () => {
   }) => {
     await page.getByRole('button', { name: '设置' }).click();
     const dialog = page.getByRole('dialog', { name: '设置' });
-    // 上限 select：选 50
-    const maxSelect = dialog.locator('select').last();
-    await maxSelect.selectOption('50');
+    // 上限 select（按 aria-label 定位，不靠位置 / v3.0 加了语言 select）
+    await dialog.getByLabel('每文档快照上限').selectOption('50');
     await page.keyboard.press('Escape');
     // 刷新后重开，值保留
     await page.reload();
     await page.getByRole('button', { name: '设置' }).click();
-    await expect(page.getByRole('dialog', { name: '设置' }).locator('select').last()).toHaveValue('50');
+    await expect(
+      page.getByRole('dialog', { name: '设置' }).getByLabel('每文档快照上限'),
+    ).toHaveValue('50');
   });
 
   test('E2E-AC22-3: 关闭自动快照 → 间隔档隐藏（AC-v29-2）', async ({ page }) => {
     await page.getByRole('button', { name: '设置' }).click();
     const dialog = page.getByRole('dialog', { name: '设置' });
-    // 默认开 → 间隔 select 存在（2 个 select：间隔 + 上限）
-    await expect(dialog.locator('select')).toHaveCount(2);
+    // 默认开 → 间隔 select 可见；关闭后隐藏（按 aria-label，不靠总数 / v3.0 加了语言 select）
+    await expect(dialog.getByLabel('快照间隔')).toBeVisible();
     await dialog.locator('input[type=checkbox]').uncheck();
-    // 关闭 → 间隔 select 隐藏（仅剩上限）
-    await expect(dialog.locator('select')).toHaveCount(1);
+    await expect(dialog.getByLabel('快照间隔')).toHaveCount(0);
+    // 上限/语言 select 始终在
+    await expect(dialog.getByLabel('每文档快照上限')).toBeVisible();
   });
 });

@@ -34,7 +34,9 @@ export function toggleTaskAtLine(text: string, line: number): string;
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| pipeline installTaskList（core rule + task_checkbox renderer，base+katex 均装）| ⏳ | — |
-| toggleTaskAtLine 纯函数 | ⏳ | — |
-| PreviewArea 委托点击回写 | ⏳ | — |
-| .task-checkbox CSS | ⏳ | — |
+| pipeline installTaskList（core rule after inline + task_checkbox renderer，base+katex 均装）| ✓ | `01b801d` |
+| toggleTaskAtLine 纯函数 | ✓ | `01b801d` |
+| PreviewArea 委托点击回写（onClick preventDefault → setText）| ✓ | `01b801d` |
+| .task-checkbox CSS（:has 隐 list marker）| ✓ | `01b801d` |
+
+> 测试：unit +12（CT-TL×6 渲染/XSS + CT-TT×6 翻转）→ 309；e2e +5 用例双引擎（ac24，含 XSS 门槛 + 移动 viewport + 持久化）→ 176+4skip。首屏 94.37KB。

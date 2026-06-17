@@ -4,6 +4,42 @@
 
 ---
 
+## v1.7.0-rc.1 — Markdown 格式工具栏（v2.7）（2026-06-17）
+
+**Tag:** `v1.7.0-rc.1` @ commit `f1ddade`
+**Range:** `e21ce28..f1ddade`（v1.6.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第二批打磨 scope 第一项；余 v2.8 表格 → v2.9 设置面板 → v3.0 国际化）。仍 RC。
+
+### Scope — 格式工具栏（共识 v2.7 / ADR-023 / `c3139d8`）
+
+- 编辑区顶部常驻 8 按钮（加粗/斜体/行内代码/链接/引用/无序列表/有序列表/代码块）；**移动端唯一可视格式入口**（无快捷键场景）
+- **高复用**：4/8 走既有 `applyFormat`（v2.1）；新增 `toggleLinePrefix`（行前缀 toggle + ol 逐行递增，复用 indentSelection 覆盖行范式）+ `wrapCodeBlock`
+- 全经 `replaceRange` → Cmd+Z 可撤销；按钮 `mousedown` preventDefault 防夺焦丢选区
+- 移动端工具栏 `overflow-x:auto` 横滚
+
+### Quality Gates [已验证: 2026-06-17 本机]
+
+- 274 unit（+11：CT-CODE×3 / CT-LP×6 / CT-CB×2）
+- 148 e2e / 4 skip（ac20 新 5 用例双引擎，含 320px 移动 viewport 可见；+1 webkit undo skip F-V21-1）
+- 首屏 91.19 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-17 增量）
+
+报告：`docs/audit/2026-06-17-v2.7-increment.md`。**无 critical/high/medium**；实现期处置工具栏夺焦（mousedown preventDefault）+ noUncheckedIndexedAccess Record 索引。2 LOW info（F-V27-1 glyph 朴素 / F-V27-2 行前缀无部分态档）。
+
+### Known Limitations
+
+- 工具栏用 Unicode 字符非图标字体（🔗 随系统渲染，F-V27-1）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V27-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M1/ADR-023/api/test-plan v2.7）落档 + 追溯回填；package.json → 1.7.0-rc.1
+
+---
+
 ## v1.6.0-rc.1 — 文档版本快照（v2.6 / L3 持久化根基）（2026-06-15）
 
 **Tag:** `v1.6.0-rc.1` @ commit `e21ce28`

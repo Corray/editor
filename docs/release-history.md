@@ -4,6 +4,43 @@
 
 ---
 
+## v1.11.0-rc.1 — 预览任务清单交互（v3.1）（2026-06-17）
+
+**Tag:** `v1.11.0-rc.1` @ commit `bd2ff99`
+**Range:** `5f9c8f6..bd2ff99`（v1.10.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第三批 scope 第一项；余 v3.2 统计面板 → v3.3 frontmatter → v3.4 扩展包）。仍 RC。
+
+### Scope — 任务清单交互（共识 v3.1 / ADR-027 / `01b801d`）
+
+- 自定义 markdown-it core rule：GFM `- [ ]` / `- [x]` 渲染成可点 `<input type=checkbox>`（带 `data-source-line`，复用 v1.7 映射）
+- PreviewArea 委托点击 → `preventDefault` → `toggleTaskAtLine` 翻转源行 `[ ]`↔`[x]` → `state.setText`（**单一数据源 = 源文**，真值由重渲染驱动，持久化经 M3）
+- **安全红线零放宽**：DOMPurify 探针前置验（input 默认放行 / onclick 剥离）；checkbox 经既有 render() sanitize，ADD_ATTR 仍仅 data-source-line（ADR-002 不动）
+- 桌面 + 移动预览 tab 均可点
+
+### Quality Gates [已验证: 2026-06-17 本机]
+
+- 309 unit（+12：CT-TL×6 渲染/XSS + CT-TT×6 翻转）
+- 176 e2e / 4 skip（ac24 新 5 用例双引擎：渲染/翻转/多任务/XSS 门槛/持久化/移动 viewport）
+- 首屏 94.37 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-17 增量）
+
+报告：`docs/audit/2026-06-17-v3.1-increment.md`。**无 critical/high/medium**；安全红线零放宽（探针 + unit + e2e 双引擎三重验 XSS）。2 LOW info（F-V31-1 防抖视觉延迟 / F-V31-2 有序任务不渲）。
+
+### Known Limitations
+
+- 大文档防抖下点击 checkbox 视觉更新延迟 ≤120ms（源文已即时翻转，F-V31-1）
+- 有序任务 `1. [ ]` 不渲 checkbox（仅 `-`/`*`/`+`，GFM 惯例，F-V31-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V31-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M2/ADR-027/api/test-plan v3.1）落档 + 追溯回填；package.json → 1.11.0-rc.1
+
+---
+
 ## v1.10.0-rc.1 — 国际化 en-US + 语言切换（v3.0）（2026-06-17）
 
 **Tag:** `v1.10.0-rc.1` @ commit `5f9c8f6`

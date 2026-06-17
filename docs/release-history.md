@@ -4,6 +4,43 @@
 
 ---
 
+## v1.8.0-rc.1 — 表格编辑辅助（v2.8）（2026-06-17）
+
+**Tag:** `v1.8.0-rc.1` @ commit `2266ad9`
+**Range:** `f1ddade..2266ad9`（v1.7.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（打磨批第二项；余 v2.9 设置面板 → v3.0 国际化）。仍 RC。
+
+### Scope — 表格辅助（共识 v2.8 / ADR-024 / `13a409c`）
+
+- **插入表格**：工具栏第 9 按钮「⊞」插 2 列模板（表头+分隔+数据行），光标选中首单元格占位
+- **Tab 单元格导航**：表格行内 Tab 跳下一单元格（选中文本）；末单元格 → 下行首；末行末单元格 → 新增同列数空行；Shift+Tab 反向
+- **Tab 三级分流**：`allowTabOnce`（a11y 逃逸）→ `tableCellNav`（表格行）→ `indentSelection`（v2.4 缺省，非表格行）——互斥清晰，零回归
+- 全经 `replaceRange` → Cmd+Z 可撤销
+
+### Quality Gates [已验证: 2026-06-17 本机]
+
+- 283 unit（+9 CT-TBL：判定/插入/行内跳/反向/跳行/末行新增/非表格行/首行吞）
+- 156 e2e / 4 skip（ac21 新 4 用例双引擎，含非表格行缩进零回归实证）
+- 首屏 91.52 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-17 增量）
+
+报告：`docs/audit/2026-06-17-v2.8-increment.md`。**无 critical/high/medium**；Tab 三级分流互斥 + 单元格导航全路径 unit 枚举。3 LOW info（F-V28-1~3：无列宽对齐 / 非 `|` 起头变体 / trim 边界）。
+
+### Known Limitations
+
+- 无列宽对齐美化（textarea 等宽下管道符不齐，F-V28-1）
+- 非 `|` 起头表格变体不支持单元格导航（F-V28-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V28-1~3（info）；变更记录追加
+- spec 全链（共识/module-list M1/ADR-024/api/test-plan v2.8）落档 + 追溯回填；package.json → 1.8.0-rc.1
+
+---
+
 ## v1.7.0-rc.1 — Markdown 格式工具栏（v2.7）（2026-06-17）
 
 **Tag:** `v1.7.0-rc.1` @ commit `f1ddade`

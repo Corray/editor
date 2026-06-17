@@ -4,6 +4,43 @@
 
 ---
 
+## v1.10.0-rc.1 — 国际化 en-US + 语言切换（v3.0）（2026-06-17）
+
+**Tag:** `v1.10.0-rc.1` @ commit `5f9c8f6`
+**Range:** `12f616d..5f9c8f6`（v1.9.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（**第二批打磨 scope 压轴**，补完 M7 已铺 i18n 框架）。仍 RC。
+
+### Scope — 国际化（共识 v3.0 / ADR-026 / `3168c99`）
+
+- **en-US 全量 dict**（104 key）：`Record<DictKey, string>` **编译期强制全覆盖**（漏译 = tsc 报错，强于运行时校验）；占位符 `{n}`/`{m}` 保留
+- **Lang 扩** `'zh-CN' | 'en-US'`；`setLang` localStorage 持久化；`t()` 读 lang signal → Solid JSX 切换即时重渲染（无需刷新）
+- **首访检测**：localStorage 持久值优先；否则 `navigator.language` `en*` → en-US / 否则 zh-CN；坏值回退
+- **M13 语言段**：v2.9 只读占位 → select（中文 / English）接 `i18n.setLang`
+
+### Quality Gates [已验证: 2026-06-17 本机]
+
+- 297 unit（+5 CT-I18N：key 集相等 / 非空 / 占位符 / 切换 / 持久化）
+- 166 e2e / 4 skip（ac23 新 2 用例双引擎：切英文 header 变 + 切回中文）
+- 首屏 93.80 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-17 增量）
+
+报告：`docs/audit/2026-06-17-v3.0-increment.md`。**无 critical/high/medium**；完整性编译期+运行时双保险。**v3.0 引入两处测试回归（均捕获修复）**：① navigator.language 检测 × Playwright en-US locale → 既有中文 e2e 全失败 → `resetStorage` seed zh-CN systemic 修复 + **PP-006 落档**（环境相关默认须给 e2e 确定性基线）；② 加语言 select 破坏 ac22 `.last()` 位置 → select 全加 aria-label。2 LOW info（F-V30-1~2）。
+
+### Known Limitations
+
+- 仅中/英两语言（F-V30-1）；用户文档内容不翻译（仅 UI chrome，F-V30-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V30-1/2（info）；变更记录追加；PP-006 落 project-patterns
+- spec 全链（共识/module-list M7/ADR-026/api/test-plan v3.0）落档 + 追溯回填；package.json → 1.10.0-rc.1
+- **第二批打磨 scope（v2.7 工具栏 / v2.8 表格 / v2.9 设置面板 / v3.0 国际化）全部交付**
+
+---
+
 ## v1.9.0-rc.1 — 设置面板（v2.9 / M13 收口散落常量）（2026-06-17）
 
 **Tag:** `v1.9.0-rc.1` @ commit `12f616d`

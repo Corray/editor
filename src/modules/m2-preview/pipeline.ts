@@ -45,10 +45,77 @@ function installSourceLine(md: MarkdownIt): void {
   });
 }
 
+/**
+ * 任务清单（v3.1 / ADR-027）：list_item 内 inline content `^[ /x ]` → 头插 task_checkbox
+ * token + 剥前缀；renderer 输出 `<input type=checkbox data-source-line>`（受信 HTML，
+ * 不受 html:false 转义；经 render() 默认 DOMPurify 放行 input、剥 onclick——探针已验）。
+ * checkbox 带 data-source-line → PreviewArea 点击委托据此回写源行（toggleTaskAtLine）。
+ */
+function installTaskList(md: MarkdownIt): void {
+  md.core.ruler.after('inline', 'task_list', (state) => {
+    const tokens = state.tokens;
+    for (let i = 0; i < tokens.length; i++) {
+      const tok = tokens[i];
+      if (!tok || tok.type !== 'inline' || !tok.children) continue;
+      const m = /^\[([ xX])\]\s/.exec(tok.content);
+      if (!m) continue;
+      // 确认在 list_item 内（向前小窗扫 list_item_open）
+      let liIdx = -1;
+      for (let j = i - 1; j >= 0 && j >= i - 3; j--) {
+        if (tokens[j]!.type === 'list_item_open') {
+          liIdx = j;
+          break;
+        }
+        if (
+          tokens[j]!.type === 'list_item_close' ||
+          tokens[j]!.type === 'bullet_list_open'
+        )
+          break;
+      }
+      if (liIdx === -1) continue;
+      const para = tokens[i - 1];
+      const line = (para?.map ?? tokens[liIdx]!.map ?? [0])[0]!;
+      const checked = m[1]!.toLowerCase() === 'x';
+      // 剥首个 text child 的 `[ ] ` 前缀
+      const first = tok.children[0];
+      if (first && first.type === 'text') {
+        first.content = first.content.replace(/^\[([ xX])\]\s/, '');
+      }
+      tok.content = tok.content.slice(m[0].length);
+      const cb = new state.Token('task_checkbox', '', 0);
+      cb.meta = { checked, line };
+      tok.children.unshift(cb);
+    }
+    return true;
+  });
+
+  md.renderer.rules.task_checkbox = (tokens, idx) => {
+    const meta = tokens[idx]!.meta as { checked: boolean; line: number };
+    const checked = meta.checked ? ' checked' : '';
+    return `<input class="task-checkbox" type="checkbox"${checked} data-source-line="${meta.line}">`;
+  };
+}
+
 /** 基底渲染器（无 KaTeX）—— KaTeX 未懒加载时用。 */
 const baseMd = new MarkdownIt(MD_OPTS);
 installMermaidFence(baseMd);
 installSourceLine(baseMd);
+installTaskList(baseMd);
+
+/**
+ * 翻转源文第 line（0-based）行的任务标记 `[ ]`↔`[x]`（v3.1 / ADR-027）。
+ * 非任务行 / 越界 → 原样返回。点击 checkbox 委托调用。
+ */
+export function toggleTaskAtLine(text: string, line: number): string {
+  const lines = text.split('\n');
+  if (line < 0 || line >= lines.length) return text;
+  const l = lines[line]!;
+  const m = /^(\s*[-*+]\s+\[)([ xX])(\])/.exec(l);
+  if (!m) return text;
+  const next = m[2]!.toLowerCase() === 'x' ? ' ' : 'x';
+  lines[line] = l.slice(0, m[1]!.length) + next + l.slice(m[1]!.length + 1);
+  return lines.join('\n');
+}
 
 /**
  * 给 markdown-it 装 ` ```mermaid ` fence 规则：同步输出**占位** div（不在 render 里
@@ -119,6 +186,7 @@ export function ensureKatex(): Promise<void> {
       });
       installMermaidFence(katexMd); // katex 渲染器也要认 mermaid fence
       installSourceLine(katexMd); // 同样标 data-source-line（v1.7）
+      installTaskList(katexMd); // task list 渲染（v3.1）
     })();
   }
   return loadPromise;

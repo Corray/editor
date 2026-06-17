@@ -17,6 +17,7 @@ import {
   hasCode,
   ensureHighlight,
   highlightReady,
+  toggleTaskAtLine,
 } from './pipeline';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -124,6 +125,17 @@ export function PreviewArea(props: PreviewAreaProps) {
     });
   });
 
+  // v3.1（ADR-027 D3）：task list checkbox 点击委托 → 翻转源行 → setText（单一数据源）。
+  // preventDefault 撤销原生 toggle，真值由重渲染驱动；持久化经 M3。
+  const onPreviewClick = (e: MouseEvent): void => {
+    const el = e.target as HTMLElement;
+    if (el.tagName !== 'INPUT' || !el.classList.contains('task-checkbox')) return;
+    e.preventDefault();
+    const line = Number(el.getAttribute('data-source-line'));
+    if (!Number.isFinite(line)) return;
+    props.state.setText(toggleTaskAtLine(props.state.text(), line));
+  };
+
   return (
     <div
       class="preview-pane"
@@ -140,6 +152,7 @@ export function PreviewArea(props: PreviewAreaProps) {
         <div
           class="preview-content"
           ref={(el) => (contentRef = el)}
+          onClick={onPreviewClick}
           innerHTML={html()}
         />
       </Show>

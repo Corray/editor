@@ -739,6 +739,17 @@
   overflow-x: auto;
 }
 
+/* v3.1 task list checkbox (ADR-027) */
+.preview-content .task-checkbox {
+  margin: 0 0.4em 0 -1.3em;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.preview-content li:has(> .task-checkbox),
+.preview-content li:has(> p > .task-checkbox) {
+  list-style: none;
+}
+
 /* v2.3 syntax highlight tokens (ADR-019 D4) — class-based, theme via vars */
 .preview-content .hljs-keyword,
 .preview-content .hljs-literal,

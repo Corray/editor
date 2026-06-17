@@ -55,7 +55,10 @@ export function SettingsDialog(props: {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| M13 settings.ts（signals + localStorage + anti-poisoning）| ⏳ | — |
-| store putSnapshot maxPerDoc 参数化 + manager settings 注入 | ⏳ | — |
-| SettingsDialog + header ⚙ + AppShell 装配 | ⏳ | — |
-| i18n settings.*（+EXPECTED_KEYS）| ⏳ | — |
+| M13 settings.ts（signals + localStorage + anti-poisoning）| ✓ | `61da777` |
+| store putSnapshot maxPerDoc 参数化 + manager settings 注入（缺省回原常量）| ✓ | `61da777` |
+| SettingsDialog + header ⚙ + AppShell 装配（Esc 关并入既有 window keydown）| ✓ | `61da777` |
+| i18n settings.*（+EXPECTED_KEYS）| ✓ | `61da777` |
+
+> 测试：unit +9（CT-SET×6 持久化/anti-poisoning + CT-SNAP-SET×3 settings 注入）→ 292；e2e +3 用例双引擎（ac22）→ 162+4skip。首屏 92.66KB。
+> 实现期：build tsc 抓到 `afterEach(() => vi.restoreAllMocks())` 表达式返回类型错（vitest esbuild 不类型检查漏过）→ 改块体；SettingsDialog Esc 关闭并入既有 window keydown（漏加被 ac22-1 捕获）。

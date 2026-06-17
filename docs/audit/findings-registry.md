@@ -161,6 +161,8 @@
 | F-V28-1 | 2026-06-17 | proposed | LOW (info) | 表格无列宽对齐美化（textarea 等宽下管道符不齐）；功能性导航优先，共识范围外 | 2026-06-17 v2.8 audit |
 | F-V28-2 | 2026-06-17 | proposed | LOW (info) | 非 `\|` 起头表格变体不被 isTableRow 识别 → 单元格导航不生效（罕见写法，文档化）| 2026-06-17 v2.8 audit |
 | F-V28-3 | 2026-06-17 | proposed | LOW (info) | 单元格导航选中 trim 后文本，含前后多空格时光标定位到 trim 边界（视觉略差）；可接受 | 2026-06-17 v2.8 audit |
+| F-V29-1 | 2026-06-17 | proposed | LOW (info) | 设置仅收口快照间隔/上限 2 项；字号/行号/主题保留专门入口未搬进（避免重复，张力 A）| 2026-06-17 v2.9 audit |
+| F-V29-2 | 2026-06-17 | proposed | LOW (info) | 调小快照上限不立即裁剪已有超额，下次 putSnapshot 才 prune 到新值（渐进收敛）| 2026-06-17 v2.9 audit |
 
 ### Issue-process 审查
 
@@ -208,3 +210,4 @@
 | 2026-06-15 | v2.6 增量 audit（报告 `2026-06-15-v2.6-increment.md`）：文档版本快照（**L3 持久化根基**，DB v2→3 additive），**无 critical/high/medium**。升级零损 unit 实证 + 单写者 piggyback 无新写者/定时器 + 恢复保护快照 + cascade + FIFO 全枚举；M11 契约零变化。**实现期 DB 版本 bump 引入 e2e helper 回归**（_storage open v2→VersionError 静默→测试串扰，ac2 webkit 2 failed）→ 修 helper 升 v3 + fix-pattern-scan 落项（bump DB 须全仓 grep 版本号）；ac5 perf 负载 flake（隔离过）。4 LOW info（F-V26-1~4）。unit 263 + e2e 138。**四项拍板 scope 全交付** |
 | 2026-06-17 | v2.7 增量 audit（报告 `2026-06-17-v2.7-increment.md`）：Markdown 格式工具栏（8 按钮），**无 critical/high/medium**。**高复用**（4/8 走既有 applyFormat，新代码仅 toggleLinePrefix+wrapCodeBlock+组件）；全经 replaceRange undo 保持 + 移动 viewport 可见 e2e 实证；实现期处置工具栏夺焦（mousedown preventDefault）。2 LOW info（F-V27-1~2）。unit 274 + e2e 148。打磨批第一项 |
 | 2026-06-17 | v2.8 增量 audit（报告 `2026-06-17-v2.8-increment.md`）：表格编辑辅助（插入+Tab 单元格导航），**无 critical/high/medium**。**Tab 三级分流**（allowTabOnce → tableCellNav → indentSelection）互斥清晰，非表格行零回归 e2e 实证；单元格导航全路径 unit 枚举。3 LOW info（F-V28-1~3：无列宽对齐/非\|起头变体/trim 边界）。unit 283 + e2e 156。打磨批第二项 |
+| 2026-06-17 | v2.9 增量 audit（报告 `2026-06-17-v2.9-increment.md`）：设置面板 M13（收口散落常量），**无 critical/high/medium**。**架构价值**：快照间隔/上限从硬编码收口 M13 单一来源 + 纯 IDB 层不耦合 Solid（store 收数值参数 / manager 读 accessor）；向后兼容零行为变化 unit 实证（settings 缺省回原常量）。实现期 tsc 抓测试 afterEach 表达式返回类型错（vitest 漏过 / 教训：提交前 build 非仅 vitest）+ SettingsDialog Esc 漏加（ac22 捕获）。2 LOW info（F-V29-1~2）。unit 292 + e2e 162。打磨批第三项 |

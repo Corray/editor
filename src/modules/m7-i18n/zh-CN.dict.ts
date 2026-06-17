@@ -28,6 +28,17 @@ export const zhCNDict = {
   'editor.fontIncrease': '增大字号',
   'editor.lineNumbers': '切换行号',
 
+  // M1 格式工具栏 (v2.7 / ADR-023)
+  'fmt.toolbar': '格式工具栏',
+  'fmt.bold': '加粗',
+  'fmt.italic': '斜体',
+  'fmt.code': '行内代码',
+  'fmt.link': '链接',
+  'fmt.quote': '引用',
+  'fmt.ul': '无序列表',
+  'fmt.ol': '有序列表',
+  'fmt.codeblock': '代码块',
+
   // M1 查找/替换 + 字数统计 (v2.1 / ADR-017)
   'find.placeholder': '查找…',
   'find.replacePlaceholder': '替换为…',

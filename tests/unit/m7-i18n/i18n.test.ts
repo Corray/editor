@@ -88,6 +88,15 @@ const EXPECTED_KEYS = [
   'history.kind.auto',
   'history.kind.manual',
   'history.kind.restore',
+  'fmt.toolbar',
+  'fmt.bold',
+  'fmt.italic',
+  'fmt.code',
+  'fmt.link',
+  'fmt.quote',
+  'fmt.ul',
+  'fmt.ol',
+  'fmt.codeblock',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

@@ -542,6 +542,42 @@
   background: var(--bg);
 }
 
+/* v2.7 格式工具栏 (ADR-023 D4) — 编辑区顶部常驻，移动端横滚 */
+.format-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.format-toolbar__btn {
+  flex: 0 0 auto;
+  min-width: 2rem;
+  height: 1.75rem;
+  padding: 0 0.4rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1;
+}
+.format-toolbar__btn--bold {
+  font-weight: 700;
+}
+.format-toolbar__btn--italic {
+  font-style: italic;
+}
+.format-toolbar__btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .find-input {
   flex: 1 1 8rem;
   min-width: 6rem;

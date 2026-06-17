@@ -3,6 +3,8 @@ import {
   applyFormat,
   continueList,
   indentSelection,
+  toggleLinePrefix,
+  wrapCodeBlock,
 } from '@/modules/m1-editor/commands';
 
 // jsdom 无 document.execCommand → replaceRange 走 fallback（setRangeText+input 事件），
@@ -192,5 +194,75 @@ describe('M1 indentSelection — CT-IND (AC-v24-1/2)', () => {
     const ta = makeTA('aa\nbb\ncc', 4, 7); // b 中间到 c 中间
     indentSelection(ta, false);
     expect(ta.value).toBe('aa\n  bb\n  cc');
+  });
+});
+
+// 测试计划 v2.7 §家族 包裹族（行内代码 / AC-v27-1）
+describe('M1 applyFormat code — CT-CODE (AC-v27-1)', () => {
+  it('CT-CODE-1: 选区包裹 `', () => {
+    const ta = makeTA('let x', 0, 5);
+    applyFormat(ta, 'code');
+    expect(ta.value).toBe('`let x`');
+  });
+  it('CT-CODE-2: 选区自带 ` → 解包（toggle）', () => {
+    const ta = makeTA('`code`', 0, 6);
+    applyFormat(ta, 'code');
+    expect(ta.value).toBe('code');
+  });
+  it('CT-CODE-3: 无选区 → 空包裹光标置中', () => {
+    const ta = makeTA('ab', 1);
+    applyFormat(ta, 'code');
+    expect(ta.value).toBe('a``b');
+    expect([ta.selectionStart, ta.selectionEnd]).toEqual([2, 2]);
+  });
+});
+
+// 测试计划 v2.7 §家族 行前缀族（AC-v27-3/4）
+describe('M1 toggleLinePrefix — CT-LP (AC-v27-3/4)', () => {
+  it('CT-LP-1: 单行加引用前缀', () => {
+    const ta = makeTA('hello', 0);
+    toggleLinePrefix(ta, 'quote');
+    expect(ta.value).toBe('> hello');
+  });
+  it('CT-LP-2: 多行整体加无序前缀', () => {
+    const ta = makeTA('a\nb\nc', 0, 5);
+    toggleLinePrefix(ta, 'ul');
+    expect(ta.value).toBe('- a\n- b\n- c');
+  });
+  it('CT-LP-3: 有序列表逐行递增', () => {
+    const ta = makeTA('a\nb\nc', 0, 5);
+    toggleLinePrefix(ta, 'ol');
+    expect(ta.value).toBe('1. a\n2. b\n3. c');
+  });
+  it('CT-LP-4: toggle — 选中行全带引用前缀 → 去除', () => {
+    const ta = makeTA('> a\n> b', 0, 7);
+    toggleLinePrefix(ta, 'quote');
+    expect(ta.value).toBe('a\nb');
+  });
+  it('CT-LP-5: 部分带前缀 → 补齐为加（不双重前缀）', () => {
+    const ta = makeTA('- a\nb', 0, 5);
+    toggleLinePrefix(ta, 'ul');
+    expect(ta.value).toBe('- a\n- b'); // 已带的不变 `- - a`
+  });
+  it('CT-LP-6: ol toggle 去除（任意数字前缀）', () => {
+    const ta = makeTA('1. a\n2. b', 0, 8);
+    toggleLinePrefix(ta, 'ol');
+    expect(ta.value).toBe('a\nb');
+  });
+});
+
+// 测试计划 v2.7 §家族 围栏族（AC-v27-5）
+describe('M1 wrapCodeBlock — CT-CB (AC-v27-5)', () => {
+  it('CT-CB-1: 选区包进 ``` 围栏', () => {
+    const ta = makeTA('const x = 1;', 0, 12);
+    wrapCodeBlock(ta);
+    expect(ta.value).toBe('```\nconst x = 1;\n```');
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('const x = 1;');
+  });
+  it('CT-CB-2: 无选区 → 空围栏光标置内空行', () => {
+    const ta = makeTA('', 0);
+    wrapCodeBlock(ta);
+    expect(ta.value).toBe('```\n\n```');
+    expect(ta.selectionStart).toBe(4); // ```\n 之后
   });
 });

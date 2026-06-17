@@ -2,6 +2,7 @@ import { createDeferred, createMemo, For, Show, type Accessor } from 'solid-js';
 import type { DocumentState } from './state';
 import { createFindController } from './find';
 import { FindBar } from './FindBar';
+import { FormatToolbar } from './FormatToolbar';
 import { applyFormat, continueList, indentSelection } from './commands';
 import { countWords, formatWordCount } from './wordcount';
 import { t } from '@/modules/m7-i18n/i18n';
@@ -105,6 +106,7 @@ export function EditorArea(props: EditorAreaProps) {
   return (
     <div class="editor-chrome" onKeyDown={onKeyDown}>
       <FindBar find={find} />
+      <FormatToolbar editor={() => taRef} />
       <div
         class="editor-with-gutter"
         classList={{ 'editor-with-gutter--numbered': showGutter() }}

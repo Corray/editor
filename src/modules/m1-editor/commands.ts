@@ -3,7 +3,8 @@
  */
 import { replaceRange } from './edit-text';
 
-export type FormatKind = 'bold' | 'italic' | 'link';
+export type FormatKind = 'bold' | 'italic' | 'link' | 'code';
+export type LinePrefixKind = 'quote' | 'ul' | 'ol';
 
 /**
  * toggle 包裹：①选区自带 marker → 解包；②marker 紧贴选区外侧 → 扩选解包；
@@ -85,7 +86,81 @@ function wrapLink(ta: HTMLTextAreaElement): void {
 export function applyFormat(ta: HTMLTextAreaElement, kind: FormatKind): void {
   if (kind === 'bold') toggleWrap(ta, '**');
   else if (kind === 'italic') toggleWrap(ta, '*');
+  else if (kind === 'code') toggleWrap(ta, '`'); // v2.7：行内代码（单 ` toggle，无误吞问题）
   else wrapLink(ta);
+}
+
+/** 行前缀正则（去除判定 / ADR-023 D2）。ol 匹配任意数字前缀。 */
+const LINE_PREFIX_RE: Record<LinePrefixKind, RegExp> = {
+  quote: /^> /,
+  ul: /^- /,
+  ol: /^\d+\. /,
+};
+
+/**
+ * 行前缀 toggle（v2.7 / ADR-023 D2）：选中行整体加/去前缀。
+ * toggle：选中行**全部**已带该前缀 → 去除；否则加（ol 加时逐行 1,2,3… 递增）。
+ * 单次 replaceRange（一步 undo），选区重算保持覆盖（同 indentSelection 范式）。
+ */
+export function toggleLinePrefix(
+  ta: HTMLTextAreaElement,
+  kind: LinePrefixKind,
+): void {
+  const value = ta.value;
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const blockStart = value.lastIndexOf('\n', s - 1) + 1;
+  const lineEndIdx = value.indexOf('\n', e === s ? s : e - 1);
+  const blockEnd = lineEndIdx === -1 ? value.length : lineEndIdx;
+  const block = value.slice(blockStart, blockEnd);
+  const lines = block.split('\n');
+  const re = LINE_PREFIX_RE[kind];
+
+  const allPrefixed = lines.every((l) => re.test(l));
+  let firstDelta = 0;
+  let totalDelta = 0;
+  const out = lines
+    .map((line, i) => {
+      let next: string;
+      if (allPrefixed) {
+        next = line.replace(re, ''); // 去除
+      } else {
+        const prefix =
+          kind === 'quote' ? '> ' : kind === 'ul' ? '- ' : `${i + 1}. `;
+        // 已带（部分行）先剥旧再加（避免 `- - `）；ol 统一重编号
+        next = prefix + line.replace(re, '');
+      }
+      const delta = next.length - line.length;
+      if (i === 0) firstDelta = delta;
+      totalDelta += delta;
+      return next;
+    })
+    .join('\n');
+
+  if (out === block) return; // no-op
+  const newStart = Math.max(blockStart, s + firstDelta);
+  const newEnd = Math.max(newStart, e + totalDelta);
+  replaceRange(ta, blockStart, blockEnd, out, { start: newStart, end: newEnd });
+}
+
+/**
+ * 代码块围栏（v2.7 / ADR-023 D3）：选区包进 ``` 独立行；无选区插空围栏光标置内。
+ */
+export function wrapCodeBlock(ta: HTMLTextAreaElement): void {
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e);
+  if (s === e) {
+    const text = '```\n\n```';
+    replaceRange(ta, s, s, text, { start: s + 4, end: s + 4 }); // 光标置中空行
+  } else {
+    const text = '```\n' + sel + '\n```';
+    const innerStart = s + 4;
+    replaceRange(ta, s, e, text, {
+      start: innerStart,
+      end: innerStart + sel.length,
+    });
+  }
 }
 
 const INDENT = '  '; // 2 空格（ADR-020 D1 / TBD-v24-1a）

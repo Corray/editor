@@ -4,6 +4,44 @@
 
 ---
 
+## v1.9.0-rc.1 — 设置面板（v2.9 / M13 收口散落常量）（2026-06-17）
+
+**Tag:** `v1.9.0-rc.1` @ commit `12f616d`
+**Range:** `2266ad9..12f616d`（v1.8.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（打磨批第三项；余 v3.0 国际化压轴）。仍 RC。
+
+### Scope — 设置面板（共识 v2.9 / ADR-025 / `61da777`）
+
+- **M13 设置模块**（signal + localStorage 持久化 + anti-poisoning，照 M1 prefs 范式）
+- 收口 2 项：自动快照（开/关 + 间隔 1/5/10min）+ 每文档快照上限（10/30/50）
+- **架构价值**：快照间隔/上限从散落硬编码 → M13 单一来源；**解耦守纪律**（纯 IDB `store.ts` 收 `maxPerDoc` 数值参数不 import M13；manager 读 settings accessor）
+- **向后兼容零行为变化**：`createDocManager` settings 缺省回 ADR-022 原常量（既有 CT-SNAP 无需注入全过）
+- header ⚙ → SettingsDialog（Esc/遮罩关）；语言段只读"中文"占位（v3.0 接切换）
+
+### Quality Gates [已验证: 2026-06-17 本机]
+
+- 292 unit（+9：CT-SET×6 持久化/anti-poisoning + CT-SNAP-SET×3 settings 注入）
+- 162 e2e / 4 skip（ac22 新 3 用例双引擎：开关面板/持久化/间隔档隐藏）
+- 首屏 92.66 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-17 增量）
+
+报告：`docs/audit/2026-06-17-v2.9-increment.md`。**无 critical/high/medium**；架构价值（常量收口 + 解耦）+ 零行为变化 unit 实证。实现期两处（tsc 抓测试 afterEach 表达式返回 / SettingsDialog Esc 漏加）被 build + e2e 捕获修复。2 LOW info（F-V29-1~2）。
+
+### Known Limitations
+
+- 设置仅收口 2 项（字号/行号/主题保留专门入口，F-V29-1）
+- 调小上限不立即裁剪已有超额（下次 putSnapshot 渐进收敛，F-V29-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V29-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M13/ADR-025/data-model/api/test-plan v2.9）落档 + 追溯回填；package.json → 1.9.0-rc.1
+
+---
+
 ## v1.8.0-rc.1 — 表格编辑辅助（v2.8）（2026-06-17）
 
 **Tag:** `v1.8.0-rc.1` @ commit `2266ad9`

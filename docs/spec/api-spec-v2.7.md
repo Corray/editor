@@ -44,7 +44,9 @@ export interface FormatToolbarProps {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| commands applyFormat+'code' / toggleLinePrefix / wrapCodeBlock | ⏳ | — |
-| FormatToolbar 组件 + EditorArea 装配 | ⏳ | — |
-| i18n fmt.*（+EXPECTED_KEYS）| ⏳ | — |
-| .format-toolbar CSS（移动横滚）| ⏳ | — |
+| commands applyFormat+'code' / toggleLinePrefix / wrapCodeBlock | ✓ | `c3139d8` |
+| FormatToolbar 组件（mousedown preventDefault 保选区）+ EditorArea 装配 | ✓ | `c3139d8` |
+| i18n fmt.*（+EXPECTED_KEYS）| ✓ | `c3139d8` |
+| .format-toolbar CSS（移动横滚）| ✓ | `c3139d8` |
+
+> 测试：unit +11（CT-CODE×3 / CT-LP×6 / CT-CB×2）→ 274；e2e +5 用例（ac20，9 pass + 1 webkit undo skip，含移动 viewport 可见）→ 148+4skip。首屏 91.19KB。

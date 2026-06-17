@@ -156,6 +156,8 @@
 | F-V26-2 | 2026-06-15 | proposed | LOW (info) | 自动快照间隔/上限硬编码（5min / 30），无用户设置；MVP 接受 | 2026-06-15 v2.6 audit |
 | F-V26-3 | 2026-06-15 | proposed | LOW (info) | HistoryDialog 相对时间渲染时取一次 Date.now，长开不刷新（粗粒度可接受）| 2026-06-15 v2.6 audit |
 | F-V26-4 | 2026-06-15 | proposed | LOW (info) | lastSnap 内存缓存跨 tab 不共享 → 多 tab 并发写同文档可能略超间隔产近重复（F-V16-4 家族，多 tab 边缘）| 2026-06-15 v2.6 audit |
+| F-V27-1 | 2026-06-17 | proposed | LOW (info) | 工具栏 glyph 用 Unicode 字符非图标字体（🔗 emoji 随系统渲染）；视觉打磨 defer | 2026-06-17 v2.7 audit |
+| F-V27-2 | 2026-06-17 | proposed | LOW (info) | 行前缀 toggle「部分带→补齐为全加」无第三档部分态；与 B/I 直觉一致，MVP 接受 | 2026-06-17 v2.7 audit |
 
 ### Issue-process 审查
 
@@ -201,3 +203,4 @@
 | 2026-06-12 | v2.4 增量 audit（报告 `2026-06-12-v2.4-increment.md`）：编辑打磨包（Tab 缩进/帮助面板/TOC 高亮），**无 critical/high/medium**。实现期捕获 webkit「点按钮不转移焦点 → main 冒泡收不到 Esc」→ 改 window 级监听（范式：全局快捷键一律 window 级）；负载超时假阴性定性（27.6min 7 failed → 空载复跑 131/131 全过）。2 LOW info（F-V24-1 a11y 深审 defer / F-V24-2 高亮仅编辑器视口）。unit 249 + e2e 131 |
 | 2026-06-12 | v2.5 增量 audit（报告 `2026-06-12-v2.5-increment.md`）：打印 print CSS + 导出独立 HTML，**无 critical/high/medium**。导出产物**双重 sanitize**（unit+e2e 实证）；KaTeX CDN SRI 本地同版本文件计算（应用本体 CSP 零变化）；print 强制浅色+滚动容器解除双引擎验。**F-V22-1 二次复发 → 加固**（poll 10s）。3 LOW info（F-V25-1~3）。unit 255 + e2e 134 |
 | 2026-06-15 | v2.6 增量 audit（报告 `2026-06-15-v2.6-increment.md`）：文档版本快照（**L3 持久化根基**，DB v2→3 additive），**无 critical/high/medium**。升级零损 unit 实证 + 单写者 piggyback 无新写者/定时器 + 恢复保护快照 + cascade + FIFO 全枚举；M11 契约零变化。**实现期 DB 版本 bump 引入 e2e helper 回归**（_storage open v2→VersionError 静默→测试串扰，ac2 webkit 2 failed）→ 修 helper 升 v3 + fix-pattern-scan 落项（bump DB 须全仓 grep 版本号）；ac5 perf 负载 flake（隔离过）。4 LOW info（F-V26-1~4）。unit 263 + e2e 138。**四项拍板 scope 全交付** |
+| 2026-06-17 | v2.7 增量 audit（报告 `2026-06-17-v2.7-increment.md`）：Markdown 格式工具栏（8 按钮），**无 critical/high/medium**。**高复用**（4/8 走既有 applyFormat，新代码仅 toggleLinePrefix+wrapCodeBlock+组件）；全经 replaceRange undo 保持 + 移动 viewport 可见 e2e 实证；实现期处置工具栏夺焦（mousedown preventDefault）。2 LOW info（F-V27-1~2）。unit 274 + e2e 148。打磨批第一项 |

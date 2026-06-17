@@ -5,6 +5,9 @@ import {
   indentSelection,
   toggleLinePrefix,
   wrapCodeBlock,
+  insertTable,
+  tableCellNav,
+  isTableRow,
 } from '@/modules/m1-editor/commands';
 
 // jsdom 无 document.execCommand → replaceRange 走 fallback（setRangeText+input 事件），
@@ -264,5 +267,65 @@ describe('M1 wrapCodeBlock — CT-CB (AC-v27-5)', () => {
     wrapCodeBlock(ta);
     expect(ta.value).toBe('```\n\n```');
     expect(ta.selectionStart).toBe(4); // ```\n 之后
+  });
+});
+
+// 测试计划 v2.8 §家族 表格辅助（AC-v28-1~4）
+describe('M1 table assist — CT-TBL (AC-v28-1/2/3/4)', () => {
+  it('CT-TBL-1: isTableRow — | 起头 true / 普通行 false', () => {
+    expect(isTableRow('| a | b |')).toBe(true);
+    expect(isTableRow('  | a |')).toBe(true); // trim 后
+    expect(isTableRow('plain text')).toBe(false);
+    expect(isTableRow('a | b')).toBe(false); // 非起头
+  });
+
+  it('CT-TBL-2: insertTable 模板结构 + 光标选中首单元格占位', () => {
+    const ta = makeTA('', 0);
+    insertTable(ta);
+    expect(ta.value).toBe('| 列1 | 列2 |\n| --- | --- |\n| 单元格 | 单元格 |\n');
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('列1');
+  });
+
+  it('CT-TBL-3: insertTable 非行首 → 先换行起块', () => {
+    const ta = makeTA('text', 4); // 光标在 text 后
+    insertTable(ta);
+    expect(ta.value.startsWith('text\n| 列1 |')).toBe(true);
+  });
+
+  it('CT-TBL-4: 行内 Tab → 跳下一单元格并选中文本', () => {
+    const ta = makeTA('| aa | bb |', 3); // 光标在 aa 单元格
+    expect(tableCellNav(ta, false)).toBe(true);
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('bb');
+  });
+
+  it('CT-TBL-5: Shift+Tab → 跳上一单元格', () => {
+    const ta = makeTA('| aa | bb |', 8); // 光标在 bb
+    expect(tableCellNav(ta, true)).toBe(true);
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('aa');
+  });
+
+  it('CT-TBL-6: 末单元格 Tab → 跳下一行首单元格', () => {
+    const ta = makeTA('| aa | bb |\n| cc | dd |', 8); // bb（末单元格）
+    expect(tableCellNav(ta, false)).toBe(true);
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('cc');
+  });
+
+  it('CT-TBL-7: 末行末单元格 Tab → 新增同列数空行', () => {
+    const ta = makeTA('| aa | bb |', 8); // 单行表，bb 末单元格
+    expect(tableCellNav(ta, false)).toBe(true);
+    expect(ta.value).toBe('| aa | bb |\n| 单元格 | 单元格 |');
+    expect(ta.value.slice(ta.selectionStart, ta.selectionEnd)).toBe('单元格');
+  });
+
+  it('CT-TBL-8: 非表格行 → tableCellNav 返 false（交回缩进）', () => {
+    const ta = makeTA('plain', 2);
+    expect(tableCellNav(ta, false)).toBe(false);
+  });
+
+  it('CT-TBL-9: 首行行首 Shift+Tab → 吞掉（返 true，不动作）', () => {
+    const ta = makeTA('| aa | bb |', 2); // aa 首单元格
+    const before = ta.value;
+    expect(tableCellNav(ta, true)).toBe(true);
+    expect(ta.value).toBe(before); // 内容不变
   });
 });

@@ -3,7 +3,12 @@ import type { DocumentState } from './state';
 import { createFindController } from './find';
 import { FindBar } from './FindBar';
 import { FormatToolbar } from './FormatToolbar';
-import { applyFormat, continueList, indentSelection } from './commands';
+import {
+  applyFormat,
+  continueList,
+  indentSelection,
+  tableCellNav,
+} from './commands';
 import { countWords, formatWordCount } from './wordcount';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -81,6 +86,11 @@ export function EditorArea(props: EditorAreaProps) {
     if (e.key === 'Tab' && !mod && !e.altKey) {
       if (allowTabOnce) {
         allowTabOnce = false; // 放行一次（原生焦点移动）
+        return;
+      }
+      // v2.8（ADR-024 D4）：表格行 → 单元格导航；非表格行落 v2.4 缩进
+      if (tableCellNav(taRef, e.shiftKey)) {
+        e.preventDefault();
         return;
       }
       e.preventDefault();

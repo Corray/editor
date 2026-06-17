@@ -1,6 +1,11 @@
 import { For } from 'solid-js';
 import { t } from '@/modules/m7-i18n/i18n';
-import { applyFormat, toggleLinePrefix, wrapCodeBlock } from './commands';
+import {
+  applyFormat,
+  toggleLinePrefix,
+  wrapCodeBlock,
+  insertTable,
+} from './commands';
 
 export interface FormatToolbarProps {
   /** 取当前 textarea（EditorArea 持 taRef）；undefined 时按钮 no-op。 */
@@ -25,6 +30,7 @@ export function FormatToolbar(props: FormatToolbarProps) {
     { key: 'ul', label: '•', run: (ta) => toggleLinePrefix(ta, 'ul') },
     { key: 'ol', label: '1.', run: (ta) => toggleLinePrefix(ta, 'ol') },
     { key: 'codeblock', label: '{ }', run: (ta) => wrapCodeBlock(ta) },
+    { key: 'table', label: '⊞', run: (ta) => insertTable(ta) },
   ];
 
   const onClick = (run: Btn['run']) => {

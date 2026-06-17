@@ -97,6 +97,7 @@ const EXPECTED_KEYS = [
   'fmt.ul',
   'fmt.ol',
   'fmt.codeblock',
+  'fmt.table',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

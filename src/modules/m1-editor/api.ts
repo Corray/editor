@@ -30,6 +30,9 @@ export {
   indentSelection,
   toggleLinePrefix,
   wrapCodeBlock,
+  insertTable,
+  tableCellNav,
+  isTableRow,
 } from './commands';
 export type { FormatKind, LinePrefixKind } from './commands';
 export { countWords, formatWordCount } from './wordcount';

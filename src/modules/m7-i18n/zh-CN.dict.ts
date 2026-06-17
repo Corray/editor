@@ -38,6 +38,7 @@ export const zhCNDict = {
   'fmt.ul': '无序列表',
   'fmt.ol': '有序列表',
   'fmt.codeblock': '代码块',
+  'fmt.table': '插入表格',
 
   // M1 查找/替换 + 字数统计 (v2.1 / ADR-017)
   'find.placeholder': '查找…',

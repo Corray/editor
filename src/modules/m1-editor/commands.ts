@@ -143,6 +143,127 @@ export function toggleLinePrefix(
   replaceRange(ta, blockStart, blockEnd, out, { start: newStart, end: newEnd });
 }
 
+// —— v2.8 表格辅助（ADR-024）——
+
+/** 当前行是否表格行（trim 后 `|` 起头 / ADR-024 D2）。 */
+export function isTableRow(line: string): boolean {
+  return line.trim().startsWith('|');
+}
+
+/** 插入 2 列表格模板（ADR-024 D1），光标选中首单元格占位。 */
+export function insertTable(ta: HTMLTextAreaElement): void {
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  // 若光标不在行首，先换行起新块
+  const atLineStart = s === 0 || ta.value[s - 1] === '\n';
+  const lead = atLineStart ? '' : '\n';
+  const tpl =
+    lead + '| 列1 | 列2 |\n| --- | --- |\n| 单元格 | 单元格 |\n';
+  const cellStart = s + lead.length + 2; // '| ' 之后
+  replaceRange(ta, s, e, tpl, {
+    start: cellStart,
+    end: cellStart + 2, // 选中 '列1'
+  });
+}
+
+/**
+ * 单元格文本区间：行内相邻 `|` 之间为一个 cell，返回其 trim 后文本的 [start,end)（绝对偏移）。
+ * `| a | b |` → 2 cells（前导/尾随 `|` 外的空段不计）。空单元格 start==end（光标落入点）。
+ */
+function tableCells(
+  value: string,
+  lineStart: number,
+  lineEnd: number,
+): { start: number; end: number }[] {
+  const line = value.slice(lineStart, lineEnd);
+  const pipes: number[] = [];
+  for (let i = 0; i < line.length; i++) if (line[i] === '|') pipes.push(i);
+  const cells: { start: number; end: number }[] = [];
+  for (let k = 0; k + 1 < pipes.length; k++) {
+    const segStart = pipes[k]! + 1;
+    const seg = line.slice(segStart, pipes[k + 1]!);
+    const lead = seg.length - seg.trimStart().length;
+    const trimmed = seg.trim();
+    const absStart = lineStart + segStart + lead;
+    cells.push({ start: absStart, end: absStart + trimmed.length });
+  }
+  return cells;
+}
+
+/**
+ * 表格行内 Tab 单元格导航（ADR-024 D3）。reverse=Shift+Tab。
+ * 返回 true=已处理（调用方 preventDefault）；非表格行返 false（交回缩进）。
+ */
+export function tableCellNav(
+  ta: HTMLTextAreaElement,
+  reverse: boolean,
+): boolean {
+  const value = ta.value;
+  const pos = ta.selectionStart;
+  const lineStart = value.lastIndexOf('\n', pos - 1) + 1;
+  const lineEndIdx = value.indexOf('\n', pos);
+  const lineEnd = lineEndIdx === -1 ? value.length : lineEndIdx;
+  if (!isTableRow(value.slice(lineStart, lineEnd))) return false;
+
+  const cells = tableCells(value, lineStart, lineEnd);
+  if (cells.length === 0) return false;
+  // 当前单元格 index（光标落在哪个 cell 区间内或之前）
+  let idx = cells.findIndex((c) => pos <= c.end);
+  if (idx === -1) idx = cells.length - 1;
+
+  const select = (c: { start: number; end: number }): void => {
+    ta.focus();
+    ta.setSelectionRange(c.start, c.end);
+  };
+
+  if (!reverse) {
+    if (idx < cells.length - 1) {
+      select(cells[idx + 1]!); // 行内下一单元格
+      return true;
+    }
+    // 行末单元格 → 下一行首单元格 / 末行新增
+    const nextStart = lineEnd + 1;
+    const nextEndIdx = value.indexOf('\n', nextStart);
+    const nextEnd = nextEndIdx === -1 ? value.length : nextEndIdx;
+    if (lineEnd < value.length && isTableRow(value.slice(nextStart, nextEnd))) {
+      const nextCells = tableCells(value, nextStart, nextEnd);
+      if (nextCells.length > 0) {
+        select(nextCells[0]!);
+        return true;
+      }
+    }
+    // 末行 → 新增同列数空行
+    const cols = cells.length;
+    const newRow =
+      '\n|' + Array.from({ length: cols }, () => ' 单元格 ').join('|') + '|';
+    const insertAt = lineEnd;
+    const firstCellStart = insertAt + 3; // newRow: \n | ' ' 单 → '单元格' 起于 +3
+    replaceRange(ta, insertAt, insertAt, newRow, {
+      start: firstCellStart,
+      end: firstCellStart + 3, // 选中 '单元格'
+    });
+    return true;
+  } else {
+    if (idx > 0) {
+      select(cells[idx - 1]!); // 行内上一单元格
+      return true;
+    }
+    // 行首单元格 → 上一行末单元格
+    if (lineStart > 0) {
+      const prevEnd = lineStart - 1;
+      const prevStart = value.lastIndexOf('\n', prevEnd - 1) + 1;
+      if (isTableRow(value.slice(prevStart, prevEnd))) {
+        const prevCells = tableCells(value, prevStart, prevEnd);
+        if (prevCells.length > 0) {
+          select(prevCells[prevCells.length - 1]!);
+          return true;
+        }
+      }
+    }
+    return true; // 首行行首 → 吞掉（不缩进）
+  }
+}
+
 /**
  * 代码块围栏（v2.7 / ADR-023 D3）：选区包进 ``` 独立行；无选区插空围栏光标置内。
  */

@@ -4,6 +4,42 @@
 
 ---
 
+## v1.13.0-rc.1 — frontmatter (YAML) 支持（v3.3）（2026-06-18）
+
+**Tag:** `v1.13.0-rc.1` @ commit `b3e45cf`
+**Range:** `f850d19..b3e45cf`（v1.12.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第三批 scope 第三项；余 v3.4 扩展包压轴）。仍 RC。
+
+### Scope — frontmatter (YAML)（共识 v3.3 / ADR-029 / `a3468a9`）
+
+- 自定义 markdown-it block rule（`before('hr')`）：仅文档头 `---`...`---` 识别为 metadata 框，**不渲染为 `<hr>`+乱内容**
+- **识别边界严**：仅 `startLine===0` + 首行 `---` + 有闭合 `---`；文中 `---` / 无闭合 → 落 hr（不误吞）
+- 轻量 `key: value` 行解析（首个 `:` 分隔，嵌套/数组行原样显示）；**不引 js-yaml**（无依赖 + 无 YAML 解析面）
+- **sanitize 零放宽**：值 `escapeHtml` + render() 既有 DOMPurify；ADD_ATTR 仍仅 data-source-line（ADR-002 不动）
+
+### Quality Gates [已验证: 2026-06-18 本机]
+
+- 322 unit（+7 CT-FM：识别/文中 hr/无闭合/嵌套/含冒号/空/XSS）
+- 186 e2e / 4 skip（ac26 新 3 用例双引擎：metadata 框/文中 hr/XSS 门槛）
+- 首屏 95.77 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-18 增量）
+
+报告：`docs/audit/2026-06-18-v3.3-increment.md`。**无 critical/high/medium**；识别边界严 + sanitize 零放宽（XSS 双引擎验）+ 无新依赖。2 LOW info（F-V33-1 仅平铺解析 / F-V33-2 块无 source-line）。
+
+### Known Limitations
+
+- 仅平铺 `key: value` 结构化，嵌套/数组原样行显示（不引 js-yaml，F-V33-1）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V33-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M2/ADR-029/api/test-plan v3.3）落档 + 追溯回填；package.json → 1.13.0-rc.1
+
+---
+
 ## v1.12.0-rc.1 — 文档统计面板（v3.2）（2026-06-18）
 
 **Tag:** `v1.12.0-rc.1` @ commit `f850d19`

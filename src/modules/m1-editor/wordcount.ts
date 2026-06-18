@@ -60,6 +60,70 @@ export function countWords(text: string): WordCount {
   return { cjk, words, minutes };
 }
 
+/** 文档统计（v3.2 / ADR-028 D1）。单遍 charCode + 行扫描，复用 countWords 算法（字段一致）。 */
+export interface DocStats {
+  charsWithSpaces: number;
+  charsNoSpaces: number;
+  words: number;
+  cjk: number;
+  headings: number;
+  paragraphs: number;
+  /** 同 WordCount.minutes：0=空 / -1=<1 / N */
+  minutes: number;
+}
+
+const WS_RE = /\s/;
+
+export function computeStats(text: string): DocStats {
+  let cjk = 0;
+  let words = 0;
+  let charsNoSpaces = 0;
+  let inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    const ch = text[i]!;
+    if (!WS_RE.test(ch)) charsNoSpaces += 1;
+    if (isCJK(c)) {
+      cjk += 1;
+      inWord = false;
+    } else if (isWordChar(c)) {
+      if (!inWord) {
+        words += 1;
+        inWord = true;
+      }
+    } else if (c < 0xd800 || c > 0xdfff) {
+      inWord = false;
+    }
+  }
+  // 行级：标题数（# 行）+ 段落数（空行分隔的非空块）
+  let headings = 0;
+  let paragraphs = 0;
+  let inPara = false;
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (/^#{1,6}\s/.test(line)) headings += 1;
+    if (line === '') {
+      inPara = false;
+    } else if (!inPara) {
+      paragraphs += 1;
+      inPara = true;
+    }
+  }
+
+  const total = cjk + words;
+  const raw = cjk / 400 + words / 200;
+  const minutes = total === 0 ? 0 : raw < 1 ? -1 : Math.round(raw);
+  return {
+    charsWithSpaces: text.length,
+    charsNoSpaces,
+    words,
+    cjk,
+    headings,
+    paragraphs,
+    minutes,
+  };
+}
+
 /** "N 字 · 约 M 分钟"；空文档 = "0 字"（不显时长）。 */
 export function formatWordCount(
   wc: WordCount,

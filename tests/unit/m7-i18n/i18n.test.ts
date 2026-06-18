@@ -110,6 +110,14 @@ const EXPECTED_KEYS = [
   'settings.language',
   'settings.language.zh',
   'settings.language.en',
+  'stats.title',
+  'stats.charsWithSpaces',
+  'stats.charsNoSpaces',
+  'stats.words',
+  'stats.cjk',
+  'stats.headings',
+  'stats.paragraphs',
+  'stats.readingTime',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

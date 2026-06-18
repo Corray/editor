@@ -1,15 +1,23 @@
-import { createDeferred, createMemo, For, Show, type Accessor } from 'solid-js';
+import {
+  createDeferred,
+  createMemo,
+  createSignal,
+  For,
+  Show,
+  type Accessor,
+} from 'solid-js';
 import type { DocumentState } from './state';
 import { createFindController } from './find';
 import { FindBar } from './FindBar';
 import { FormatToolbar } from './FormatToolbar';
+import { StatsPanel } from './StatsPanel';
 import {
   applyFormat,
   continueList,
   indentSelection,
   tableCellNav,
 } from './commands';
-import { countWords, formatWordCount } from './wordcount';
+import { countWords, formatWordCount, computeStats } from './wordcount';
 import { t } from '@/modules/m7-i18n/i18n';
 
 export interface EditorAreaProps {
@@ -52,6 +60,9 @@ export function EditorArea(props: EditorAreaProps) {
   const wordCountText = createMemo(() =>
     formatWordCount(countWords(deferredText()), t),
   );
+  // v3.2：点击 status bar 展开详细统计（同 deferred 出输入路径 / ADR-028）
+  const [statsOpen, setStatsOpen] = createSignal(false);
+  const stats = createMemo(() => computeStats(deferredText()));
 
   const showGutter = () => props.showLineNumbers?.() ?? false;
   const lineCount = createMemo(() => props.state.text().split('\n').length);
@@ -146,7 +157,22 @@ export function EditorArea(props: EditorAreaProps) {
           spellcheck="false"
         />
       </div>
-      <div class="editor-status">{wordCountText()}</div>
+      <div class="editor-status-wrap">
+        <button
+          type="button"
+          class="editor-status"
+          aria-haspopup="dialog"
+          aria-expanded={statsOpen()}
+          onClick={() => setStatsOpen((v) => !v)}
+        >
+          {wordCountText()}
+        </button>
+        <StatsPanel
+          open={statsOpen()}
+          onClose={() => setStatsOpen(false)}
+          stats={stats}
+        />
+      </div>
     </div>
   );
 }

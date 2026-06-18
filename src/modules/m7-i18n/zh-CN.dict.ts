@@ -52,6 +52,16 @@ export const zhCNDict = {
   'wordcount.empty': '0 字',
   'wordcount.fmt': '{n} 字 · 约 {m} 分钟',
 
+  // M1 文档统计面板 (v3.2 / ADR-028)
+  'stats.title': '文档统计',
+  'stats.charsWithSpaces': '字符数（含空格）',
+  'stats.charsNoSpaces': '字符数（不含空格）',
+  'stats.words': '词数',
+  'stats.cjk': 'CJK 字数',
+  'stats.headings': '标题数',
+  'stats.paragraphs': '段落数',
+  'stats.readingTime': '阅读时长（分钟）',
+
   // M12 大纲 (v2.2 / ADR-018)
   'outline.title': '大纲',
   'outline.empty': '暂无标题',

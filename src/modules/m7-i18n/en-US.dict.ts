@@ -50,6 +50,16 @@ export const enUSDict: Record<DictKey, string> = {
   'wordcount.empty': '0 words',
   'wordcount.fmt': '{n} words · ~{m} min',
 
+  // M1 document stats panel (v3.2)
+  'stats.title': 'Document stats',
+  'stats.charsWithSpaces': 'Characters (with spaces)',
+  'stats.charsNoSpaces': 'Characters (no spaces)',
+  'stats.words': 'Words',
+  'stats.cjk': 'CJK characters',
+  'stats.headings': 'Headings',
+  'stats.paragraphs': 'Paragraphs',
+  'stats.readingTime': 'Reading time (min)',
+
   // M12 outline (v2.2)
   'outline.title': 'Outline',
   'outline.empty': 'No headings',

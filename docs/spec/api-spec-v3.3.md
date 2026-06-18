@@ -28,7 +28,9 @@ type FmRow = { key: string; value: string } | { raw: string };
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| pipeline installFrontmatter（block rule + renderer，仅 doc 头 + 闭合校验）| ⏳ | — |
-| 轻量 key:value 行解析（嵌套原样）| ⏳ | — |
-| base+katex 均装 | ⏳ | — |
-| .frontmatter CSS | ⏳ | — |
+| pipeline installFrontmatter（block.ruler.before hr，仅 startLine 0 + 闭合校验）| ✓ | `a3468a9` |
+| 轻量 key:value 行解析（嵌套/数组原样 raw）| ✓ | `a3468a9` |
+| base+katex 均装 | ✓ | `a3468a9` |
+| .frontmatter CSS（弱样式 metadata 框）| ✓ | `a3468a9` |
+
+> 测试：unit +7（CT-FM：识别/文中 hr/无闭合/嵌套/含冒号/空/XSS）→ 322；e2e +3 用例双引擎（ac26，含 XSS 门槛）→ 186+4skip。首屏 95.77KB。

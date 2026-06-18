@@ -18,6 +18,9 @@ import {
   ensureHighlight,
   highlightReady,
   toggleTaskAtLine,
+  hasExtension,
+  ensureExtensions,
+  extensionsReady,
 } from './pipeline';
 import { t } from '@/modules/m7-i18n/i18n';
 
@@ -52,6 +55,8 @@ export function PreviewArea(props: PreviewAreaProps) {
   const [katexVer, setKatexVer] = createSignal(0);
   // v2.3 highlight.js 懒加载（ADR-019，katexVer 同构）。
   const [hlVer, setHlVer] = createSignal(0);
+  // v3.4 markdown 扩展包懒加载（ADR-030，katexVer 同构）。
+  const [extVer, setExtVer] = createSignal(0);
 
   // 防抖渲染源：renderText 跟随 state.text()，但大文档 / 含 mermaid 时延迟到输入停顿。
   // textarea 仍即时响应（输入处理廉价）；仅昂贵的 render() 被推迟。
@@ -72,12 +77,16 @@ export function PreviewArea(props: PreviewAreaProps) {
   const html = createMemo(() => {
     katexVer();
     hlVer();
+    extVer();
     const text = renderText();
     if (hasMath(text) && !katexReady()) {
       void ensureKatex().then(() => setKatexVer((v) => v + 1));
     }
     if (hasCode(text) && !highlightReady()) {
       void ensureHighlight().then(() => setHlVer((v) => v + 1));
+    }
+    if (hasExtension(text) && !extensionsReady()) {
+      void ensureExtensions().then(() => setExtVer((v) => v + 1));
     }
     return render(text);
   });

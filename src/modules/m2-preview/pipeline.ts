@@ -164,6 +164,49 @@ installSourceLine(baseMd);
 installTaskList(baseMd);
 installFrontmatter(baseMd);
 
+// —— markdown 扩展包（v3.4 / ADR-030）：emoji/脚注/上下标 懒加载 ——
+// 插件 .use() mutate 实例，每实例只应用一次（baseMd + katexMd 对称协同）。
+let extPlugins: ((md: MarkdownIt) => void)[] | null = null;
+let extLoad: Promise<void> | null = null;
+
+/** 文本是否含扩展语法（emoji/脚注/sub/sup）→ 决定懒加载（误判最坏多加载一次）。 */
+export function hasExtension(markdown: string): boolean {
+  return /:[a-z0-9_+-]+:|\[\^[^\]]+\]|~[^~\s]+~|\^[^\^\s]+\^/.test(markdown);
+}
+
+/** 扩展插件是否已加载。 */
+export function extensionsReady(): boolean {
+  return extPlugins !== null;
+}
+
+function applyExtensions(md: MarkdownIt): void {
+  if (!extPlugins) return;
+  for (const p of extPlugins) p(md);
+}
+
+/** 一次性懒加载 4 插件 + 应用到现有实例（baseMd + katexMd?）。memoized（ADR-030 D1/D2）。 */
+export function ensureExtensions(): Promise<void> {
+  if (!extLoad) {
+    extLoad = (async () => {
+      const [emoji, footnote, sub, sup] = await Promise.all([
+        import('markdown-it-emoji'),
+        import('markdown-it-footnote'),
+        import('markdown-it-sub'),
+        import('markdown-it-sup'),
+      ]);
+      extPlugins = [
+        (md) => md.use(emoji.full),
+        (md) => md.use(footnote.default),
+        (md) => md.use(sub.default),
+        (md) => md.use(sup.default),
+      ];
+      applyExtensions(baseMd);
+      if (katexMd) applyExtensions(katexMd); // 对称：katex 已建 → 同步应用
+    })();
+  }
+  return extLoad;
+}
+
 /**
  * 翻转源文第 line（0-based）行的任务标记 `[ ]`↔`[x]`（v3.1 / ADR-027）。
  * 非任务行 / 越界 → 原样返回。点击 checkbox 委托调用。
@@ -250,6 +293,7 @@ export function ensureKatex(): Promise<void> {
       installSourceLine(katexMd); // 同样标 data-source-line（v1.7）
       installTaskList(katexMd); // task list 渲染（v3.1）
       installFrontmatter(katexMd); // frontmatter metadata 框（v3.3）
+      applyExtensions(katexMd); // 对称：扩展已载 → 同步应用到新建的 katexMd（v3.4）
     })();
   }
   return loadPromise;

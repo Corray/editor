@@ -167,6 +167,8 @@
 | F-V30-2 | 2026-06-17 | proposed | LOW (info) | 用户文档内容不翻译（仅 UI chrome）；符合范围，文档化 | 2026-06-17 v3.0 audit |
 | F-V31-1 | 2026-06-17 | proposed | LOW (info) | 大文档防抖下点击 checkbox 视觉更新延迟 ≤120ms（源文已即时翻转，仅视觉滞后）| 2026-06-17 v3.1 audit |
 | F-V31-2 | 2026-06-17 | proposed | LOW (info) | 有序任务列表 `1. [ ]` 不渲 checkbox（仅 `-`/`*`/`+`，GFM 惯例）；罕见，文档化 | 2026-06-17 v3.1 audit |
+| F-V32-1 | 2026-06-18 | proposed | LOW (info) | 统计标题数不跳 fenced code（``` 内 # 计入）；与 v2.2 大纲（跳 fence）不一致但粗粒度可接受，文档化 | 2026-06-18 v3.2 audit |
+| F-V32-2 | 2026-06-18 | proposed | LOW (info) | status bar 改 button（语义化+可聚焦），视觉同 div 无回归 | 2026-06-18 v3.2 audit |
 
 ### Issue-process 审查
 
@@ -217,3 +219,4 @@
 | 2026-06-17 | v2.9 增量 audit（报告 `2026-06-17-v2.9-increment.md`）：设置面板 M13（收口散落常量），**无 critical/high/medium**。**架构价值**：快照间隔/上限从硬编码收口 M13 单一来源 + 纯 IDB 层不耦合 Solid（store 收数值参数 / manager 读 accessor）；向后兼容零行为变化 unit 实证（settings 缺省回原常量）。实现期 tsc 抓测试 afterEach 表达式返回类型错（vitest 漏过 / 教训：提交前 build 非仅 vitest）+ SettingsDialog Esc 漏加（ac22 捕获）。2 LOW info（F-V29-1~2）。unit 292 + e2e 162。打磨批第三项 |
 | 2026-06-17 | v3.0 增量 audit（报告 `2026-06-17-v3.0-increment.md`）：国际化 en-US（全量 dict + 语言切换 + 持久化 + navigator 检测），**无 critical/high/medium**。**完整性编译期强制**（`Record<DictKey,string>` 漏译=tsc 报错）+ 运行时 key 集相等双保险。**v3.0 引入两处测试回归**：① navigator.language 检测 × Playwright en-US locale → 既有中文 e2e 全失败 → resetStorage seed zh-CN systemic 修复 + **PP-006 落档**；② 加语言 select 破坏 ac22 `.last()` 位置 → select 全加 aria-label。2 LOW info（F-V30-1~2）。unit 297 + e2e 166。**第二批打磨 scope 全交付** |
 | 2026-06-17 | v3.1 增量 audit（报告 `2026-06-17-v3.1-increment.md`）：预览任务清单交互（GFM checkbox + 点击回写），**无 critical/high/medium**。**安全红线零放宽**（DOMPurify 探针前置 + unit + e2e 双引擎三重验 XSS）；复用 v1.7 data-source-line 映射 + 单一数据源回写（preventDefault + setText 重渲染驱动真值）。2 LOW info（F-V31-1 防抖视觉延迟 / F-V31-2 有序任务不渲）。unit 309 + e2e 176。第三批 scope 第一项 |
+| 2026-06-18 | v3.2 增量 audit（报告 `2026-06-18-v3.2-increment.md`）：文档统计面板（点 status bar 展开 7 项），**无 critical/high/medium**。**一致性保障**：computeStats 复用 countWords 算法 → words/cjk/minutes 与 status bar 摘要保证一致（CT-STATS-2 同输入实证防分叉）；deferred 出输入路径。2 LOW info（F-V32-1 标题不跳 fence / F-V32-2 status bar 改 button）。unit 315 + e2e 180。第三批 scope 第二项 |

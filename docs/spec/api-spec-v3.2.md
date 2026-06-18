@@ -36,7 +36,9 @@ export function StatsPanel(props: { open: boolean; onClose: () => void; stats: A
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| wordcount computeStats + DocStats | ⏳ | — |
-| StatsPanel + EditorArea status bar 点击 + deferred | ⏳ | — |
-| i18n stats.*（zh+en，+EXPECTED_KEYS）| ⏳ | — |
-| .stats-* CSS | ⏳ | — |
+| wordcount computeStats + DocStats（单遍 + 行扫描，字段与 countWords 一致）| ✓ | `b1de3b1` |
+| StatsPanel + EditorArea status bar（button）点击 + deferred | ✓ | `b1de3b1` |
+| i18n stats.*（zh+en，+EXPECTED_KEYS）| ✓ | `b1de3b1` |
+| .stats-* CSS（弹层锚 status bar 上方 + backdrop 关闭）| ✓ | `b1de3b1` |
+
+> 测试：unit +6（CT-STATS：字符/一致性/标题/段落/空文档/混排）→ 315；e2e +2 用例双引擎（ac25）→ 180+4skip。首屏 95.35KB。

@@ -796,6 +796,37 @@
   overflow-x: auto;
 }
 
+/* v3.3 frontmatter metadata 框 (ADR-029) */
+.preview-content .frontmatter {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+}
+.preview-content .frontmatter dl {
+  margin: 0;
+}
+.preview-content .frontmatter__row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.1rem 0;
+}
+.preview-content .frontmatter__row dt {
+  color: var(--muted);
+  min-width: 5rem;
+  font-weight: 600;
+}
+.preview-content .frontmatter__row dd {
+  margin: 0;
+}
+.preview-content .frontmatter__raw {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 0.1rem 0;
+}
+
 /* v3.1 task list checkbox (ADR-027) */
 .preview-content .task-checkbox {
   margin: 0 0.4em 0 -1.3em;

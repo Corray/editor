@@ -96,11 +96,73 @@ function installTaskList(md: MarkdownIt): void {
   };
 }
 
+/**
+ * frontmatter（v3.3 / ADR-029）：仅文档头 `---`...`---` 识别为 metadata 框（不渲染为
+ * hr+乱内容）。轻量 key:value 行解析（不引 js-yaml）；值 escapeHtml + 过 render() 默认
+ * DOMPurify（不放宽 / ADR-002）。文中 `---` 仍走 hr；无闭合不识别（落 hr）。
+ */
+function installFrontmatter(md: MarkdownIt): void {
+  md.block.ruler.before(
+    'hr',
+    'frontmatter',
+    (state, startLine, endLine, silent) => {
+      if (startLine !== 0) return false; // 仅文档最开头
+      const firstStart = state.bMarks[startLine]! + state.tShift[startLine]!;
+      const firstEnd = state.eMarks[startLine]!;
+      if (state.src.slice(firstStart, firstEnd).trim() !== '---') return false;
+      // 向下找闭合 ---
+      let closeLine = -1;
+      for (let l = startLine + 1; l < endLine; l++) {
+        const s = state.bMarks[l]! + state.tShift[l]!;
+        const e = state.eMarks[l]!;
+        if (state.src.slice(s, e).trim() === '---') {
+          closeLine = l;
+          break;
+        }
+      }
+      if (closeLine === -1) return false; // 无闭合 → 不识别（落 hr）
+      if (silent) return true;
+      // 收集 frontmatter 内容行
+      const rows: ({ key: string; value: string } | { raw: string })[] = [];
+      for (let l = startLine + 1; l < closeLine; l++) {
+        const s = state.bMarks[l]! + state.tShift[l]!;
+        const e = state.eMarks[l]!;
+        const line = state.src.slice(s, e);
+        const m = /^([^:\s][^:]*?):\s*(.*)$/.exec(line);
+        if (m) rows.push({ key: m[1]!, value: m[2]! });
+        else if (line.trim() !== '') rows.push({ raw: line });
+      }
+      const token = state.push('frontmatter', '', 0);
+      token.meta = { rows };
+      token.map = [startLine, closeLine + 1];
+      state.line = closeLine + 1;
+      return true;
+    },
+    { alt: [] },
+  );
+
+  md.renderer.rules.frontmatter = (tokens, idx) => {
+    const rows = (tokens[idx]!.meta as {
+      rows: ({ key: string; value: string } | { raw: string })[];
+    }).rows;
+    const esc = md.utils.escapeHtml;
+    const body = rows
+      .map((r) =>
+        'raw' in r
+          ? `<div class="frontmatter__raw">${esc(r.raw)}</div>`
+          : `<div class="frontmatter__row"><dt>${esc(r.key)}</dt><dd>${esc(r.value)}</dd></div>`,
+      )
+      .join('');
+    return `<div class="frontmatter"><dl>${body}</dl></div>\n`;
+  };
+}
+
 /** 基底渲染器（无 KaTeX）—— KaTeX 未懒加载时用。 */
 const baseMd = new MarkdownIt(MD_OPTS);
 installMermaidFence(baseMd);
 installSourceLine(baseMd);
 installTaskList(baseMd);
+installFrontmatter(baseMd);
 
 /**
  * 翻转源文第 line（0-based）行的任务标记 `[ ]`↔`[x]`（v3.1 / ADR-027）。
@@ -187,6 +249,7 @@ export function ensureKatex(): Promise<void> {
       installMermaidFence(katexMd); // katex 渲染器也要认 mermaid fence
       installSourceLine(katexMd); // 同样标 data-source-line（v1.7）
       installTaskList(katexMd); // task list 渲染（v3.1）
+      installFrontmatter(katexMd); // frontmatter metadata 框（v3.3）
     })();
   }
   return loadPromise;

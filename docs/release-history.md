@@ -4,6 +4,44 @@
 
 ---
 
+## v1.14.0-rc.1 — markdown 扩展包（emoji/脚注/上下标 / v3.4）（2026-06-18）
+
+**Tag:** `v1.14.0-rc.1` @ commit `46907c5`
+**Range:** `b3e45cf..46907c5`（v1.13.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（**第三批 scope 压轴**）。仍 RC。
+
+### Scope — markdown 扩展包（共识 v3.4 / ADR-030 / `586b66a`）
+
+- emoji `:smile:`（markdown-it-emoji full 全量 shortcode）/ 脚注 `[^1]` / 上下标 `~sub~` `^sup^`
+- **懒加载**：`hasExtension` 启发式触发（katex/mermaid/hljs 范式），emoji data 进 lazy chunk，**首屏不含**（保 size 闸）
+- **双实例同步**：baseMd + katexMd × 扩展插件 mutate → applyExtensions 每实例恰好一次（对称协同，无双注册）
+- **sanitize 零放宽**：emoji Unicode / 脚注 `<sup><a><section><ol>` / `<sub><sup>` 均 DOMPurify 默认放行；ADR-002 不动；XSS 双引擎验
+
+### Quality Gates [已验证: 2026-06-18 本机]
+
+- 330 unit（+8 CT-EXT：启发式/降级/emoji/未知/脚注/上下标/XSS/零回归）
+- 190 e2e / 4 skip（ac27 新 2 用例双引擎：三扩展渲染 + XSS 门槛）
+- 首屏 96.00 KB gz（emoji data lazy 未进首屏，预算 150）；precache 1570→1654KB；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-18 增量）
+
+报告：`docs/audit/2026-06-18-v3.4-increment.md`。**无 critical/high/medium**；双实例同步无双注册（设计正确性验）+ 懒加载保首屏 + XSS 双引擎。2 LOW info（F-V34-1 precache +40% / F-V34-2 插件无官方类型）。
+
+### Known Limitations
+
+- precache 累计 1.65MB（emoji chunk +84KB，离线扩展可用代价，F-V34-1）
+- 4 插件本地 ambient 类型声明（升级 API 变需手动同步，F-V34-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V34-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M2/ADR-030/api/test-plan v3.4）落档 + 追溯回填；新依赖 emoji/footnote/sub/sup；package.json → 1.14.0-rc.1
+- **第三批 scope（v3.1 任务清单 / v3.2 统计面板 / v3.3 frontmatter / v3.4 扩展包）全部交付**
+
+---
+
 ## v1.13.0-rc.1 — frontmatter (YAML) 支持（v3.3）（2026-06-18）
 
 **Tag:** `v1.13.0-rc.1` @ commit `b3e45cf`

@@ -4,6 +4,41 @@
 
 ---
 
+## v1.12.0-rc.1 — 文档统计面板（v3.2）（2026-06-18）
+
+**Tag:** `v1.12.0-rc.1` @ commit `f850d19`
+**Range:** `bd2ff99..f850d19`（v1.11.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第三批 scope 第二项；余 v3.3 frontmatter → v3.4 扩展包）。仍 RC。
+
+### Scope — 文档统计面板（共识 v3.2 / ADR-028 / `b1de3b1`）
+
+- 点击编辑区底部 status bar（已显「N 字 · ~M 分钟」摘要）→ 展开统计弹层 7 项：字符（含/不含空格）/ 词 / CJK / 标题数 / 段落数 / 阅读时长
+- `computeStats` 单遍 charCode + 行扫描，**复用 countWords 算法** → words/cjk/minutes 与 status bar 摘要保证一致（不分叉）
+- deferred 出输入路径（同 wordcount 范式，不阻塞输入）；不加 header 按钮
+
+### Quality Gates [已验证: 2026-06-18 本机]
+
+- 315 unit（+6 CT-STATS：字符/与 countWords 一致性/标题/段落/空文档/混排）
+- 180 e2e / 4 skip（ac25 新 2 用例双引擎：点 status bar 开弹层 + 字段 + 空文档）
+- 首屏 95.35 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-18 增量）
+
+报告：`docs/audit/2026-06-18-v3.2-increment.md`。**无 critical/high/medium**；与 countWords 字段一致性 unit 实证（防算法分叉）。2 LOW info（F-V32-1 标题不跳 fence / F-V32-2 status bar 改 button）。
+
+### Known Limitations
+
+- 标题统计不跳 fenced code（与 v2.2 大纲不一致，粗粒度可接受，F-V32-1）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V32-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M1/ADR-028/api/test-plan v3.2）落档 + 追溯回填；package.json → 1.12.0-rc.1
+
+---
+
 ## v1.11.0-rc.1 — 预览任务清单交互（v3.1）（2026-06-17）
 
 **Tag:** `v1.11.0-rc.1` @ commit `bd2ff99`

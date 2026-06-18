@@ -30,8 +30,10 @@ export function ensureExtensions(): Promise<void>;
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| pipeline hasExtension/ensureExtensions/extensionsReady + applyExtensions 双实例同步 | ⏳ | — |
-| ensureKatex 协同 applyExtensions(katexMd) | ⏳ | — |
-| PreviewArea extVer 集成 | ⏳ | — |
-| 依赖 emoji/footnote/sub/sup | ⏳ | — |
-| .footnotes / sub/sup CSS（如需）| ⏳ | — |
+| pipeline hasExtension/ensureExtensions/extensionsReady + applyExtensions 双实例同步 | ✓ | `586b66a` |
+| ensureKatex 协同 applyExtensions(katexMd)（对称，无双注册）| ✓ | `586b66a` |
+| PreviewArea extVer 集成（katex/hljs 同构）| ✓ | `586b66a` |
+| 依赖 emoji@3.0.0/footnote@4.0.0/sub@2.0.0/sup@2.0.0 + 4 插件类型声明（vite-env.d.ts）| ✓ | `586b66a` |
+| 沿用浏览器默认 sub/sup/footnote 样式（无新 CSS）| ✓ | `586b66a` |
+
+> 测试：unit +8（CT-EXT：启发式/降级/emoji/未知/脚注/sub-sup/XSS/零回归）→ 330；e2e +2 用例双引擎（ac27，含 XSS 门槛）→ 190+4skip。首屏 96.00KB（emoji chunk lazy 未进首屏）；precache 1570→1654KB。

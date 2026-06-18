@@ -171,6 +171,8 @@
 | F-V32-2 | 2026-06-18 | proposed | LOW (info) | status bar 改 button（语义化+可聚焦），视觉同 div 无回归 | 2026-06-18 v3.2 audit |
 | F-V33-1 | 2026-06-18 | proposed | LOW (info) | frontmatter 仅平铺 key:value 结构化；嵌套/数组原样行显示（不引 js-yaml，张力 A）| 2026-06-18 v3.3 audit |
 | F-V33-2 | 2026-06-18 | proposed | LOW (info) | frontmatter 块无 data-source-line → 滚动同步略过该块（顶部小块影响微）| 2026-06-18 v3.3 audit |
+| F-V34-1 | 2026-06-18 | proposed | LOW (info) | precache 1654KB（emoji chunk +84KB / 较 F-V15-1 基线 1.18MB +40%）；再有重 chunk 应整体重评 precache vs runtimeCaching 分流 | 2026-06-18 v3.4 audit |
+| F-V34-2 | 2026-06-18 | proposed | LOW (info) | 4 markdown-it 插件无官方类型 → 本地 ambient declare（vite-env.d.ts）；升级 API 变需手动同步 | 2026-06-18 v3.4 audit |
 
 ### Issue-process 审查
 
@@ -223,3 +225,4 @@
 | 2026-06-17 | v3.1 增量 audit（报告 `2026-06-17-v3.1-increment.md`）：预览任务清单交互（GFM checkbox + 点击回写），**无 critical/high/medium**。**安全红线零放宽**（DOMPurify 探针前置 + unit + e2e 双引擎三重验 XSS）；复用 v1.7 data-source-line 映射 + 单一数据源回写（preventDefault + setText 重渲染驱动真值）。2 LOW info（F-V31-1 防抖视觉延迟 / F-V31-2 有序任务不渲）。unit 309 + e2e 176。第三批 scope 第一项 |
 | 2026-06-18 | v3.2 增量 audit（报告 `2026-06-18-v3.2-increment.md`）：文档统计面板（点 status bar 展开 7 项），**无 critical/high/medium**。**一致性保障**：computeStats 复用 countWords 算法 → words/cjk/minutes 与 status bar 摘要保证一致（CT-STATS-2 同输入实证防分叉）；deferred 出输入路径。2 LOW info（F-V32-1 标题不跳 fence / F-V32-2 status bar 改 button）。unit 315 + e2e 180。第三批 scope 第二项 |
 | 2026-06-18 | v3.3 增量 audit（报告 `2026-06-18-v3.3-increment.md`）：frontmatter (YAML) 支持（doc 头识别 + metadata 框），**无 critical/high/medium**。**识别边界严**（仅 startLine 0 + 闭合校验，文中 ---/无闭合落 hr 不误吞）；**sanitize 零放宽**（值 escapeHtml + 默认 DOMPurify，XSS 双引擎验）；无新依赖（不引 js-yaml）。2 LOW info（F-V33-1 仅平铺解析 / F-V33-2 块无 source-line）。unit 322 + e2e 186。第三批 scope 第三项 |
+| 2026-06-18 | v3.4 增量 audit（报告 `2026-06-18-v3.4-increment.md`）：markdown 扩展包（emoji/脚注/上下标 懒加载），**无 critical/high/medium**。**双实例同步无双注册**（baseMd+katexMd × applyExtensions 每实例一次，对称协同）；懒加载保首屏（emoji data 进 lazy chunk）；安全默认放行标准标签 + XSS 双引擎验。2 LOW info（F-V34-1 precache +40% / F-V34-2 插件无官方类型）。unit 330 + e2e 190。**第三批 scope 全交付** |

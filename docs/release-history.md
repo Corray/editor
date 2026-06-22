@@ -4,6 +4,42 @@
 
 ---
 
+## v1.17.0-rc.1 — 主题增强（强调色 / v3.7）（2026-06-22）
+
+**Tag:** `v1.17.0-rc.1` @ commit `92e1765`
+**Range:** `d84e2b1..92e1765`（v1.16.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第四批 scope 收尾）。仍 RC。
+
+### Scope — 强调色（共识 v3.7 / ADR-033 / `02003c5`）
+
+- M13 settings +accentColor：5 档预设（蓝默认 / 绿 / 紫 / 橙 / 玫红，各浅深双值保对比度）
+- `data-accent` 属性正交 M6 `data-theme`；blue 默认 → 删属性（用 variables.css 默认 --accent，**零变化**）
+- 设置面板 5 色块（active 环）；anti-poisoning 复用 v2.9 settings 范式
+- **诚实砍**：不加整套预设主题（sepia 等，全套 var 价值低于成本）
+
+### Quality Gates [已验证: 2026-06-22 本机]
+
+- 347 unit（+5 CT-SET-7~11：默认/持久化+应用/blue 删属性/非档位/坏值回退）
+- 202 e2e / 4 skip（ac30 新 2 用例双引擎，含 --accent computed 值验）
+- 首屏 97.01 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-22 增量）
+
+报告：`docs/audit/2026-06-22-v3.7-increment.md`。**无 critical/high/medium / 无新 finding**；正交 M6 + 默认零变化 + anti-poisoning 复用。
+
+### Known Limitations
+
+- 仅 5 预设强调色（无任意 color picker）；不加整套预设主题
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- 变更记录追加；spec 全链（共识/module-list M13/ADR-033/api/test-plan v3.7）落档 + 追溯回填；package.json → 1.17.0-rc.1
+- **第四批 scope（v3.5 callout / v3.6 mark-ins / v3.7 主题增强）全部交付**
+
+---
+
 ## v1.16.0-rc.1 — 文本高亮/标记（mark/ins / v3.6）（2026-06-22）
 
 **Tag:** `v1.16.0-rc.1` @ commit `d84e2b1`

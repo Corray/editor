@@ -62,6 +62,12 @@ export const zhCNDict = {
   'stats.paragraphs': '段落数',
   'stats.readingTime': '阅读时长（分钟）',
 
+  // M2 callout 容器块 (v3.5 / ADR-031)
+  'callout.note': '注意',
+  'callout.tip': '提示',
+  'callout.warning': '警告',
+  'callout.danger': '危险',
+
   // M12 大纲 (v2.2 / ADR-018)
   'outline.title': '大纲',
   'outline.empty': '暂无标题',

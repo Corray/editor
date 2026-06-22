@@ -33,3 +33,9 @@ declare module 'markdown-it-sup' {
   const plugin: (md: MarkdownIt) => void;
   export default plugin;
 }
+declare module 'markdown-it-container' {
+  import type MarkdownIt from 'markdown-it';
+  // v3.5：(md, name, opts) 插件；opts.render 自定义渲染
+  const plugin: (md: MarkdownIt, name: string, opts?: unknown) => void;
+  export default plugin;
+}

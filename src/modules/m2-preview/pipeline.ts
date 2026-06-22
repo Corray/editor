@@ -1,6 +1,7 @@
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
 import type { HLJSApi } from 'highlight.js';
+import { t } from '@/modules/m7-i18n/i18n'; // v3.5：callout 默认类型名标题
 
 // —— 语法高亮（v2.3 / ADR-019）——
 // hljs 懒加载；MD_OPTS.highlight 闭包在 render 期读取 → 加载完成后无需重建渲染器。
@@ -169,10 +170,15 @@ installFrontmatter(baseMd);
 let extPlugins: ((md: MarkdownIt) => void)[] | null = null;
 let extLoad: Promise<void> | null = null;
 
-/** 文本是否含扩展语法（emoji/脚注/sub/sup）→ 决定懒加载（误判最坏多加载一次）。 */
+/** 文本是否含扩展语法（emoji/脚注/sub/sup/callout）→ 决定懒加载（误判最坏多加载一次）。 */
 export function hasExtension(markdown: string): boolean {
-  return /:[a-z0-9_+-]+:|\[\^[^\]]+\]|~[^~\s]+~|\^[^\^\s]+\^/.test(markdown);
+  return /:[a-z0-9_+-]+:|\[\^[^\]]+\]|~[^~\s]+~|\^[^\^\s]+\^|(^|\n):::[a-z]/.test(
+    markdown,
+  );
 }
+
+/** callout 类型（v3.5 / ADR-031）。 */
+const CALLOUT_TYPES = ['note', 'tip', 'warning', 'danger'] as const;
 
 /** 扩展插件是否已加载。 */
 export function extensionsReady(): boolean {
@@ -188,17 +194,35 @@ function applyExtensions(md: MarkdownIt): void {
 export function ensureExtensions(): Promise<void> {
   if (!extLoad) {
     extLoad = (async () => {
-      const [emoji, footnote, sub, sup] = await Promise.all([
+      const [emoji, footnote, sub, sup, container] = await Promise.all([
         import('markdown-it-emoji'),
         import('markdown-it-footnote'),
         import('markdown-it-sub'),
         import('markdown-it-sup'),
+        import('markdown-it-container'),
       ]);
       extPlugins = [
         (md) => md.use(emoji.full),
         (md) => md.use(footnote.default),
         (md) => md.use(sub.default),
         (md) => md.use(sup.default),
+        // v3.5：4 类 callout 容器块（ADR-031）
+        (md) => {
+          for (const type of CALLOUT_TYPES) {
+            md.use(container.default, type, {
+              render: (tokens: { nesting: number; info: string }[], idx: number) => {
+                const token = tokens[idx]!;
+                if (token.nesting === 1) {
+                  // info 串剥类型名 → 剩余为自定义标题；空 → i18n 类型名
+                  const title = token.info.trim().slice(type.length).trim();
+                  const label = title || t(`callout.${type}`);
+                  return `<div class="callout callout--${type}"><div class="callout__title">${md.utils.escapeHtml(label)}</div>\n`;
+                }
+                return '</div></div>\n';
+              },
+            });
+          }
+        },
       ];
       applyExtensions(baseMd);
       if (katexMd) applyExtensions(katexMd); // 对称：katex 已建 → 同步应用

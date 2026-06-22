@@ -60,6 +60,12 @@ export const enUSDict: Record<DictKey, string> = {
   'stats.paragraphs': 'Paragraphs',
   'stats.readingTime': 'Reading time (min)',
 
+  // M2 callout container (v3.5)
+  'callout.note': 'Note',
+  'callout.tip': 'Tip',
+  'callout.warning': 'Warning',
+  'callout.danger': 'Danger',
+
   // M12 outline (v2.2)
   'outline.title': 'Outline',
   'outline.empty': 'No headings',

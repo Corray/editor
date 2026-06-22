@@ -118,6 +118,10 @@ const EXPECTED_KEYS = [
   'stats.headings',
   'stats.paragraphs',
   'stats.readingTime',
+  'callout.note',
+  'callout.tip',
+  'callout.warning',
+  'callout.danger',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

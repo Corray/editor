@@ -796,6 +796,47 @@
   overflow-x: auto;
 }
 
+/* v3.5 callout 容器块 (ADR-031) — 4 类左边框 + 浅背景 */
+.preview-content .callout {
+  border-left: 4px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 1rem;
+  background: var(--code-bg);
+}
+.preview-content .callout__title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+.preview-content .callout > :last-child {
+  margin-bottom: 0;
+}
+.preview-content .callout--note {
+  border-left-color: #2563eb;
+}
+.preview-content .callout--note .callout__title {
+  color: #2563eb;
+}
+.preview-content .callout--tip {
+  border-left-color: #16a34a;
+}
+.preview-content .callout--tip .callout__title {
+  color: #16a34a;
+}
+.preview-content .callout--warning {
+  border-left-color: #d97706;
+}
+.preview-content .callout--warning .callout__title {
+  color: #d97706;
+}
+.preview-content .callout--danger {
+  border-left-color: #dc2626;
+}
+.preview-content .callout--danger .callout__title {
+  color: #dc2626;
+}
+
 /* v3.3 frontmatter metadata 框 (ADR-029) */
 .preview-content .frontmatter {
   border: 1px solid var(--border);

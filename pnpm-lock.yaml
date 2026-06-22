@@ -41,6 +41,12 @@ importers:
       markdown-it-footnote:
         specifier: 4.0.0
         version: 4.0.0
+      markdown-it-ins:
+        specifier: 4.0.0
+        version: 4.0.0
+      markdown-it-mark:
+        specifier: 4.0.0
+        version: 4.0.0
       markdown-it-sub:
         specifier: 2.0.0
         version: 2.0.0
@@ -2241,6 +2247,12 @@ packages:
 
   markdown-it-footnote@4.0.0:
     resolution: {integrity: sha512-WYJ7urf+khJYl3DqofQpYfEYkZKbmXmwxQV8c8mO/hGIhgZ1wOe7R4HLFNwqx7TjILbnC98fuyeSsin19JdFcQ==}
+
+  markdown-it-ins@4.0.0:
+    resolution: {integrity: sha512-sWbjK2DprrkINE4oYDhHdCijGT+MIDhEupjSHLXe5UXeVr5qmVxs/nTUVtgi0Oh/qtF+QKV0tNWDhQBEPxiMew==}
+
+  markdown-it-mark@4.0.0:
+    resolution: {integrity: sha512-YLhzaOsU9THO/cal0lUjfMjrqSMPjjyjChYM7oyj4DnyaXEzA8gnW6cVJeyCrCVeyesrY2PlEdUYJSPFYL4Nkg==}
 
   markdown-it-sub@2.0.0:
     resolution: {integrity: sha512-iCBKgwCkfQBRg2vApy9vx1C1Tu6D8XYo8NvevI3OlwzBRmiMtsJ2sXupBgEA7PPxiDwNni3qIUkhZ6j5wofDUA==}
@@ -5420,6 +5432,10 @@ snapshots:
   markdown-it-emoji@3.0.0: {}
 
   markdown-it-footnote@4.0.0: {}
+
+  markdown-it-ins@4.0.0: {}
+
+  markdown-it-mark@4.0.0: {}
 
   markdown-it-sub@2.0.0: {}
 

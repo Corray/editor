@@ -170,9 +170,9 @@ installFrontmatter(baseMd);
 let extPlugins: ((md: MarkdownIt) => void)[] | null = null;
 let extLoad: Promise<void> | null = null;
 
-/** 文本是否含扩展语法（emoji/脚注/sub/sup/callout）→ 决定懒加载（误判最坏多加载一次）。 */
+/** 文本是否含扩展语法（emoji/脚注/sub/sup/callout/mark/ins）→ 决定懒加载（误判最坏多加载）。 */
 export function hasExtension(markdown: string): boolean {
-  return /:[a-z0-9_+-]+:|\[\^[^\]]+\]|~[^~\s]+~|\^[^\^\s]+\^|(^|\n):::[a-z]/.test(
+  return /:[a-z0-9_+-]+:|\[\^[^\]]+\]|~[^~\s]+~|\^[^\^\s]+\^|(^|\n):::[a-z]|==[^=]|\+\+[^+]/.test(
     markdown,
   );
 }
@@ -194,18 +194,23 @@ function applyExtensions(md: MarkdownIt): void {
 export function ensureExtensions(): Promise<void> {
   if (!extLoad) {
     extLoad = (async () => {
-      const [emoji, footnote, sub, sup, container] = await Promise.all([
-        import('markdown-it-emoji'),
-        import('markdown-it-footnote'),
-        import('markdown-it-sub'),
-        import('markdown-it-sup'),
-        import('markdown-it-container'),
-      ]);
+      const [emoji, footnote, sub, sup, container, mark, ins] =
+        await Promise.all([
+          import('markdown-it-emoji'),
+          import('markdown-it-footnote'),
+          import('markdown-it-sub'),
+          import('markdown-it-sup'),
+          import('markdown-it-container'),
+          import('markdown-it-mark'),
+          import('markdown-it-ins'),
+        ]);
       extPlugins = [
         (md) => md.use(emoji.full),
         (md) => md.use(footnote.default),
         (md) => md.use(sub.default),
         (md) => md.use(sup.default),
+        (md) => md.use(mark.default), // v3.6：==高亮==
+        (md) => md.use(ins.default), // v3.6：++插入++
         // v3.5：4 类 callout 容器块（ADR-031）
         (md) => {
           for (const type of CALLOUT_TYPES) {

@@ -27,7 +27,9 @@
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| ensureExtensions +container 4 类 + calloutRender | ⏳ | — |
-| hasExtension `:::` 检测 | ⏳ | — |
-| i18n callout.*（zh+en，+EXPECTED_KEYS）| ⏳ | — |
-| .callout CSS + container 类型声明 | ⏳ | — |
+| ensureExtensions +container 4 类 + calloutRender（标题 escapeHtml + t 默认类型名）| ✓ | `adbf5e5` |
+| hasExtension `:::` 检测（行首）| ✓ | `adbf5e5` |
+| i18n callout.*（zh+en，+EXPECTED_KEYS）| ✓ | `adbf5e5` |
+| .callout CSS（4 色左边框）+ container ambient 类型声明 | ✓ | `adbf5e5` |
+
+> 测试：unit +7（CT-CALLOUT：hasExtension/4 类/标题/默认名 i18n/内部 md/未知类型/XSS）→ 337；e2e +2 用例双引擎（ac28，含 XSS 门槛）→ 194+4skip。首屏 96.35KB。

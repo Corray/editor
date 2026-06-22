@@ -173,6 +173,8 @@
 | F-V33-2 | 2026-06-18 | proposed | LOW (info) | frontmatter 块无 data-source-line → 滚动同步略过该块（顶部小块影响微）| 2026-06-18 v3.3 audit |
 | F-V34-1 | 2026-06-18 | proposed | LOW (info) | precache 1654KB（emoji chunk +84KB / 较 F-V15-1 基线 1.18MB +40%）；再有重 chunk 应整体重评 precache vs runtimeCaching 分流 | 2026-06-18 v3.4 audit |
 | F-V34-2 | 2026-06-18 | proposed | LOW (info) | 4 markdown-it 插件无官方类型 → 本地 ambient declare（vite-env.d.ts）；升级 API 变需手动同步 | 2026-06-18 v3.4 audit |
+| F-V35-1 | 2026-06-22 | proposed | LOW (info) | callout 默认类型名标题用 t() render 期取值 → 语言切换不重渲染该标签（仅文本变更更新）；自定义标题不受影响 | 2026-06-22 v3.5 audit |
+| F-V35-2 | 2026-06-22 | proposed | LOW (info) | 不支持嵌套 callout / 用户自定义类型（固定 4 类）；范围内文档化 | 2026-06-22 v3.5 audit |
 
 ### Issue-process 审查
 
@@ -226,3 +228,4 @@
 | 2026-06-18 | v3.2 增量 audit（报告 `2026-06-18-v3.2-increment.md`）：文档统计面板（点 status bar 展开 7 项），**无 critical/high/medium**。**一致性保障**：computeStats 复用 countWords 算法 → words/cjk/minutes 与 status bar 摘要保证一致（CT-STATS-2 同输入实证防分叉）；deferred 出输入路径。2 LOW info（F-V32-1 标题不跳 fence / F-V32-2 status bar 改 button）。unit 315 + e2e 180。第三批 scope 第二项 |
 | 2026-06-18 | v3.3 增量 audit（报告 `2026-06-18-v3.3-increment.md`）：frontmatter (YAML) 支持（doc 头识别 + metadata 框），**无 critical/high/medium**。**识别边界严**（仅 startLine 0 + 闭合校验，文中 ---/无闭合落 hr 不误吞）；**sanitize 零放宽**（值 escapeHtml + 默认 DOMPurify，XSS 双引擎验）；无新依赖（不引 js-yaml）。2 LOW info（F-V33-1 仅平铺解析 / F-V33-2 块无 source-line）。unit 322 + e2e 186。第三批 scope 第三项 |
 | 2026-06-18 | v3.4 增量 audit（报告 `2026-06-18-v3.4-increment.md`）：markdown 扩展包（emoji/脚注/上下标 懒加载），**无 critical/high/medium**。**双实例同步无双注册**（baseMd+katexMd × applyExtensions 每实例一次，对称协同）；懒加载保首屏（emoji data 进 lazy chunk）；安全默认放行标准标签 + XSS 双引擎验。2 LOW info（F-V34-1 precache +40% / F-V34-2 插件无官方类型）。unit 330 + e2e 190。**第三批 scope 全交付** |
+| 2026-06-22 | v3.5 增量 audit（报告 `2026-06-22-v3.5-increment.md`）：callout 容器块（note/tip/warning/danger 并入扩展链），**无 critical/high/medium**。并入 ensureExtensions 不破双实例同步；安全默认放行 div/class + 标题 escapeHtml + XSS 双引擎验；实现期 CT-CALLOUT-3 默认类型名 jsdom navigator en-US（PP-006 同源）→ 测试显式 setLang 双验。2 LOW info（F-V35-1 标签 i18n 非响应 / F-V35-2 固定 4 类）。unit 337 + e2e 194。第四批 scope 第一项 |

@@ -38,7 +38,9 @@ export interface SettingsAPI {
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| settings +accentColor + ACCENT_PRESETS + createEffect 应用 data-accent | ⏳ | — |
-| variables.css 强调色 4×2 规则 | ⏳ | — |
-| SettingsDialog 强调色段 | ⏳ | — |
-| i18n settings.accent.*（zh+en，+EXPECTED_KEYS）| ⏳ | — |
+| settings +accentColor + ACCENT_PRESETS + createEffect applyAccent（blue→删属性）| ✓ | `02003c5` |
+| variables.css 强调色 4×2 规则（green/purple/orange/rose × 浅深）| ✓ | `02003c5` |
+| SettingsDialog 强调色段（5 色块 + active 环）| ✓ | `02003c5` |
+| i18n settings.accent.*（zh+en，+EXPECTED_KEYS）| ✓ | `02003c5` |
+
+> 测试：unit +5（CT-SET-7~11：默认/持久化+应用/blue 删属性/非档位/坏值回退）→ 347；e2e +2 用例双引擎（ac30，含 --accent computed 值验）→ 202+4skip。首屏 97.01KB。

@@ -4,6 +4,40 @@
 
 ---
 
+## v1.16.0-rc.1 — 文本高亮/标记（mark/ins / v3.6）（2026-06-22）
+
+**Tag:** `v1.16.0-rc.1` @ commit `d84e2b1`
+**Range:** `e6e706a..d84e2b1`（v1.15.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第四批 scope 第二项；余 v3.7 主题增强）。仍 RC。
+
+### Scope — mark/ins（共识 v3.6 / ADR-032 / `6a3a889`）
+
+- `==高亮==` → `<mark>` / `++插入++` → `<ins>`（markdown-it-mark/ins，极小插件）
+- **并入 v3.4 ensureExtensions 懒加载链**（hasExtension +`==`/`++`），首屏不含；不破双实例同步
+- **sanitize 零放宽**：mark/ins 标准标签默认放行；ADR-002 不动；XSS 双引擎验
+- 删除线 `~~`（markdown-it 核心）不受影响
+
+### Quality Gates [已验证: 2026-06-22 本机]
+
+- 342 unit（+5 CT-MARK：hasExtension/mark/ins/XSS/删除线回归）
+- 197 e2e / 4 skip（ac29 新 2 用例双引擎；ac5-perf 负载 flake 隔离过）
+- 首屏 96.40 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-22 增量）
+
+报告：`docs/audit/2026-06-22-v3.6-increment.md`。**无 critical/high/medium / 无新 finding**；极小插件不破同步 + XSS 双引擎。
+
+### Known Limitations
+
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- 变更记录追加；spec 全链落档 + 追溯回填；新依赖 mark/ins；package.json → 1.16.0-rc.1
+
+---
+
 ## v1.15.0-rc.1 — callout 容器块（v3.5）（2026-06-22）
 
 **Tag:** `v1.15.0-rc.1` @ commit `e6e706a`

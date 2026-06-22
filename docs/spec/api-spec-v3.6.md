@@ -19,6 +19,8 @@
 
 | 入口 | 状态 | commit |
 |------|------|--------|
-| ensureExtensions +mark/ins | ⏳ | — |
-| hasExtension `==`/`++` 检测 | ⏳ | — |
-| 依赖 mark/ins + 类型声明 | ⏳ | — |
+| ensureExtensions +mark/ins | ✓ | `6a3a889` |
+| hasExtension `==`/`++` 检测 | ✓ | `6a3a889` |
+| 依赖 mark@4.0.0/ins@4.0.0 + ambient 类型声明 | ✓ | `6a3a889` |
+
+> 测试：unit +5（CT-MARK：hasExtension/mark/ins/XSS/删除线回归）→ 342；e2e +2 用例双引擎（ac29）→ 197+4skip。首屏 96.40KB。ac5-perf 负载 flake（隔离过，历轮一致）。

@@ -37,6 +37,17 @@
   --hl-tag: #7ee787;
 }
 
+/* v3.7 强调色预设 (ADR-033)：data-accent 覆盖 --accent；blue=默认（无规则，用上方默认）。
+   每色浅/深双值保证两模式对比度。 */
+[data-accent='green'] { --accent: #16a34a; }
+[data-theme='dark'][data-accent='green'] { --accent: #4ade80; }
+[data-accent='purple'] { --accent: #7c3aed; }
+[data-theme='dark'][data-accent='purple'] { --accent: #a78bfa; }
+[data-accent='orange'] { --accent: #ea580c; }
+[data-theme='dark'][data-accent='orange'] { --accent: #fb923c; }
+[data-accent='rose'] { --accent: #e11d48; }
+[data-theme='dark'][data-accent='rose'] { --accent: #fb7185; }
+
 body {
   background: var(--bg);
   color: var(--fg);

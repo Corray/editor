@@ -100,6 +100,12 @@ export const zhCNDict = {
   'settings.language': '语言',
   'settings.language.zh': '中文',
   'settings.language.en': '英文',
+  'settings.accent': '强调色',
+  'settings.accent.blue': '蓝',
+  'settings.accent.green': '绿',
+  'settings.accent.purple': '紫',
+  'settings.accent.orange': '橙',
+  'settings.accent.rose': '玫红',
 
   // M9 版本快照 (v2.6 / ADR-022)
   'history.button': '版本历史',

@@ -122,6 +122,12 @@ const EXPECTED_KEYS = [
   'callout.tip',
   'callout.warning',
   'callout.danger',
+  'settings.accent',
+  'settings.accent.blue',
+  'settings.accent.green',
+  'settings.accent.purple',
+  'settings.accent.orange',
+  'settings.accent.rose',
 ] as const;
 
 describe('M7 i18n — UT-I18N (basic API)', () => {

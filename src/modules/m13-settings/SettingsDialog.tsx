@@ -4,6 +4,7 @@ import {
   type SettingsAPI,
   SNAPSHOT_INTERVAL_PRESETS,
   SNAPSHOT_MAX_PRESETS,
+  ACCENT_PRESETS,
 } from './settings';
 
 export interface SettingsDialogProps {
@@ -90,6 +91,28 @@ export function SettingsDialog(props: SettingsDialogProps) {
                   {(n) => <option value={String(n)}>{n}</option>}
                 </For>
               </select>
+            </label>
+
+            {/* 强调色（v3.7 / ADR-033）：5 色块，选中环 */}
+            <label class="settings-row">
+              <span>{t('settings.accent')}</span>
+              <span class="accent-swatches">
+                <For each={ACCENT_PRESETS}>
+                  {(c) => (
+                    <button
+                      type="button"
+                      class="accent-swatch"
+                      classList={{
+                        'accent-swatch--active': s.accentColor() === c,
+                        [`accent-swatch--${c}`]: true,
+                      }}
+                      aria-label={t(`settings.accent.${c}`)}
+                      aria-pressed={s.accentColor() === c}
+                      onClick={() => s.setAccentColor(c)}
+                    />
+                  )}
+                </For>
+              </span>
             </label>
 
             {/* 语言切换（v3.0 / ADR-026 D4：接 v2.9 占位 → select；setLang 即时重渲染+持久化） */}

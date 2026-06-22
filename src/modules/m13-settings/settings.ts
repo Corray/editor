@@ -11,18 +11,23 @@ export interface SettingsAPI {
   readonly autoSnapshotEnabled: Accessor<boolean>;
   readonly autoSnapshotIntervalMs: Accessor<number>;
   readonly maxSnapshotsPerDoc: Accessor<number>;
+  /** v3.7：强调色预设（'blue' 默认；ADR-033）。 */
+  readonly accentColor: Accessor<string>;
   setAutoSnapshotEnabled(v: boolean): void;
   setAutoSnapshotIntervalMs(ms: number): void;
   setMaxSnapshotsPerDoc(n: number): void;
+  setAccentColor(c: string): void;
 }
 
 export const SNAPSHOT_INTERVAL_PRESETS = [60_000, 300_000, 600_000] as const; // 1/5/10 min
 export const SNAPSHOT_MAX_PRESETS = [10, 30, 50] as const;
+export const ACCENT_PRESETS = ['blue', 'green', 'purple', 'orange', 'rose'] as const; // v3.7
 
 const DEFAULTS = {
   autoSnapshotEnabled: true,
   autoSnapshotIntervalMs: 300_000, // 5min（= ADR-022 原常量）
   maxSnapshotsPerDoc: 30, // = ADR-022 原常量
+  accentColor: 'blue', // v3.7：= variables.css 默认 --accent（蓝），零变化
 } as const;
 
 const STORAGE_KEY = 'editor.settings.v1';
@@ -31,6 +36,14 @@ interface StoredSettings {
   autoSnapshotEnabled: boolean;
   autoSnapshotIntervalMs: number;
   maxSnapshotsPerDoc: number;
+  accentColor: string;
+}
+
+/** v3.7：应用强调色到 <html data-accent>（'blue' 默认 → 删属性用 variables.css 默认）。 */
+function applyAccent(color: string): void {
+  if (typeof document === 'undefined') return;
+  if (color === 'blue') delete document.documentElement.dataset.accent;
+  else document.documentElement.dataset.accent = color;
 }
 
 /** 读取 + anti-poisoning：枚举/类型不合法 → 该字段回默认；JSON 坏/不可用 → 全量默认。 */
@@ -62,6 +75,11 @@ function readInitial(): StoredSettings {
         maxes.includes(p.maxSnapshotsPerDoc)
           ? p.maxSnapshotsPerDoc
           : DEFAULTS.maxSnapshotsPerDoc,
+      accentColor:
+        typeof p.accentColor === 'string' &&
+        (ACCENT_PRESETS as readonly string[]).includes(p.accentColor)
+          ? p.accentColor
+          : DEFAULTS.accentColor,
     };
   } catch {
     return fallback;
@@ -73,6 +91,7 @@ export function createSettings(): SettingsAPI {
   const [autoSnapshotEnabled, setEnabled] = createSignal(init.autoSnapshotEnabled);
   const [autoSnapshotIntervalMs, setInterval] = createSignal(init.autoSnapshotIntervalMs);
   const [maxSnapshotsPerDoc, setMax] = createSignal(init.maxSnapshotsPerDoc);
+  const [accentColor, setAccent] = createSignal(init.accentColor);
 
   // 镜像持久化（任一变更 → 写 localStorage，best-effort）
   createEffect(() => {
@@ -80,6 +99,7 @@ export function createSettings(): SettingsAPI {
       autoSnapshotEnabled: autoSnapshotEnabled(),
       autoSnapshotIntervalMs: autoSnapshotIntervalMs(),
       maxSnapshotsPerDoc: maxSnapshotsPerDoc(),
+      accentColor: accentColor(),
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -88,16 +108,23 @@ export function createSettings(): SettingsAPI {
     }
   });
 
+  // v3.7：accentColor → <html data-accent>（createEffect 响应式应用）
+  createEffect(() => applyAccent(accentColor()));
+
   return {
     autoSnapshotEnabled,
     autoSnapshotIntervalMs,
     maxSnapshotsPerDoc,
+    accentColor,
     setAutoSnapshotEnabled: (v) => setEnabled(v),
     setAutoSnapshotIntervalMs: (ms) => {
       if ((SNAPSHOT_INTERVAL_PRESETS as readonly number[]).includes(ms)) setInterval(ms);
     },
     setMaxSnapshotsPerDoc: (n) => {
       if ((SNAPSHOT_MAX_PRESETS as readonly number[]).includes(n)) setMax(n);
+    },
+    setAccentColor: (c) => {
+      if ((ACCENT_PRESETS as readonly string[]).includes(c)) setAccent(c);
     },
   };
 }

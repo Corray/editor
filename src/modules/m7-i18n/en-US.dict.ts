@@ -98,6 +98,12 @@ export const enUSDict: Record<DictKey, string> = {
   'settings.language': 'Language',
   'settings.language.zh': '中文',
   'settings.language.en': 'English',
+  'settings.accent': 'Accent color',
+  'settings.accent.blue': 'Blue',
+  'settings.accent.green': 'Green',
+  'settings.accent.purple': 'Purple',
+  'settings.accent.orange': 'Orange',
+  'settings.accent.rose': 'Rose',
 
   // M9 version snapshots (v2.6)
   'history.button': 'Version history',

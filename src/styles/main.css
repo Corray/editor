@@ -369,6 +369,28 @@
   color: var(--muted);
 }
 
+/* v3.7 强调色色块 (ADR-033) */
+.accent-swatches {
+  display: flex;
+  gap: 0.4rem;
+}
+.accent-swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.accent-swatch--active {
+  border-color: var(--fg);
+}
+.accent-swatch--blue { background: #2563eb; }
+.accent-swatch--green { background: #16a34a; }
+.accent-swatch--purple { background: #7c3aed; }
+.accent-swatch--orange { background: #ea580c; }
+.accent-swatch--rose { background: #e11d48; }
+
 /* v2.4 快捷键帮助浮层 (ADR-020 D2) */
 .help-backdrop {
   position: fixed;

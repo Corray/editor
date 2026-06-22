@@ -87,4 +87,48 @@ describe('M13 settings — CT-SET', () => {
     expect(SNAPSHOT_INTERVAL_PRESETS).toContain(300_000);
     expect(SNAPSHOT_MAX_PRESETS).toContain(30);
   });
+
+  // v3.7 强调色（AC-v37-1/2/4/5）
+  it('CT-SET-7: accentColor 默认 blue（零变化基线）', () => {
+    const { api, dispose } = setup();
+    expect(api.accentColor()).toBe('blue');
+    dispose();
+  });
+
+  it('CT-SET-8: setAccentColor 持久化 + data-accent 应用（非 blue）', async () => {
+    const { api, dispose } = setup();
+    api.setAccentColor('green');
+    expect(api.accentColor()).toBe('green');
+    await flush();
+    expect(document.documentElement.dataset.accent).toBe('green');
+    dispose();
+    const { api: api2, dispose: d2 } = setup();
+    expect(api2.accentColor()).toBe('green'); // hydrate
+    d2();
+  });
+
+  it('CT-SET-9: blue → 删 data-accent（用默认 --accent）', async () => {
+    const { api, dispose } = setup();
+    api.setAccentColor('purple');
+    await flush();
+    expect(document.documentElement.dataset.accent).toBe('purple');
+    api.setAccentColor('blue');
+    await flush();
+    expect(document.documentElement.dataset.accent).toBeUndefined();
+    dispose();
+  });
+
+  it('CT-SET-10: 非档位强调色 → 忽略（不变）', () => {
+    const { api, dispose } = setup();
+    api.setAccentColor('chartreuse'); // 非预设
+    expect(api.accentColor()).toBe('blue');
+    dispose();
+  });
+
+  it('CT-SET-11: 坏存档 accentColor → 回退 blue', () => {
+    localStorage.setItem(KEY, JSON.stringify({ accentColor: 'notacolor' }));
+    const { api, dispose } = setup();
+    expect(api.accentColor()).toBe('blue');
+    dispose();
+  });
 });

@@ -4,6 +4,43 @@
 
 ---
 
+## v1.15.0-rc.1 — callout 容器块（v3.5）（2026-06-22）
+
+**Tag:** `v1.15.0-rc.1` @ commit `e6e706a`
+**Range:** `46907c5..e6e706a`（v1.14.0-rc.1 以来）
+**部署:** https://corray.github.io/editor/
+**类型:** 功能 minor（第四批 scope 第一项；余 v3.6 mark/ins → v3.7 主题增强）。仍 RC。
+
+### Scope — callout 容器块（共识 v3.5 / ADR-031 / `adbf5e5`）
+
+- markdown-it-container × 4 类（note / tip / warning / danger）→ `:::note`...`:::` 渲染样式框（4 色左边框）
+- 可选自定义标题 `:::note 标题`；无则显类型名（i18n）
+- **并入 v3.4 ensureExtensions 懒加载链**（hasExtension +`:::`），首屏不含；不破双实例同步
+- **sanitize 零放宽**：div/class 默认放行 + 标题 escapeHtml；ADR-002 不动；XSS 双引擎验
+
+### Quality Gates [已验证: 2026-06-22 本机]
+
+- 337 unit（+7 CT-CALLOUT：识别/4 类/标题/默认名 i18n/内部 md/未知类型/XSS）
+- 194 e2e / 4 skip（ac28 新 2 用例双引擎：4 类渲染 + XSS 门槛）
+- 首屏 96.35 KB gz（预算 150）；typecheck 0；doc-hash + fb 闸 pass
+
+### Audit（2026-06-22 增量）
+
+报告：`docs/audit/2026-06-22-v3.5-increment.md`。**无 critical/high/medium**；并入扩展链不破双实例同步 + 安全默认放行 + XSS 双引擎。2 LOW info（F-V35-1 标签 i18n 非响应 / F-V35-2 固定 4 类）。
+
+### Known Limitations
+
+- callout 默认类型名标签语言切换不即时重渲染（自定义标题不受影响，F-V35-1）
+- 不支持嵌套 / 用户自定义类型（固定 4 类，F-V35-2）
+- 仍 RC：云安全门槛 pending provision
+
+### Closure
+
+- findings-registry：+F-V35-1/2（info）；变更记录追加
+- spec 全链（共识/module-list M2/ADR-031/api/test-plan v3.5）落档 + 追溯回填；新依赖 markdown-it-container；package.json → 1.15.0-rc.1
+
+---
+
 ## v1.14.0-rc.1 — markdown 扩展包（emoji/脚注/上下标 / v3.4）（2026-06-18）
 
 **Tag:** `v1.14.0-rc.1` @ commit `46907c5`
